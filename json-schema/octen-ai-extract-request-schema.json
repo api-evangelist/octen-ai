@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/octen-ai/main/json-schema/octen-ai-extract-request-schema.json",
+  "title": "ExtractRequest",
+  "description": "Request body for the Extract API.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/octen-ai-openapi.yml#/components/schemas/ExtractRequest",
+  "type": "object",
+  "required": [
+    "urls"
+  ],
+  "properties": {
+    "urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of URLs to extract content from. Maximum URLs per request: 20. Maximum length per URL: 2048. Failed URLs are not billed."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "advanced",
+        "auto"
+      ],
+      "default": "standard",
+      "description": "Processing mode. `standard` prioritizes speed, `advanced` prioritizes success rate on hard-to-reach pages, and `auto` picks one per URL. `advanced` and `auto` can take longer, so raise `timeout` accordingly."
+    },
+    "query": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Intent-focused keywords. When provided, returns query-relevant highlights per URL; otherwise returns the complete page content."
+    },
+    "max_age_seconds": {
+      "type": "integer",
+      "default": 86400,
+      "minimum": 300,
+      "maximum": 31536000,
+      "description": "Maximum age (in seconds) of cached content. URLs whose cached version exceeds this threshold will be re-fetched. Values outside the allowed range are adjusted to the nearest bound."
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "markdown",
+        "text"
+      ],
+      "default": "markdown",
+      "description": "Format of the returned content."
+    },
+    "timeout": {
+      "type": "integer",
+      "default": 30,
+      "minimum": 1,
+      "maximum": 60,
+      "description": "Per-URL extraction timeout in seconds. Values outside the allowed range are adjusted to the nearest bound."
+    },
+    "include_images": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to return image URLs detected on the page."
+    },
+    "include_videos": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to return video URLs detected on the page."
+    },
+    "include_audio": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to return audio URLs detected on the page."
+    },
+    "include_links": {
+      "type": "object",
+      "description": "Controls whether to return links detected on the page.",
+      "properties": {
+        "scope": {
+          "type": "string",
+          "enum": [
+            "prefer_internal",
+            "prefer_external"
+          ],
+          "default": "prefer_internal",
+          "description": "Which links to prioritize. `prefer_internal` favors links within the page's registered domain; `prefer_external` favors external links. Prioritized links come first, and links of the same kind keep their order on the page."
+        },
+        "max_links": {
+          "type": "integer",
+          "default": 200,
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Maximum number of links to return per URL."
+        }
+      }
+    }
+  }
+}

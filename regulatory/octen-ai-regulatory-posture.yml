@@ -1,0 +1,29 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/resources/security-&-compliance.md; https://octen.ai/privacy-policy (Next.js shell, no readable text to a plain GET)
+signals:
+  data_subject_request:
+    url: https://docs.octen.ai/resources/security-&-compliance
+    evidence:
+    - source: https://docs.octen.ai/resources/security-&-compliance.md
+      http_status: 200
+      fetched: '2026-10-07'
+      quote: 'GDPR: Data subject rights supported, including access, correction, and deletion'
+    - source: https://docs.octen.ai/resources/security-&-compliance.md
+      http_status: 200
+      fetched: '2026-10-07'
+      quote: 'Data deletion available upon request — General support / Security issues: support@octen.ai'
+    mechanism: email
+    note: a statement with a contact, not a self-service portal
+  training_data_summary:
+    url: https://docs.octen.ai/resources/security-&-compliance
+    evidence:
+    - source: https://docs.octen.ai/resources/security-&-compliance.md
+      http_status: 200
+      fetched: '2026-10-07'
+      quote: Customer data is processed solely to provide the requested services; Customer data is not used for model training
+    note: a customer-data non-use statement; no training-data summary for Octen's own models is published
+checked:
+- https://octen.ai/privacy-policy (200, JS shell)
+- /accessibility, /legal/subprocessors, /legal/dpa, /transparency not linked from the site; not probed blind per the no-pattern rule
+note: No subprocessor list, DPA, accessibility conformance report, SBOM, data-residency page or transparency report was found on the site or docs

@@ -1,0 +1,546 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Broad Search API
+  version: 1.0.0
+  description: 'Operations tagged Broad Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Broad Search
+paths:
+  /broad-search:
+    post:
+      summary: Broad Search
+      description: Decomposes a query into related sub-queries from multiple angles, searches them concurrently.
+      operationId: broad-search
+      security:
+      - bearerAuthNoPayment: []
+      - apiKeyAuthNoPayment: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BroadSearchRequest'
+            examples:
+              basic:
+                summary: Basic Broad Search
+                value:
+                  query: compare cloud GPU pricing across major providers
+                  max_queries: 5
+              fullContent:
+                summary: With Full Content
+                value:
+                  query: compare cloud GPU pricing across major providers
+                  max_queries: 5
+                  search_options:
+                    count: 10
+                    highlight:
+                      enable: true
+                      max_tokens: 512
+                    full_content:
+                      enable: true
+                      max_tokens: 2048
+              domainFiltering:
+                summary: With Domain and Time Filters
+                value:
+                  query: Latest central bank interest rate decisions globally
+                  max_queries: 8
+                  search_options:
+                    count: 10
+                    include_domains:
+                    - reuters.com
+                    exclude_domains:
+                    - medium.com
+                    include_text:
+                    - interest rate
+                    - central bank
+                    exclude_text:
+                    - opinion
+                    - rumor
+                    time_basis: published
+                    start_time: '2025-01-01T00:00:00Z'
+                    end_time: '2025-01-31T23:59:59Z'
+                    highlight:
+                      enable: true
+                      max_tokens: 512
+                    format: markdown
+                    safesearch: strict
+              allOptions:
+                summary: All Options (every available parameter)
+                value:
+                  query: Latest central bank interest rate decisions globally
+                  max_queries: 8
+                  search_options:
+                    count: 10
+                    include_domains:
+                    - reuters.com
+                    - bloomberg.com
+                    exclude_domains:
+                    - medium.com
+                    include_text:
+                    - interest rate
+                    - central bank
+                    exclude_text:
+                    - opinion
+                    - rumor
+                    time_basis: published
+                    start_time: '2025-01-01T00:00:00Z'
+                    end_time: '2025-01-31T23:59:59Z'
+                    highlight:
+                      enable: true
+                      max_tokens: 512
+                    format: markdown
+                    safesearch: strict
+                    full_content:
+                      enable: true
+                      max_tokens: 2048
+                    include_images: true
+      responses:
+        '200':
+          description: Successful broad search response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BroadSearchResponse'
+              example:
+                data:
+                  query: Latest central bank interest rate decisions globally
+                  queries:
+                  - central bank interest rate decisions 2026
+                  - latest global central bank rate hikes
+                  - recent central bank monetary policy changes
+                  - major central bank interest rate announcements today
+                  - ECB interest rate decision 2026
+                  search_results:
+                  - query: recent central bank monetary policy changes
+                    results:
+                    - title: United States Monetary Policy June 2026 - FocusEconomics
+                      url: https://www.focus-economics.com/countries/united-states/news/monetary-policy/...
+                      highlight: 'United States: Central Bank keeps rates steady in June. At its 17 June meeting, the Central Bank kept the target range for the federal funds rate at 3.50-3.75%...'
+                      full_content: 'United States: Central Bank keeps rates steady in June
+
+                        Latest bank decision: At its 17 June meeting, the Central Bank kept the target range for the federal funds rate at 3.50-3.75%, following 75 basis points of rate cuts from August to December last year. [...truncated...]'
+                      authors: FocusEconomics
+                      time_published: '2026-06-18T00:00:00Z'
+                      time_last_crawled: '2026-06-18T14:18:27Z'
+                      favicon: ''
+                    latency: 116
+                  - query: ECB interest rate decision 2026
+                    results:
+                    - title: Monetary policy decisions
+                      url: https://www.ecb.europa.eu/press/pr/date/2025/html/ecb.mp251218~58b0e415a6.en.html
+                      highlight: The Governing Council today decided to keep the three key ECB interest rates unchanged...
+                      full_content: 'Monetary policy decisions
+
+                        18 December 2025
+
+                        The Governing Council today decided to keep the three key ECB interest rates unchanged. [...truncated...]'
+                      authors: European Central Bank
+                      time_published: '2025-12-18T00:00:00Z'
+                      time_last_crawled: '2026-05-20T22:27:18Z'
+                      favicon: ''
+                    latency: 110
+                request_id: 20260626113629956CJ6G3AG7C2
+                meta:
+                  usage:
+                    num_search_queries: 5
+                    full_content_extra_count: 20
+                  latency: 1649
+                code: 0
+        '400':
+          description: Invalid params — Returned when a required parameter is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Invalid params. query is required
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Broad Search
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    BroadSearchRequest:
+      type: object
+      required:
+      - query
+      properties:
+        query:
+          type: string
+          maxLength: 500
+          description: The original search query.
+        max_queries:
+          type: integer
+          minimum: 1
+          maximum: 30
+          default: 5
+          description: Upper bound on the number of sub-queries generated.
+        search_options:
+          allOf:
+          - $ref: '#/components/schemas/WebSearchOptions'
+          description: Search options applied to each sub-query. Shares the same parameters and defaults as the Web Search API.
+    SearchUsage:
+      type: object
+      description: Usage information for the search request.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of search queries executed.
+        full_content_extra_count:
+          type: integer
+          description: Billable full_content results beyond the free allowance.
+    SearchResultGroup:
+      type: object
+      description: A group of search results for a single sub-query.
+      properties:
+        query:
+          type: string
+          description: The sub-query that produced these results.
+        results:
+          type: array
+          description: The search results for this sub-query.
+          items:
+            $ref: '#/components/schemas/SearchResult'
+        latency:
+          type: integer
+          description: Search latency for this query in milliseconds.
+    FullContentOptions:
+      type: object
+      description: Controls whether to return the full raw content of each result page.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
+    HighlightOptions:
+      type: object
+      description: Controls highlight extraction from result pages.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns query-relevant highlight in each result.
+        max_tokens:
+          type: integer
+          default: 512
+          minimum: 100
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    SearchResult:
+      type: object
+      description: A single search result.
+      properties:
+        title:
+          type: string
+          description: The title of the result page.
+        url:
+          type: string
+          description: The URL of the result page.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the result site.
+        cover_image:
+          type: object
+          description: The page cover image. Returned only when `include_images` is true and the page has a cover image.
+          properties:
+            url:
+              type: string
+              description: The cover image URL.
+            description:
+              type: string
+              description: Text description of the cover image.
+        images:
+          type: array
+          description: In-body images of the page, in order of appearance. Returned only when `include_images` is true.
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                description: The image URL.
+              description:
+                type: string
+                description: Text description of the image.
+    WebSearchOptions:
+      type: object
+      properties:
+        count:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 100
+          description: Number of results to return.
+        include_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically include in the search results. The `site:` query operator adds to this list.
+          example:
+          - octen.ai
+          - wikipedia.org
+        exclude_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically exclude from the search results. The `-site:` query operator adds to this list. If a domain appears in both `include_domains` and `exclude_domains`, `exclude_domains` takes precedence.
+          example:
+          - spam.com
+          - ads.example.net
+        include_text:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+          maxItems: 5
+          description: Strings that must appear in the result page text.
+        exclude_text:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+          maxItems: 5
+          description: Strings that must not appear in the result page text.
+        time_basis:
+          type: string
+          enum:
+          - auto
+          - published
+          - crawled
+          default: auto
+          description: Determines which time field is used for time filtering. `published` uses time_published; `crawled` uses time_last_crawled. Results missing this field are excluded when filtering by time.
+        time_range:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          - year
+          - d
+          - w
+          - m
+          - y
+          description: Relative time window counting back from the current time based on `time_basis`. Mutually exclusive with `start_time`/`end_time` — if both are provided, `start_time`/`end_time` take precedence.
+        start_time:
+          type: string
+          format: date-time
+          description: Start time for filtering results. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        end_time:
+          type: string
+          format: date-time
+          description: End time for filtering results. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        language:
+          type: array
+          items:
+            type: string
+            enum:
+            - ar
+            - de
+            - en
+            - es
+            - fr
+            - hi
+            - id
+            - it
+            - ja
+            - ko
+            - nl
+            - pl
+            - pt
+            - ru
+            - th
+            - tr
+            - vi
+            - zh
+          default: []
+          description: A list of languages to restrict results to, as ISO 639-1 codes. By default, no language filter is applied.
+          example:
+          - en
+          - zh
+        highlight:
+          $ref: '#/components/schemas/HighlightOptions'
+        full_content:
+          $ref: '#/components/schemas/FullContentOptions'
+        format:
+          type: string
+          enum:
+          - markdown
+          - text
+          default: text
+          description: Controls the formatting of highlight outputs.
+        safesearch:
+          type: string
+          enum:
+          - 'off'
+          - strict
+          default: strict
+          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
+        include_images:
+          type: boolean
+          default: false
+          description: Whether to include images in each result.
+    BroadSearchResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/BroadSearchData'
+        meta:
+          $ref: '#/components/schemas/SearchMeta'
+    SearchMeta:
+      type: object
+      description: Additional metadata for the search request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/SearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
+          type: string
+          nullable: true
+          description: Warning message, if any.
+    BroadSearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        query:
+          type: string
+          description: The original query.
+        queries:
+          type: array
+          items:
+            type: string
+          description: Sub-queries generated from the query.
+        search_results:
+          type: array
+          description: Results are grouped by sub-query and are not de-duplicated across groups.
+          items:
+            $ref: '#/components/schemas/SearchResultGroup'
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

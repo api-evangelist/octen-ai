@@ -1,0 +1,1010 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Research API
+  version: 1.0.0
+  description: 'Operations tagged Research across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Research
+paths:
+  /v1/research:
+    post:
+      summary: Deep Research
+      description: 'Generates a deep research report at the selected tier. The `pro-visual` tier also returns relevant images and videos.
+
+
+        **Two-phase invocation**
+
+        - **Phase 1:** the server generates a research plan. If the plan has no ambiguity, the server proceeds directly to research and streams the final report. If the plan is ambiguous, the `plan` event carries `requires_selection=true` together with a `plan_id`, and the SSE stream ends there — waiting for the client to confirm.
+
+        - **Phase 2:** call this endpoint again with the `plan_id` and `selections`. The server loads the stored plan, applies the selections, and streams the final report.
+
+
+        **Notes**
+
+        - Phase 2 only inherits the stored `plan` via `plan_id`. Other parameters are NOT inherited from Phase 1 — they must be supplied again in Phase 2, otherwise they fall back to defaults.
+
+        - `messages` is required in both phases and should carry the same user question.'
+      operationId: deep-research
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeepResearchRequest'
+            examples:
+              phase1:
+                summary: Phase 1 — Initial request
+                value:
+                  tier: standard
+                  messages:
+                  - role: user
+                    content: Progress and key milestones of the Artemis program
+              phase2:
+                summary: Phase 2 — Continue with plan_id and selections
+                value:
+                  tier: standard
+                  messages:
+                  - role: user
+                    content: Progress and key milestones of the Artemis program
+                  plan_id: plan_20260403abc123
+                  selections:
+                  - term: Artemis
+                    chosen: nasa_program
+                    indices:
+                    - 0
+                    - 1
+                    - 3
+                  extra_context: Focus on developments after 2024; de-emphasize early program background.
+      responses:
+        '200':
+          description: Successful Deep Research response. Always streamed as Server-Sent Events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeepResearchChunk'
+              examples:
+                streamStatus:
+                  summary: 'Streaming chunk — pipeline progress (type: status)'
+                  value:
+                    type: status
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    status: Analyzing your question...
+                streamPlan:
+                  summary: 'Streaming chunk — research plan (type: plan, requires_selection=true ends the stream)'
+                  value:
+                    type: plan
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    plan_id: plan_20260403abc123
+                    latency: 4120
+                    plan:
+                      title: Artemis program research plan
+                      overview: '...'
+                      interpretations:
+                      - term: Artemis
+                        meanings:
+                        - id: nasa_program
+                          label: NASA-led crewed lunar program
+                        - id: greek_goddess
+                          label: Greek goddess of the hunt and the moon
+                        chosen: nasa_program
+                        reasoning: The user asks about 'progress and milestones', which strongly points to the NASA program.
+                      angles:
+                      - focus: Artemis I-III mission progress
+                        focus_desc: Timeline, payloads, and outcomes of launched and upcoming missions
+                        interpretation_id: nasa_program
+                        queries:
+                        - Artemis I mission summary
+                        - Artemis II crew launch date
+                        - Artemis III lunar landing timeline
+                        sub_question_ids:
+                        - sq_progress
+                      requires_selection: true
+                streamQueries:
+                  summary: 'Streaming chunk — sub-queries for this round (type: queries)'
+                  value:
+                    type: queries
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    round: 1
+                    latency: 312
+                    queries:
+                    - Artemis I mission summary
+                    - Artemis II crew launch date
+                    - Artemis III lunar landing timeline
+                streamSearchDone:
+                  summary: 'Streaming chunk — search results for this round (type: search_done)'
+                  value:
+                    type: search_done
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    round: 1
+                    latency: 1820
+                    search_result_count: 28
+                    search_results:
+                    - query: Artemis I mission summary
+                      results:
+                      - title: Artemis I Mission Overview - NASA
+                        url: https://www.nasa.gov/...
+                        highlight: Artemis I successfully launched on November 16, 2022...
+                        full_content: ''
+                        authors: NASA
+                        time_published: '2022-12-11T00:00:00Z'
+                        time_last_crawled: '2026-04-02T03:18:46Z'
+                      latency: 69
+                streamAnalysis:
+                  summary: 'Streaming chunk — per-round findings (type: analysis)'
+                  value:
+                    type: analysis
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    round: 1
+                    latency: 2940
+                    analysis:
+                      findings:
+                      - Artemis I completed a 25.5-day uncrewed lunar flyby in November 2022.
+                      - Artemis II crewed lunar flyby is scheduled for 2026 with a 4-person crew.
+                      - Artemis III lunar landing has slipped from 2025 to 2027.
+                      should_continue: true
+                      follow_up_suggestions:
+                      - SLS Block 1B upgrade progress
+                      - Starship HLS lander test milestones
+                streamBrief:
+                  summary: 'Streaming chunk — report outline and evidence (type: brief)'
+                  value:
+                    type: brief
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    latency: 5310
+                    brief:
+                      report_type: trend
+                      total_word_budget: 1800
+                      assertiveness_required: false
+                      tables:
+                      - table_id: t_milestones
+                        title: Artemis mission milestones
+                        columns:
+                        - Mission
+                        - Type
+                        - Planned date
+                        - Status
+                        description: Key milestones across Artemis I-V.
+                        placement: sec_timeline
+                      outline:
+                      - section_id: sec_overview
+                        section_title: Program background and goals
+                        thesis: Artemis is NASA's first crewed lunar program since Apollo, aiming to return astronauts to the lunar surface before 2027.
+                        target_words: 300
+                        evidence:
+                        - content: Artemis was formally announced by NASA in 2017.
+                          source_indices:
+                          - 1
+                          confidence: strong
+                      unresolved:
+                        contradictions: []
+                        weak_claims:
+                        - Artemis IV commercial payload manifest
+                        unanswered: []
+                      suggested_title: 'Artemis program: from uncrewed flyby to crewed landing'
+                      references:
+                      - index: 1
+                        url: https://www.nasa.gov/...
+                        title: Artemis I Mission Overview
+                streamContent:
+                  summary: 'Streaming chunk — incremental report text (type: content)'
+                  value:
+                    type: content
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    choices:
+                    - index: 0
+                      delta:
+                        content: '## Program background and goals
+
+
+                          Artemis'
+                      finish_reason: null
+                streamFinish:
+                  summary: 'Streaming chunk — report stream complete (type: finish)'
+                  value:
+                    type: finish
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    latency: 18420
+                    choices:
+                    - index: 0
+                      delta: {}
+                      finish_reason: stop
+                streamUsage:
+                  summary: 'Streaming chunk — usage and totals, last event in the stream (type: usage)'
+                  value:
+                    type: usage
+                    request_id: 20260403120000003ABCDE12345
+                    object: research.chunk
+                    created: 1775361600
+                    model: moonshotai/kimi-k2.5
+                    meta:
+                      usage:
+                        num_search_queries: 14
+                        prompt_tokens: 58210
+                        completion_tokens: 1832
+                        total_tokens: 60042
+                      latency: 32480
+                      total_rounds: 3
+                      total_search_count: 84
+        '400':
+          description: Missing parameter messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Missing parameter messages
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Research
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    DeepResearchBrief:
+      type: object
+      description: Report outline and evidence set. Carried by `brief` chunks.
+      properties:
+        report_type:
+          type: string
+          enum:
+          - general
+          - comparison
+          - trend
+          - how-to
+          - evaluation
+          - framework
+          - deep_explainer
+          - theoretical_analysis
+          - landscape_mapping
+          - multi_part
+          description: 'Report type, classified by the LLM from the question. `general`: general synthesis; `comparison`: cross-entity comparison; `trend`: time-axis trend analysis; `how-to`: step-by-step guide; `evaluation`: ranked or scored evaluation; `framework`: methodology or scoring framework; `deep_explainer`: deep explanation of a single topic; `theoretical_analysis`: scholarly analysis across multiple theoretical lenses; `landscape_mapping`: taxonomy and players in a domain; `multi_part`: composite question with explicit sub-questions.'
+        secondary_report_types:
+          type: array
+          items:
+            type: string
+          description: Secondary type tags for hybrid reports, combined with `report_type`.
+        total_word_budget:
+          type: integer
+          description: Total word budget for the report.
+        assertiveness_required:
+          type: boolean
+          description: Whether the report must deliver a clear verdict.
+        verdict_scaffold:
+          $ref: '#/components/schemas/DeepResearchVerdictScaffold'
+        tables:
+          type: array
+          description: Table metadata to render in the report. Mutually exclusive with `presentation_notes`.
+          items:
+            $ref: '#/components/schemas/DeepResearchTable'
+        presentation_notes:
+          type: array
+          items:
+            type: string
+          description: Presentation notes for reports that do not use tables. Mutually exclusive with `tables`.
+        outline:
+          type: array
+          description: Report outline in section order.
+          items:
+            $ref: '#/components/schemas/DeepResearchOutlineSection'
+        sub_question_to_section_map:
+          type: object
+          additionalProperties:
+            type: string
+          description: Mapping from sub-question ID to section ID.
+        unresolved:
+          $ref: '#/components/schemas/DeepResearchUnresolved'
+        suggested_title:
+          type: string
+          description: Suggested title for the report.
+        references:
+          type: array
+          description: List of cited references.
+          items:
+            $ref: '#/components/schemas/DeepResearchReference'
+    DeepResearchRequest:
+      type: object
+      required:
+      - messages
+      description: Request body for the Deep Research API.
+      properties:
+        tier:
+          type: string
+          enum:
+          - lite
+          - standard
+          - pro
+          - pro-visual
+          default: lite
+          description: The research tier. `lite`, `standard`, and `pro` increase research depth, cost, and time in that order. `pro-visual` additionally illustrates each report section with images and videos and streams an HTML version of the report.
+        messages:
+          type: array
+          description: Conversation messages. Only the last `role=user` message is used as the research question; other messages are ignored and do not enter plan generation, search, analysis, or report writing.
+          items:
+            $ref: '#/components/schemas/DeepResearchMessage'
+        extra_context:
+          type: string
+          description: Additional research background, constraints, or preferences, used as extra context for query rewriting and research direction supplementation.
+        skip_brief:
+          type: boolean
+          default: false
+          description: 'Skip the Research Brief stage and write the final report directly from raw search and analysis results.
+
+
+            Note: when enabled, no `brief` event is emitted. Clients can rebuild the citation index by accumulating `search_results` events in the order they arrive (round-by-round / query-by-query / result-by-result) into a global index, then look up the corresponding url/title by the `N` in `[^N]`.'
+        skip_plan:
+          type: boolean
+          default: false
+          description: Phase 1 only. Skip the Research Plan stage and proceed straight to the search loop. With `skip_plan=true`, the call never enters the Phase 2 pause mechanism.
+        skip_plan_confirm:
+          type: boolean
+          default: false
+          description: Phase 1 only. When `true`, the run continues with all angles even if the plan is ambiguous, instead of pausing and waiting for the user to confirm a selection.
+        plan_id:
+          type: string
+          description: Phase 2 only. The plan ID returned by a Phase 1 `plan` event with `requires_selection=true`. When provided, the server skips plan generation and applies the supplied `selections` against the stored plan. Each `plan_id` is retained for 30 minutes; after expiry the plan is regenerated.
+        selections:
+          type: array
+          description: Phase 2 only. The user's corrections and angle filtering against the Phase 1 plan.
+          items:
+            $ref: '#/components/schemas/DeepResearchSelection'
+    DeepResearchTextContentBlock:
+      type: object
+      required:
+      - type
+      description: A text content block.
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          description: The block type. Always `text` for Deep Research.
+        text:
+          type: string
+          description: The text content.
+    DeepResearchEvidence:
+      type: object
+      description: A single piece of evidence within a section.
+      properties:
+        content:
+          type: string
+          description: Evidence content.
+        source_indices:
+          type: array
+          items:
+            type: integer
+          description: Source indices cited by this evidence (matching `brief.references[].index`).
+        confidence:
+          type: string
+          enum:
+          - strong
+          - moderate
+          - weak
+          - conflicting
+          description: Confidence level of the evidence.
+        layer:
+          type: string
+          enum:
+          - phenomenon
+          - mechanism
+          - evidence
+          - implication
+          description: Depth layer of the evidence.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    DeepResearchAnalysis:
+      type: object
+      description: Analysis output for one research round. Carried by `analysis` chunks.
+      properties:
+        findings:
+          type: array
+          items:
+            type: string
+          description: Key findings extracted from this round.
+        should_continue:
+          type: boolean
+          description: Whether the pipeline should run another research round.
+        follow_up_suggestions:
+          type: array
+          items:
+            type: string
+          description: Suggested research directions for the next round.
+    DeepResearchChunkDelta:
+      type: object
+      description: Incremental content in a Deep Research streaming chunk.
+      properties:
+        content:
+          type: string
+          description: Incremental report text. Concatenate across `content` chunks to build the final report.
+    DeepResearchVisualImage:
+      type: object
+      description: An image selected for a report section.
+      properties:
+        url:
+          type: string
+          description: The image URL.
+        thumbnail:
+          type: string
+          description: Thumbnail URL.
+        caption:
+          type: string
+          description: A short caption for the image.
+        visual_evidence:
+          type: string
+          description: Why this image supports the section's content.
+        source_page:
+          type: string
+          description: URL of the page the image was found on.
+        width:
+          type: integer
+          description: Image width in pixels.
+        height:
+          type: integer
+          description: Image height in pixels.
+        confidence:
+          type: number
+          description: Relevance confidence score.
+    DeepResearchOutlineSection:
+      type: object
+      description: A single section in the report outline.
+      properties:
+        section_id:
+          type: string
+          description: Unique section ID, referenced by `sub_question_to_section_map` and `table.placement`.
+        section_title:
+          type: string
+          description: Section title.
+        thesis:
+          type: string
+          description: Central claim of this section.
+        table_ids:
+          type: array
+          items:
+            type: string
+          description: Table IDs belonging to this section.
+        covers_sub_questions:
+          type: array
+          items:
+            type: string
+          description: Sub-question IDs covered by this section.
+        target_words:
+          type: integer
+          description: Target word count for this section.
+        evidence:
+          type: array
+          description: Evidence supporting this section.
+          items:
+            $ref: '#/components/schemas/DeepResearchEvidence'
+    DeepResearchInterpretation:
+      type: object
+      description: An ambiguous term and its candidate meanings.
+      properties:
+        term:
+          type: string
+          description: The ambiguous term.
+        meanings:
+          type: array
+          description: All candidate meanings for this term.
+          items:
+            $ref: '#/components/schemas/DeepResearchMeaning'
+        chosen:
+          type: string
+          description: The meaning ID the LLM picked by default.
+        reasoning:
+          type: string
+          description: The LLM's rationale for the chosen meaning.
+    DeepResearchAngle:
+      type: object
+      description: A single research angle within the plan.
+      properties:
+        focus:
+          type: string
+          description: Angle name.
+        focus_desc:
+          type: string
+          description: Angle description.
+        interpretation_id:
+          type: string
+          description: The meaning ID this angle serves. `"general"` denotes a cross-interpretation angle.
+        queries:
+          type: array
+          items:
+            type: string
+          description: Search queries planned for this angle.
+        sub_question_ids:
+          type: array
+          items:
+            type: string
+          description: Sub-question IDs covered by this angle.
+    DeepResearchUnresolved:
+      type: object
+      description: Items the brief stage flagged as unresolved.
+      properties:
+        contradictions:
+          type: array
+          items:
+            type: string
+          description: Contradictions between sources.
+        weak_claims:
+          type: array
+          items:
+            type: string
+          description: Claims with thin evidence.
+        depth_gaps:
+          type: array
+          items:
+            type: string
+          description: Depth-layer gaps across sections.
+        unanswered:
+          type: array
+          items:
+            type: string
+          description: Sub-questions left unanswered.
+    SearchResultGroup:
+      type: object
+      description: A group of search results for a single sub-query.
+      properties:
+        query:
+          type: string
+          description: The sub-query that produced these results.
+        results:
+          type: array
+          description: The search results for this sub-query.
+          items:
+            $ref: '#/components/schemas/SearchResult'
+        latency:
+          type: integer
+          description: Search latency for this query in milliseconds.
+    DeepResearchReference:
+      type: object
+      description: A single cited reference.
+      properties:
+        index:
+          type: integer
+          description: Reference index; cited in the report body as `[^N]`.
+        url:
+          type: string
+          description: Source URL.
+        title:
+          type: string
+          description: Source title.
+    SearchResult:
+      type: object
+      description: A single search result.
+      properties:
+        title:
+          type: string
+          description: The title of the result page.
+        url:
+          type: string
+          description: The URL of the result page.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the result site.
+        cover_image:
+          type: object
+          description: The page cover image. Returned only when `include_images` is true and the page has a cover image.
+          properties:
+            url:
+              type: string
+              description: The cover image URL.
+            description:
+              type: string
+              description: Text description of the cover image.
+        images:
+          type: array
+          description: In-body images of the page, in order of appearance. Returned only when `include_images` is true.
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                description: The image URL.
+              description:
+                type: string
+                description: Text description of the image.
+    DeepResearchMeta:
+      type: object
+      description: Usage and latency metadata for the Deep Research call. Carried by `usage` chunks.
+      properties:
+        usage:
+          type: object
+          description: Search usage.
+          properties:
+            num_search_queries:
+              type: integer
+              description: Total number of search queries executed across all rounds.
+        latency:
+          type: integer
+          description: Total request latency in milliseconds.
+        total_rounds:
+          type: integer
+          description: Total number of research rounds completed.
+        total_search_count:
+          type: integer
+          description: Total search results accumulated across all rounds.
+        billed_tier:
+          type: string
+          description: The tier actually billed for this request.
+    DeepResearchTable:
+      type: object
+      description: Table metadata referenced from an outline section.
+      properties:
+        table_id:
+          type: string
+          description: Unique table ID, referenced by `outline.table_ids`.
+        title:
+          type: string
+          description: Table title.
+        columns:
+          type: array
+          items:
+            type: string
+          description: Column names.
+        description:
+          type: string
+          description: Description of the table contents, guiding how the report-writing stage should populate the cells.
+        placement:
+          type: string
+          description: Section ID this table belongs to.
+    DeepResearchSelection:
+      type: object
+      description: A single user correction or angle filter applied against a Phase 1 plan.
+      properties:
+        term:
+          type: string
+          description: An ambiguous term, matching `plan.interpretations[].term`. When present, overrides the LLM's default `chosen` meaning.
+        chosen:
+          type: string
+          description: The selected meaning ID (from `plan.interpretations[].meanings[].id`, e.g. `"nasa_program"`). Pass `"all"` to keep every meaning. When used as an angle filter, this carries the `interpretation_id` of the angles to keep.
+        indices:
+          type: array
+          items:
+            type: integer
+          description: 0-based angle indices within the group identified by `chosen`. Absent means keep every angle in that group.
+    DeepResearchChunk:
+      type: object
+      description: A streaming chunk of a Deep Research response.
+      required:
+      - request_id
+      - created
+      properties:
+        type:
+          type: string
+          enum:
+          - status
+          - plan
+          - queries
+          - search_done
+          - analysis
+          - brief
+          - content
+          - visual
+          - html_delta
+          - html
+          - finish
+          - usage
+          - error
+          description: The type of this streaming chunk. On the `pro-visual` tier, `html_delta` chunks stream an HTML version of the report after the report content completes, and a final `html` chunk marks the end of that stream.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        object:
+          type: string
+          enum:
+          - research.chunk
+          description: The object type, always `research.chunk`.
+        created:
+          type: number
+          description: Unix timestamp (in seconds) of when the chunk was created.
+        round:
+          type: integer
+          description: Current research round. Present only in `queries`, `search_done`, and `analysis` chunks.
+        latency:
+          type: integer
+          description: Latency in milliseconds for the stage represented by this chunk.
+        status:
+          type: string
+          description: Pipeline progress copy. Present only in `status` chunks.
+        plan:
+          $ref: '#/components/schemas/DeepResearchPlan'
+        plan_id:
+          type: string
+          description: Plan ID carried by `plan` chunks. The client must echo this back as `plan_id` when entering Phase 2.
+        queries:
+          type: array
+          items:
+            type: string
+          description: Sub-queries generated for this round. Present only in `queries` chunks.
+        search_result_count:
+          type: integer
+          description: Total number of search results returned this round. Present only in `search_done` chunks.
+        search_results:
+          type: array
+          description: Search results for this round, one group per sub-query. Present only in `search_done` chunks.
+          items:
+            $ref: '#/components/schemas/SearchResultGroup'
+        analysis:
+          $ref: '#/components/schemas/DeepResearchAnalysis'
+        brief:
+          $ref: '#/components/schemas/DeepResearchBrief'
+        choices:
+          type: array
+          description: Incremental choices for the final report. Present in `content` and `finish` chunks.
+          items:
+            $ref: '#/components/schemas/DeepResearchChunkChoice'
+        visual:
+          allOf:
+          - $ref: '#/components/schemas/DeepResearchVisual'
+          description: Visual material for one report section. Present only in `visual` chunks, emitted on the `pro-visual` tier.
+        html_delta:
+          type: object
+          description: An incremental fragment of the HTML report. Present only in `html_delta` chunks. Concatenate the fragments in order to rebuild the full page.
+          properties:
+            delta:
+              type: string
+              description: The next fragment of the HTML page.
+        meta:
+          $ref: '#/components/schemas/DeepResearchMeta'
+    DeepResearchPlan:
+      type: object
+      description: Research plan generated in Phase 1. Carried by `plan` chunks.
+      properties:
+        title:
+          type: string
+          description: Plan title.
+        overview:
+          type: string
+          description: Plan overview.
+        interpretations:
+          type: array
+          description: Ambiguous terms in the question along with their possible meanings. Empty when the question has no ambiguity.
+          items:
+            $ref: '#/components/schemas/DeepResearchInterpretation'
+        angles:
+          type: array
+          description: Research angles the plan will explore.
+          items:
+            $ref: '#/components/schemas/DeepResearchAngle'
+        requires_selection:
+          type: boolean
+          description: When `true`, the SSE stream ends at this `plan` chunk and waits for the client to continue via Phase 2 (`plan_id` + `selections`). When `false`, research continues automatically.
+    DeepResearchChunkChoice:
+      type: object
+      description: A single choice in a Deep Research streaming chunk. Carried by `content` and `finish` chunks.
+      properties:
+        index:
+          type: number
+          description: The index of this choice. Usually `0`.
+        delta:
+          $ref: '#/components/schemas/DeepResearchChunkDelta'
+        finish_reason:
+          type: string
+          nullable: true
+          enum:
+          - stop
+          - length
+          - content_filter
+          - error
+          description: The reason generation stopped. `null` in `content` chunks; populated in the `finish` chunk.
+    DeepResearchVerdictScaffold:
+      type: object
+      description: Structured scaffold for reports that need to deliver a verdict.
+      properties:
+        verdict_type:
+          type: string
+          enum:
+          - ranked_list
+          - single_pick
+          - tiered_recommendation
+          - qualified_pick
+          description: 'Shape of the verdict. `ranked_list`: ordered ranking; `single_pick`: a single best answer; `tiered_recommendation`: tiered recommendation; `qualified_pick`: conditional recommendation.'
+        items_expected:
+          type: integer
+          description: Expected number of items in the verdict.
+        justification_dimensions:
+          type: array
+          items:
+            type: string
+          description: Data dimensions supporting the verdict.
+    DeepResearchMeaning:
+      type: object
+      description: A candidate meaning for an ambiguous term.
+      properties:
+        id:
+          type: string
+          description: Unique meaning ID.
+        label:
+          type: string
+          description: Description of the meaning.
+    DeepResearchVisualVideo:
+      type: object
+      description: A video selected for a report section.
+      properties:
+        url:
+          type: string
+          description: The video URL.
+        cover_url:
+          type: string
+          description: Video cover image URL.
+        title:
+          type: string
+          description: The video title.
+        duration_seconds:
+          type: integer
+          description: Video duration in seconds.
+        source_page:
+          type: string
+          description: URL of the page the video was found on.
+        time_published:
+          type: string
+          description: Publish time in ISO 8601.
+    DeepResearchVisual:
+      type: object
+      description: Visual material for one report section. Carried by `visual` chunks on the `pro-visual` tier.
+      properties:
+        section_id:
+          type: string
+          description: The report section this material belongs to, matching `brief.outline[].section_id`.
+        images:
+          type: array
+          description: Images selected for this section.
+          items:
+            $ref: '#/components/schemas/DeepResearchVisualImage'
+        videos:
+          type: array
+          description: Videos selected for this section.
+          items:
+            $ref: '#/components/schemas/DeepResearchVisualVideo'
+    DeepResearchMessage:
+      type: object
+      required:
+      - role
+      - content
+      description: A single message in the Deep Research request.
+      properties:
+        role:
+          type: string
+          enum:
+          - system
+          - user
+          - assistant
+          description: The role of the message author.
+        content:
+          description: The content of the message. Can be a plain string, or an array of text content blocks.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              $ref: '#/components/schemas/DeepResearchTextContentBlock'
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

@@ -1,0 +1,1170 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Answer API
+  version: 1.0.0
+  description: 'Operations tagged Answer across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Answer
+paths:
+  /answer:
+    post:
+      summary: Answer
+      description: Automatically decomposes user messages into multiple sub-queries, performs searches, and synthesizes results using an LLM.
+      operationId: answer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerRequest'
+            examples:
+              basic:
+                summary: Basic Answer
+                value:
+                  model: anthropic/claude-sonnet-4.6
+                  messages:
+                  - role: user
+                    content: Latest trends and major players in the global AI chip market in 2026
+                  max_queries: 5
+                  stream: false
+                  web_search_options:
+                    count: 10
+                    highlight:
+                      enable: true
+                      max_tokens: 300
+                    full_content:
+                      enable: true
+                      max_tokens: 2048
+              queriesOnly:
+                summary: Queries Only Mode
+                value:
+                  model: anthropic/claude-sonnet-4.6
+                  messages:
+                  - role: user
+                    content: What are the latest developments in quantum computing?
+                  mode: queries_only
+                  max_queries: 10
+              queriesAndSearch:
+                summary: Queries and Search Mode
+                value:
+                  model: anthropic/claude-sonnet-4.6
+                  messages:
+                  - role: user
+                    content: Compare Tesla and BYD electric vehicle sales in 2026
+                  mode: queries_and_search
+                  max_queries: 8
+                  web_search_options:
+                    count: 5
+                    highlight:
+                      enable: true
+                      max_tokens: 300
+              multiTurn:
+                summary: Multi-turn Conversation
+                value:
+                  model: anthropic/claude-sonnet-4.6
+                  messages:
+                  - role: user
+                    content: Who are the major players in the current chip market?
+                  - role: assistant
+                    content: Major players include NVIDIA, AMD, Intel, Broadcom, Google, Amazon, etc.
+                  - role: user
+                    content: What are their latest developments?
+                  max_queries: 10
+                  stream: false
+              withDomainFilter:
+                summary: With Domain and Time Filters
+                value:
+                  model: anthropic/claude-sonnet-4.6
+                  messages:
+                  - role: user
+                    content: Latest central bank interest rate decisions globally
+                  max_queries: 15
+                  stream: false
+                  web_search_options:
+                    count: 10
+                    include_domains:
+                    - reuters.com
+                    exclude_domains:
+                    - medium.com
+                    include_text:
+                    - interest rate
+                    - central bank
+                    exclude_text:
+                    - opinion
+                    - rumor
+                    time_basis: published
+                    start_time: '2025-01-01T00:00:00Z'
+                    end_time: '2025-01-31T23:59:59Z'
+                    highlight:
+                      enable: true
+                      max_tokens: 300
+                    format: markdown
+                    safesearch: strict
+                    full_content:
+                      enable: true
+                      max_tokens: 2048
+      responses:
+        '200':
+          description: 'Successful Answer response. When `stream=false`, returns a single `chat.completion` object with `queries` and `search_results` at the top level. When `stream=true`, returns a stream of `chat.completion.chunk` objects with types: `queries` (generated sub-queries), `search_done` (search results), `content` (incremental content), `finish` (completion signal), and `usage` (token usage).'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/AnswerResponse'
+                - $ref: '#/components/schemas/AnswerChunk'
+                discriminator:
+                  propertyName: object
+                  mapping:
+                    chat.completion: '#/components/schemas/AnswerResponse'
+                    chat.completion.chunk: '#/components/schemas/AnswerChunk'
+              examples:
+                nonStreaming:
+                  summary: Non-streaming response (chat.completion)
+                  value:
+                    request_id: 20260403120000001ABCDE12345
+                    object: chat.completion
+                    created: 1775361600
+                    model: anthropic/claude-sonnet-4.6
+                    choices:
+                    - index: 0
+                      finish_reason: stop
+                      message:
+                        role: assistant
+                        content: '## Global AI Chip Market in 2026: Latest Trends & Major Players
+
+
+                          **The AI chip market was valued at approximately $102.9 billion in 2025, and is projected to grow at a 29.4% CAGR to $1.35 trillion by 2035.** NVIDIA continues to dominate with over 80% data center market share, but the custom ASIC chip wave is accelerating challenges to its position.[^1][^6]
+
+
+                          ### Major Players Overview
+
+
+                          | Company | Core Strength | Key 2026 Developments |
+
+                          |---|---|---|
+
+                          | **NVIDIA** | Data center GPU, >80% market share | Blackwell/Rubin roadmap, $1T revenue target |
+
+                          | **Broadcom** | Custom ASIC chips | Expected to capture 60% of custom AI chip market by 2027 |
+
+                          | **AMD** | GPU alternative | MI450 chip volume ramp in H2, OpenAI/Meta large orders |
+
+                          | **Intel** | CPU + foundry | Gaudi 3 launch, Xeon 6 selected for Nvidia DGX systems |
+
+                          | **Google** | In-house TPU (Ironwood) | Surging HBM demand |
+
+                          | **Amazon AWS** | Trainium series | Anthropic training Claude on over 1M Trainium2 chips |'
+                    queries:
+                    - 2026 global AI chip market trends
+                    - AI chip market share 2026
+                    - top AI chip manufacturers 2026
+                    - NVIDIA AI chip dominance 2026
+                    - AMD AI chip strategy 2026
+                    search_results:
+                    - query: 2026 global AI chip market trends
+                      results:
+                      - title: AI Chip Market Size to Exceed USD 1354.35 Billion by 2035
+                        url: http://globenewswire.com/news-release/2026/04/01/...
+                        highlight: According to the SNS Insider, The AI Chip Market Size was valued at USD 102.89 Billion in 2025 and is expected to reach USD 1354.35 Billion by 2035...
+                        full_content: ''
+                        authors: SNS Insider pvt ltd
+                        time_published: '2026-04-01T07:30:00Z'
+                        time_last_crawled: '2026-04-02T03:18:46Z'
+                      latency: 69
+                    - query: AI chip market share 2026
+                      results:
+                      - title: Another result title...
+                        url: https://example.com/...
+                        highlight: '...'
+                        full_content: ''
+                        authors: '...'
+                        time_published: '2026-03-28T00:00:00Z'
+                        time_last_crawled: '2026-03-29T12:00:00Z'
+                      latency: 72
+                    meta:
+                      usage:
+                        num_search_queries: 20
+                        prompt_tokens: 35351
+                        completion_tokens: 942
+                        total_tokens: 36293
+                      latency: 24048
+                streamQueries:
+                  summary: 'Streaming chunk — queries (type: queries)'
+                  value:
+                    type: queries
+                    request_id: 20260403120000002XYZAB67890
+                    object: chat.completion.chunk
+                    created: 1775361600
+                    model: anthropic/claude-sonnet-4.6
+                    queries:
+                    - latest quantum computing developments 2026
+                    - quantum computing breakthroughs 2026
+                streamSearchDone:
+                  summary: 'Streaming chunk — search results (type: search_done)'
+                  value:
+                    type: search_done
+                    request_id: 20260403120000002XYZAB67890
+                    object: chat.completion.chunk
+                    created: 1775361600
+                    model: anthropic/claude-sonnet-4.6
+                    search_results:
+                    - query: latest quantum computing developments 2026
+                      results:
+                      - title: Stocks to Gain From Quantum Computing in 2025
+                        url: https://www.nasdaq.com/articles/...
+                        highlight: This year has seen quantum computing being pushed from lab interests toward practical deployments...
+                        full_content: ''
+                        authors: ''
+                        time_published: '2026-03-15T00:00:00Z'
+                        time_last_crawled: '2026-03-16T12:00:00Z'
+                      latency: 65
+                streamContent:
+                  summary: 'Streaming chunk — content (type: content)'
+                  value:
+                    type: content
+                    request_id: 20260403120000002XYZAB67890
+                    object: chat.completion.chunk
+                    created: 1775361600
+                    model: anthropic/claude-sonnet-4.6
+                    choices:
+                    - index: 0
+                      delta:
+                        content: '**Quantum computing'
+                      finish_reason: null
+                streamFinish:
+                  summary: 'Streaming chunk — finish (type: finish)'
+                  value:
+                    type: finish
+                    request_id: 20260403120000002XYZAB67890
+                    object: chat.completion.chunk
+                    created: 1775361600
+                    model: anthropic/claude-sonnet-4.6
+                    choices:
+                    - index: 0
+                      delta: {}
+                      finish_reason: stop
+                streamUsage:
+                  summary: 'Streaming chunk — usage (type: usage)'
+                  value:
+                    type: usage
+                    request_id: 20260403120000002XYZAB67890
+                    object: chat.completion.chunk
+                    created: 1775361600
+                    model: anthropic/claude-sonnet-4.6
+                    meta:
+                      usage:
+                        num_search_queries: 2
+                        prompt_tokens: 2664
+                        completion_tokens: 78
+                        total_tokens: 2742
+                      latency: 3565
+        '400':
+          description: Missing parameter messages — Returned when a required parameter is missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Missing parameter messages
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Answer
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    SystemMessage:
+      type: object
+      required:
+      - role
+      - content
+      properties:
+        role:
+          type: string
+          enum:
+          - system
+          description: The role of the message author. Always `system`.
+        content:
+          description: The system prompt content. A plain string or an array of content blocks.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              $ref: '#/components/schemas/ChatContentBlock'
+    AnswerResponse:
+      type: object
+      description: A non-streaming Answer response. Returned when `stream=false`.
+      required:
+      - request_id
+      - object
+      - created
+      - model
+      - choices
+      properties:
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        object:
+          type: string
+          enum:
+          - chat.completion
+          description: The object type, always `chat.completion` for non-streaming responses.
+        created:
+          type: number
+          description: Unix timestamp (in seconds) of when the completion was created.
+        model:
+          type: string
+          description: The model used for this completion.
+        choices:
+          type: array
+          description: A list of completion choices containing the synthesized response.
+          items:
+            $ref: '#/components/schemas/ChatCompletionChoice'
+        queries:
+          type: array
+          items:
+            type: string
+          description: The list of sub-queries automatically generated from the user message by the system.
+        search_results:
+          type: array
+          description: Search results grouped by query. Each sub-query has a corresponding result group.
+          items:
+            $ref: '#/components/schemas/SearchResultGroup'
+        meta:
+          $ref: '#/components/schemas/AnswerMeta'
+        warning:
+          type: string
+          nullable: true
+          description: Warning message, if any.
+    ChatMessage:
+      oneOf:
+      - $ref: '#/components/schemas/SystemMessage'
+      - $ref: '#/components/schemas/DeveloperMessage'
+      - $ref: '#/components/schemas/UserMessage'
+      - $ref: '#/components/schemas/AssistantMessage'
+      - $ref: '#/components/schemas/ToolMessage'
+      discriminator:
+        propertyName: role
+        mapping:
+          system: '#/components/schemas/SystemMessage'
+          developer: '#/components/schemas/DeveloperMessage'
+          user: '#/components/schemas/UserMessage'
+          assistant: '#/components/schemas/AssistantMessage'
+          tool: '#/components/schemas/ToolMessage'
+    ChatAnnotation:
+      type: object
+      description: A citation annotation. Returned only when `octen_search` was used, currently only for `anthropic/` models. For other models, results are still available in `search_results`.
+      properties:
+        type:
+          type: string
+          enum:
+          - url_citation
+          description: The annotation type.
+        url_citation:
+          type: object
+          properties:
+            url:
+              type: string
+              description: The URL of the cited source.
+            title:
+              type: string
+              description: The title of the cited source.
+            start_index:
+              type: integer
+              description: Start position of the cited span in `content`.
+            end_index:
+              type: integer
+              description: End position of the cited span in `content`.
+    ChatCompletionChoice:
+      type: object
+      description: A single completion choice in a non-streaming response.
+      properties:
+        index:
+          type: integer
+          description: The index of this choice. Usually 0.
+        finish_reason:
+          type: string
+          enum:
+          - stop
+          - length
+          - tool_calls
+          - content_filter
+          - error
+          description: The reason the model stopped generating. `stop` indicates normal completion.
+        message:
+          $ref: '#/components/schemas/ChatCompletionMessage'
+        logprobs:
+          $ref: '#/components/schemas/ChatLogprobs'
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    FullContentOptions:
+      type: object
+      description: Controls whether to return the full raw content of each result page.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
+    AnswerChunk:
+      type: object
+      description: 'A streaming chunk of an Answer response. Returned when `stream=true`. The `type` field indicates the chunk kind: `queries`, `search_done`, `content`, `finish`, `usage`.'
+      required:
+      - request_id
+      - object
+      - created
+      - model
+      properties:
+        type:
+          type: string
+          enum:
+          - queries
+          - search_done
+          - content
+          - finish
+          - usage
+          description: The type of this streaming chunk. The `queries` type contains the auto-generated sub-queries.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        object:
+          type: string
+          enum:
+          - chat.completion.chunk
+          description: The object type, always `chat.completion.chunk` for streaming responses.
+        created:
+          type: number
+          description: Unix timestamp (in seconds) of when the chunk was created.
+        model:
+          type: string
+          description: The model used for this completion.
+        queries:
+          type: array
+          items:
+            type: string
+          description: Auto-generated sub-queries. Present only in `queries` type chunks.
+        choices:
+          type: array
+          description: Incremental choices. Present in `content` and `finish` chunks.
+          items:
+            $ref: '#/components/schemas/ChatCompletionChunkChoice'
+        search_results:
+          type: array
+          description: Search results grouped by query. Present in `search_done` chunks.
+          items:
+            $ref: '#/components/schemas/SearchResultGroup'
+        meta:
+          $ref: '#/components/schemas/AnswerMeta'
+    ChatCompletionChunkChoice:
+      type: object
+      description: A single choice in a streaming chunk.
+      properties:
+        index:
+          type: integer
+          description: The index of this choice. Usually 0.
+        delta:
+          $ref: '#/components/schemas/ChatCompletionDelta'
+        finish_reason:
+          type: string
+          nullable: true
+          enum:
+          - stop
+          - length
+          - tool_calls
+          - content_filter
+          - error
+          - null
+          description: The reason generation stopped. `null` for intermediate chunks; set in the `finish` chunk.
+        logprobs:
+          $ref: '#/components/schemas/ChatLogprobs'
+    UserMessage:
+      type: object
+      required:
+      - role
+      - content
+      properties:
+        role:
+          type: string
+          enum:
+          - user
+          description: The role of the message author. Always `user`.
+        content:
+          description: The content of the message. A plain string or an array of content blocks.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              $ref: '#/components/schemas/ChatContentBlock'
+    ChatToolCall:
+      type: object
+      required:
+      - id
+      - type
+      - function
+      description: A custom function call generated by the model.
+      properties:
+        index:
+          type: integer
+          description: The index of this tool call in the array.
+        id:
+          type: string
+          description: A unique identifier for this tool call. Referenced by the corresponding `tool` message's `tool_call_id`.
+        type:
+          type: string
+          enum:
+          - function
+          description: The type of tool call. Always `function`.
+        function:
+          $ref: '#/components/schemas/ChatToolCallFunction'
+    ChatReasoningDetail:
+      type: object
+      description: Detailed reasoning information. Returned only for reasoning models.
+      properties:
+        format:
+          type: string
+          enum:
+          - unknown
+          - openai-responses-v1
+          - azure-openai-responses-v1
+          - xai-responses-v1
+          - anthropic-claude-v1
+          - google-gemini-v1
+          description: The format of the reasoning information.
+        index:
+          type: integer
+          description: The position of this entry in the output. Usually 0.
+        type:
+          type: string
+          enum:
+          - reasoning.text
+          - reasoning.summary
+          - reasoning.encrypted
+          description: The kind of reasoning information.
+        text:
+          type: string
+          description: Reasoning text. Present only when `type` is `reasoning.text`.
+        summary:
+          type: string
+          description: Reasoning summary. Present only when `type` is `reasoning.summary`.
+        data:
+          type: string
+          description: Encrypted reasoning. Present only when `type` is `reasoning.encrypted`.
+    ChatToolCallFunction:
+      type: object
+      required:
+      - name
+      - arguments
+      description: The function invocation details within a tool call.
+      properties:
+        name:
+          type: string
+          description: The name of the function to call.
+        arguments:
+          type: string
+          description: The arguments to the function, as a JSON string generated by the model.
+    SearchResultGroup:
+      type: object
+      description: A group of search results for a single sub-query.
+      properties:
+        query:
+          type: string
+          description: The sub-query that produced these results.
+        results:
+          type: array
+          description: The search results for this sub-query.
+          items:
+            $ref: '#/components/schemas/SearchResult'
+        latency:
+          type: integer
+          description: Search latency for this query in milliseconds.
+    SearchResult:
+      type: object
+      description: A single search result.
+      properties:
+        title:
+          type: string
+          description: The title of the result page.
+        url:
+          type: string
+          description: The URL of the result page.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the result site.
+        cover_image:
+          type: object
+          description: The page cover image. Returned only when `include_images` is true and the page has a cover image.
+          properties:
+            url:
+              type: string
+              description: The cover image URL.
+            description:
+              type: string
+              description: Text description of the cover image.
+        images:
+          type: array
+          description: In-body images of the page, in order of appearance. Returned only when `include_images` is true.
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                description: The image URL.
+              description:
+                type: string
+                description: Text description of the image.
+    ToolMessage:
+      type: object
+      required:
+      - role
+      - tool_call_id
+      - content
+      properties:
+        role:
+          type: string
+          enum:
+          - tool
+          description: The role of the message author. Always `tool`.
+        tool_call_id:
+          type: string
+          description: The ID of the tool call this message responds to.
+        content:
+          type: string
+          description: The tool output, typically a JSON string with the function result.
+    AnswerRequest:
+      type: object
+      required:
+      - messages
+      description: Request body for the Answer API.
+      properties:
+        model:
+          type: string
+          enum:
+          - openai/gpt-6-astra
+          - openai/gpt-5.6-sol
+          - openai/gpt-5.6-terra
+          - openai/gpt-5.6-luna
+          - openai/gpt-5.5-pro
+          - openai/gpt-5.5
+          - openai/gpt-5.4
+          - anthropic/claude-fable-5.1
+          - anthropic/claude-fable-5
+          - anthropic/claude-opus-5
+          - anthropic/claude-opus-4.8
+          - anthropic/claude-opus-4.6
+          - anthropic/claude-sonnet-5
+          - anthropic/claude-sonnet-4.6
+          - anthropic/claude-haiku-4.5
+          - google/gemini-3.8-flash
+          - google/gemini-3.5-flash
+          - google/gemini-3.5-flash-lite
+          - google/gemini-3.1-pro-preview
+          - google/gemini-3.1-flash-lite
+          - google/gemini-3-flash-preview
+          - moonshotai/kimi-k3
+          - moonshotai/kimi-k2.6
+          - moonshotai/kimi-k2.5
+          - minimax/minimax-m2.5
+          - qwen/qwen3.6-plus
+          - deepseek/deepseek-v4-pro
+          - deepseek/deepseek-v4-flash-0731
+          default: anthropic/claude-sonnet-4.6
+          description: The model to use for query decomposition and response synthesis.
+        messages:
+          type: array
+          description: A list of messages comprising the conversation so far. User and assistant messages in chronological order for multi-turn conversations.
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+        mode:
+          type: string
+          enum:
+          - queries_only
+          - queries_and_search
+          - full
+          default: full
+          description: 'Controls the execution depth. `queries_only`: only decompose the message into sub-queries without performing searches; `queries_and_search`: decompose into sub-queries and return search results without LLM synthesis; `full`: decompose, search, and synthesize a final response using the LLM.'
+        max_queries:
+          type: integer
+          minimum: 1
+          maximum: 30
+          default: 30
+          description: Maximum number of sub-queries to generate.
+        web_search_options:
+          allOf:
+          - $ref: '#/components/schemas/WebSearchOptions'
+          description: Search options. Shares the same parameters and defaults as the Web Search API, except `highlight.max_tokens` defaults to 256. Queries are automatically generated from the messages.
+        stream:
+          type: boolean
+          default: false
+          description: 'Whether to enable streaming output. When `true`, returns `chat.completion.chunk` objects incrementally with types: `queries`, `search_done`, `content`, `finish`, and `usage`.'
+    DeveloperMessage:
+      type: object
+      required:
+      - role
+      - content
+      description: A developer message. The OpenAI-protocol equivalent of `system` (sent by newer OpenAI SDKs); handled as `system`.
+      properties:
+        role:
+          type: string
+          enum:
+          - developer
+          description: The role of the message author. Always `developer`.
+        content:
+          description: The content. A plain string or an array of content blocks.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              $ref: '#/components/schemas/ChatContentBlock'
+    ChatToolCallDelta:
+      type: object
+      description: Incremental tool call data in a streaming chunk. The first chunk for a tool call includes `id`, `type`, and `function.name`. Subsequent chunks append to `function.arguments`.
+      properties:
+        index:
+          type: number
+          description: The index of this tool call in the tool_calls array.
+        id:
+          type: string
+          description: The tool call ID. Only present in the first chunk for this tool call.
+        type:
+          type: string
+          enum:
+          - function
+          description: The type of tool call.
+        function:
+          type: object
+          description: Incremental function call data.
+          properties:
+            name:
+              type: string
+              description: The function name. Only present in the first chunk for this tool call.
+            arguments:
+              type: string
+              description: Incremental JSON string of the function arguments. Concatenate across chunks to build the complete arguments.
+    SynthesisUsage:
+      type: object
+      description: Token usage information for the Answer response. When `stream=true`, this is only present in the `usage` type chunk.
+      required:
+      - num_search_queries
+      - prompt_tokens
+      - completion_tokens
+      - total_tokens
+      properties:
+        num_search_queries:
+          type: integer
+          description: Total number of search queries executed across all sub-queries.
+        prompt_tokens:
+          type: integer
+          description: Number of input tokens.
+        completion_tokens:
+          type: integer
+          description: Number of output tokens.
+        total_tokens:
+          type: integer
+          description: Total tokens used (prompt_tokens + completion_tokens).
+    ChatContentBlock:
+      type: object
+      description: A content block within a message.
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          - image
+          - image_url
+          description: The type of content block.
+        text:
+          type: string
+          description: The text content. Required when `type` is `text`.
+        image:
+          type: string
+          description: Base64-encoded image. Required when `type` is `image`.
+        image_url:
+          type: object
+          description: Image URL object. Required when `type` is `image_url`.
+          required:
+          - url
+          properties:
+            url:
+              type: string
+              description: The URL of the image.
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+    ChatCompletionMessage:
+      type: object
+      description: The assistant's response message.
+      properties:
+        role:
+          type: string
+          enum:
+          - assistant
+          description: The role of the message author. Always `assistant`.
+        content:
+          type: string
+          nullable: true
+          description: The assistant's text content. May be `null` when the model only produces tool calls or refuses.
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatToolCall'
+          description: Custom function calls generated by the model. Present only when `finish_reason` is `tool_calls`.
+        annotations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatAnnotation'
+          description: Citation annotations. Present only when `octen_broad_search` or `octen_search` was used.
+        refusal:
+          type: string
+          nullable: true
+          description: A model-generated refusal message, or `null`.
+        reasoning:
+          type: string
+          nullable: true
+          description: Reasoning text. Present only for reasoning models, otherwise `null`.
+        reasoning_details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatReasoningDetail'
+          description: Detailed reasoning information. Present only for reasoning models.
+    HighlightOptions:
+      type: object
+      description: Controls highlight extraction from result pages.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns query-relevant highlight in each result.
+        max_tokens:
+          type: integer
+          default: 512
+          minimum: 100
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    CacheControl:
+      type: object
+      description: Prompt caching marker. Sets a cache breakpoint so the stable prefix up to this block can be reused.
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - ephemeral
+          description: The cache control type. Always `ephemeral`.
+        ttl:
+          type: string
+          enum:
+          - 5m
+          - 1h
+          default: 5m
+          description: Cache lifetime.
+    ChatCompletionDelta:
+      type: object
+      description: Incremental content in a streaming chunk. Contains only the new fields for this chunk.
+      properties:
+        role:
+          type: string
+          enum:
+          - assistant
+          description: The role. Typically included in the first chunk.
+        content:
+          type: string
+          description: Incremental text content.
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatToolCallDelta'
+          description: Incremental tool call data.
+    WebSearchOptions:
+      type: object
+      properties:
+        count:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 100
+          description: Number of results to return.
+        include_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically include in the search results. The `site:` query operator adds to this list.
+          example:
+          - octen.ai
+          - wikipedia.org
+        exclude_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically exclude from the search results. The `-site:` query operator adds to this list. If a domain appears in both `include_domains` and `exclude_domains`, `exclude_domains` takes precedence.
+          example:
+          - spam.com
+          - ads.example.net
+        include_text:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+          maxItems: 5
+          description: Strings that must appear in the result page text.
+        exclude_text:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+          maxItems: 5
+          description: Strings that must not appear in the result page text.
+        time_basis:
+          type: string
+          enum:
+          - auto
+          - published
+          - crawled
+          default: auto
+          description: Determines which time field is used for time filtering. `published` uses time_published; `crawled` uses time_last_crawled. Results missing this field are excluded when filtering by time.
+        time_range:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          - year
+          - d
+          - w
+          - m
+          - y
+          description: Relative time window counting back from the current time based on `time_basis`. Mutually exclusive with `start_time`/`end_time` — if both are provided, `start_time`/`end_time` take precedence.
+        start_time:
+          type: string
+          format: date-time
+          description: Start time for filtering results. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        end_time:
+          type: string
+          format: date-time
+          description: End time for filtering results. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        language:
+          type: array
+          items:
+            type: string
+            enum:
+            - ar
+            - de
+            - en
+            - es
+            - fr
+            - hi
+            - id
+            - it
+            - ja
+            - ko
+            - nl
+            - pl
+            - pt
+            - ru
+            - th
+            - tr
+            - vi
+            - zh
+          default: []
+          description: A list of languages to restrict results to, as ISO 639-1 codes. By default, no language filter is applied.
+          example:
+          - en
+          - zh
+        highlight:
+          $ref: '#/components/schemas/HighlightOptions'
+        full_content:
+          $ref: '#/components/schemas/FullContentOptions'
+        format:
+          type: string
+          enum:
+          - markdown
+          - text
+          default: text
+          description: Controls the formatting of highlight outputs.
+        safesearch:
+          type: string
+          enum:
+          - 'off'
+          - strict
+          default: strict
+          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
+        include_images:
+          type: boolean
+          default: false
+          description: Whether to include images in each result.
+    ChatLogprobs:
+      type: object
+      nullable: true
+      description: Log probability information for the output tokens. Present only when `logprobs` is `true`, otherwise `null`.
+      properties:
+        content:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              token:
+                type: string
+                description: The token text.
+              logprob:
+                type: number
+                description: The log probability of this token.
+              bytes:
+                type: array
+                nullable: true
+                items:
+                  type: integer
+                description: UTF-8 byte representation.
+              top_logprobs:
+                type: array
+                description: The top candidate tokens at this position, same structure.
+                items:
+                  type: object
+    AnswerMeta:
+      type: object
+      description: Metadata for the Answer response.
+      properties:
+        usage:
+          $ref: '#/components/schemas/SynthesisUsage'
+        latency:
+          type: integer
+          description: Total request latency in milliseconds.
+    AssistantMessage:
+      type: object
+      required:
+      - role
+      properties:
+        role:
+          type: string
+          enum:
+          - assistant
+          description: The role of the message author. Always `assistant`.
+        content:
+          type: string
+          nullable: true
+          description: The assistant's text content. May be `null` or omitted when the assistant only produces tool calls.
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatToolCall'
+          description: Tool calls generated by the model in a previous turn, replayed verbatim. Only valid when `role` is `assistant`.
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

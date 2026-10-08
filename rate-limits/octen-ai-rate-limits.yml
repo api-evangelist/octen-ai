@@ -1,0 +1,122 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/resources/rate-limits.md
+docs: https://docs.octen.ai/resources/rate-limits
+name: Octen rate limits
+published: true
+limit_count: 17
+exceeded_status: 429
+headers: null
+note: Limits are per account by subscription tier, with optional per-key caps (the lower applies). No RateLimit-* or Retry-After headers are documented; a 429 carries a msg field. Custom limits via support@octen.ai.
+limits:
+- name: Search QPS — Free
+  limit_text: '| Free | 10 |'
+  limit: 10
+  window: second
+  scope: per-account
+  plan: Free
+  endpoint: /broad-search, /search, /news-search, /business-search
+- name: Search QPS — Base
+  limit_text: '| Base | 20 |'
+  limit: 20
+  window: second
+  scope: per-account
+  plan: Base
+  endpoint: /broad-search, /search, /news-search, /business-search
+- name: Search QPS — Builder
+  limit_text: '| Builder | 50 |'
+  limit: 50
+  window: second
+  scope: per-account
+  plan: Builder
+  endpoint: /broad-search, /search, /news-search, /business-search
+- name: Search QPS — Pro
+  limit_text: '| Pro | 200 |'
+  limit: 200
+  window: second
+  scope: per-account
+  plan: Pro
+  endpoint: /broad-search, /search, /news-search, /business-search
+- name: Search QPS — Max
+  limit_text: '| Max | 500 |'
+  limit: 500
+  window: second
+  scope: per-account
+  plan: Max
+  endpoint: /broad-search, /search, /news-search, /business-search
+- name: Image/Video/Answer QPS
+  limit_text: Image Search, Video Search, and Answer share a single QPS limit equal to your subscription tier's QPS, in a separate bucket from the search APIs above.
+  window: second
+  scope: per-account
+  endpoint: /image-search, /video-search, /answer
+- name: Embedding TPM — Free / Base
+  limit_text: '| Free / Base | 1,000,000 | 200,000 |'
+  limit: 1000000
+  window: minute
+  scope: per-account
+  plan: Free / Base
+  endpoint: /embedding
+  note: VL Embedding 200,000 TPM on the same row
+- name: Embedding TPM — Builder
+  limit_text: '| Builder | 2,500,000 | 500,000 |'
+  limit: 2500000
+  window: minute
+  scope: per-account
+  plan: Builder
+  endpoint: /embedding
+  note: VL Embedding 500,000 TPM
+- name: Embedding TPM — Pro
+  limit_text: '| Pro | 10,000,000 | 2,000,000 |'
+  limit: 10000000
+  window: minute
+  scope: per-account
+  plan: Pro
+  endpoint: /embedding
+  note: VL Embedding 2,000,000 TPM
+- name: Embedding TPM — Max
+  limit_text: '| Max | 25,000,000 | 5,000,000 |'
+  limit: 25000000
+  window: minute
+  scope: per-account
+  plan: Max
+  endpoint: /embedding
+  note: VL Embedding 5,000,000 TPM
+- name: Extract URLs/min — standard
+  limit_text: '| `standard` | 2,000 |'
+  limit: 2000
+  window: minute
+  scope: per-account
+  endpoint: /extract
+- name: Extract URLs/min — auto
+  limit_text: '| `auto` | 500 |'
+  limit: 500
+  window: minute
+  scope: per-account
+  endpoint: /extract
+- name: Extract URLs/min — advanced
+  limit_text: '| `advanced` | 200 |'
+  limit: 200
+  window: minute
+  scope: per-account
+  endpoint: /extract
+- name: Model Gateway RPM
+  limit_text: '| RPM | 300 |'
+  limit: 300
+  window: minute
+  scope: per-model
+  endpoint: /v1/chat/completions
+- name: Model Gateway TPM
+  limit_text: '| TPM | 2,000,000 |'
+  limit: 2000000
+  window: minute
+  scope: per-model
+  endpoint: /v1/chat/completions
+- name: Deep Research concurrency
+  limit_text: Only a single concurrent request is supported.
+  limit: 1
+  scope: per-account
+  endpoint: /v1/research
+  kind: concurrency
+- name: Per-key cap
+  limit_text: When creating an API key, you may configure an additional rate limit for that key.
+  scope: per-key

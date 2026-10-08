@@ -1,0 +1,477 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Search API
+  version: 1.0.0
+  description: 'Operations tagged Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Search
+paths:
+  /search:
+    post:
+      summary: Web Search
+      description: Searches the live web and returns ranked results with model-ready highlights and optional full content. Optional filters narrow sources, time windows, and languages.
+      operationId: search
+      security:
+      - bearerAuthNoPayment: []
+      - apiKeyAuthNoPayment: []
+      x-mint:
+        href: /api-reference/search
+        metadata:
+          title: Web Search
+          sidebarTitle: Web Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+            examples:
+              basic:
+                summary: Basic Search
+                value:
+                  query: What record did Kendrick Lamar break at the 2026 Grammy Awards?
+                  count: 5
+              domainFiltering:
+                summary: Domain Filtering + Time Range + Highlights
+                value:
+                  query: summary judgment
+                  count: 10
+                  time_basis: published
+                  start_time: '2024-01-01T00:00:00+08:00'
+                  end_time: '2025-01-01T00:00:00+08:00'
+                  include_domains:
+                  - uscourts.gov
+                  highlight:
+                    enable: true
+                    max_tokens: 300
+                  full_content:
+                    enable: false
+                  format: text
+              fullContent:
+                summary: Full Content Enabled
+                value:
+                  query: latest WHO guidance on influenza vaccination
+                  count: 5
+                  full_content:
+                    enable: true
+                    max_tokens: 1000
+      responses:
+        '200':
+          description: Successful search response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+              example:
+                code: 0
+                msg: success
+                request_id: req_abc123def456
+                data:
+                  query: latest WHO guidance on influenza vaccination
+                  results:
+                  - title: Influenza (Seasonal) - World Health Organization (WHO)
+                    url: https://www.who.int/news-room/fact-sheets/detail/influenza-(seasonal)
+                    highlight: 'WHO recommends annual vaccination for high-risk groups
+
+
+                      ...
+
+
+                      Seasonal influenza vaccination policies vary by region...'
+                    authors: World Health Organization
+                    time_published: '2024-10-15T00:00:00Z'
+                    time_last_crawled: '2026-01-20T02:12:34Z'
+                    favicon: https://www.who.int/favicon.ico
+                    cover_image:
+                      url: https://www.who.int/images/default-source/influenza/seasonal-influenza-cover.jpg
+                      description: Seasonal influenza vaccination
+                    images:
+                    - url: https://www.who.int/images/default-source/influenza/influenza-vaccine-vial.jpg
+                      description: A vial of seasonal influenza vaccine.
+                meta:
+                  usage:
+                    num_search_queries: 1
+                    full_content_extra_count: 0
+                  latency: 237
+                  warning: null
+        '400':
+          description: Missing parameter query — Returned when a required parameter is missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Missing parameter query
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Search
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    SearchUsage:
+      type: object
+      description: Usage information for the search request.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of search queries executed.
+        full_content_extra_count:
+          type: integer
+          description: Billable full_content results beyond the free allowance.
+    FullContentOptions:
+      type: object
+      description: Controls whether to return the full raw content of each result page.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
+    SearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        query:
+          type: string
+          description: The original query.
+        results:
+          type: array
+          description: A list of search results.
+          items:
+            $ref: '#/components/schemas/SearchResult'
+    HighlightOptions:
+      type: object
+      description: Controls highlight extraction from result pages.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns query-relevant highlight in each result.
+        max_tokens:
+          type: integer
+          default: 512
+          minimum: 100
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    SearchRequest:
+      type: object
+      required:
+      - query
+      properties:
+        query:
+          type: string
+          maxLength: 500
+          description: 'The search query.
+
+
+            **Operators**
+
+
+            - `site:<domain>`: restrict results to a single domain. For multiple domains, use `include_domains` and `exclude_domains`.
+
+            - `-site:<domain>`: exclude a single domain from the results.'
+      allOf:
+      - $ref: '#/components/schemas/WebSearchOptions'
+    SearchResult:
+      type: object
+      description: A single search result.
+      properties:
+        title:
+          type: string
+          description: The title of the result page.
+        url:
+          type: string
+          description: The URL of the result page.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the result site.
+        cover_image:
+          type: object
+          description: The page cover image. Returned only when `include_images` is true and the page has a cover image.
+          properties:
+            url:
+              type: string
+              description: The cover image URL.
+            description:
+              type: string
+              description: Text description of the cover image.
+        images:
+          type: array
+          description: In-body images of the page, in order of appearance. Returned only when `include_images` is true.
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                description: The image URL.
+              description:
+                type: string
+                description: Text description of the image.
+    SearchResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/SearchData'
+        meta:
+          $ref: '#/components/schemas/SearchMeta'
+    SearchMeta:
+      type: object
+      description: Additional metadata for the search request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/SearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
+          type: string
+          nullable: true
+          description: Warning message, if any.
+    WebSearchOptions:
+      type: object
+      properties:
+        count:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 100
+          description: Number of results to return.
+        include_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically include in the search results. The `site:` query operator adds to this list.
+          example:
+          - octen.ai
+          - wikipedia.org
+        exclude_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically exclude from the search results. The `-site:` query operator adds to this list. If a domain appears in both `include_domains` and `exclude_domains`, `exclude_domains` takes precedence.
+          example:
+          - spam.com
+          - ads.example.net
+        include_text:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+          maxItems: 5
+          description: Strings that must appear in the result page text.
+        exclude_text:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+          maxItems: 5
+          description: Strings that must not appear in the result page text.
+        time_basis:
+          type: string
+          enum:
+          - auto
+          - published
+          - crawled
+          default: auto
+          description: Determines which time field is used for time filtering. `published` uses time_published; `crawled` uses time_last_crawled. Results missing this field are excluded when filtering by time.
+        time_range:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          - year
+          - d
+          - w
+          - m
+          - y
+          description: Relative time window counting back from the current time based on `time_basis`. Mutually exclusive with `start_time`/`end_time` — if both are provided, `start_time`/`end_time` take precedence.
+        start_time:
+          type: string
+          format: date-time
+          description: Start time for filtering results. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        end_time:
+          type: string
+          format: date-time
+          description: End time for filtering results. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        language:
+          type: array
+          items:
+            type: string
+            enum:
+            - ar
+            - de
+            - en
+            - es
+            - fr
+            - hi
+            - id
+            - it
+            - ja
+            - ko
+            - nl
+            - pl
+            - pt
+            - ru
+            - th
+            - tr
+            - vi
+            - zh
+          default: []
+          description: A list of languages to restrict results to, as ISO 639-1 codes. By default, no language filter is applied.
+          example:
+          - en
+          - zh
+        highlight:
+          $ref: '#/components/schemas/HighlightOptions'
+        full_content:
+          $ref: '#/components/schemas/FullContentOptions'
+        format:
+          type: string
+          enum:
+          - markdown
+          - text
+          default: text
+          description: Controls the formatting of highlight outputs.
+        safesearch:
+          type: string
+          enum:
+          - 'off'
+          - strict
+          default: strict
+          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
+        include_images:
+          type: boolean
+          default: false
+          description: Whether to include images in each result.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

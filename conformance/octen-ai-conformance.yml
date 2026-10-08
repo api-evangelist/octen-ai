@@ -1,0 +1,46 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/resources/security-&-compliance.md; openapi/octen-ai-openapi.yml; https://mcp.octen.ai/.well-known/oauth-protected-resource
+standards:
+- id: soc2-type2
+  conforms: true
+  evidence: 'https://docs.octen.ai/resources/security-&-compliance.md — Compliance table: "SOC 2 Type II | Certified"'
+- id: hipaa
+  conforms: false
+  evidence: 'https://docs.octen.ai/resources/security-&-compliance.md — Compliance table: "HIPAA | In progress"'
+  note: claimed in progress, not certified
+- id: gdpr
+  conforms: true
+  evidence: 'https://docs.octen.ai/resources/security-&-compliance.md — "GDPR: Data subject rights supported, including access, correction, and
+    deletion"'
+  note: self-declared support, no certification
+- id: ccpa
+  conforms: true
+  evidence: 'https://docs.octen.ai/resources/security-&-compliance.md — "CCPA: Privacy rights supported as described in our Privacy Policy"'
+  note: self-declared
+- id: rfc9728
+  conforms: true
+  evidence: https://mcp.octen.ai/.well-known/oauth-protected-resource returns 200 with resource, authorization_servers [https://auth.octen.ai],
+    scopes_supported [mcp:tools]
+- id: openai-chat-completions-compat
+  conforms: true
+  evidence: 'openapi/octen-ai-openapi.yml POST /v1/chat/completions (operationId chat-completions) and POST /v1/images/generations; error-codes
+    page: Model Gateway returns errors in the native OpenAI or Anthropic format'
+- id: anthropic-messages-compat
+  conforms: true
+  evidence: openapi/octen-ai-openapi.yml POST /v1/messages (operationId messages)
+- id: mcp
+  conforms: true
+  evidence: https://mcp.octen.ai/mcp answers JSON-RPC tools/list with a 401 that names x-api-key, Bearer and the OAuth flow; docs.octen.ai/integrations/octen-mcp-server
+- id: openapi-3.1
+  conforms: true
+  evidence: the document declares 3.1.0
+- id: oauth2
+  conforms: false
+  evidence: 'securitySchemes: apiKeyAuth (apiKey), apiKeyAuthNoPayment (apiKey), bearerAuth (http), bearerAuthNoPayment (http)'
+- id: rfc9457
+  conforms: false
+  evidence: no response declares application/problem+json
+- id: idempotency
+  conforms: false
+  evidence: no idempotency key parameter on mutating operations

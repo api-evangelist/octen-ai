@@ -1,0 +1,68 @@
+generated: '2026-10-07'
+method: searched
+status: official
+source: https://docs.octen.ai/integrations/octen-mcp-server.md; https://github.com/Octen-Team/octen-mcp (README Tools table); https://mcp.octen.ai/mcp (POST tools/list -> 401); https://mcp.octen.ai/.well-known/oauth-protected-resource (200)
+server:
+  name: Octen MCP
+  url: https://mcp.octen.ai/mcp
+  transport: streamable-http
+  repository: https://github.com/Octen-Team/octen-mcp
+  package: https://www.npmjs.com/package/octen-mcp
+deployment:
+  mode: both
+  endpoint: https://mcp.octen.ai/mcp
+  install: npx -y octen-mcp
+  package: https://www.npmjs.com/package/octen-mcp
+  auth: api-key
+  verified: probed
+  note: 'Remote endpoint probed 2026-10-07: tools/list returned 401 naming x-api-key / Bearer / octenApiKey query param and an OAuth flow (metadata at mcp.octen.ai). OAuth via auth.octen.ai is also offered (Claude connector sign-in). Local stdio run uses OCTEN_API_KEY.'
+auth:
+  type: api-key or oauth
+  header: x-api-key
+  oauth:
+    protected_resource: https://mcp.octen.ai/.well-known/oauth-protected-resource
+    authorization_servers:
+    - https://auth.octen.ai
+    scopes_supported:
+    - mcp:tools
+rfc9728:
+  url: https://mcp.octen.ai/.well-known/oauth-protected-resource
+  status: 200
+  resource: https://mcp.octen.ai/mcp
+  authorization_servers:
+  - https://auth.octen.ai
+  scopes_supported:
+  - mcp:tools
+  note: /.well-known/oauth-authorization-server on mcp.octen.ai answers 404; the AS metadata lives on auth.octen.ai
+tool_source: documented
+l3: table
+evidence_url: https://github.com/Octen-Team/octen-mcp#tools
+tool_count: 6
+tools:
+- name: search
+  category: search
+  description: Search the live web with domain, text, language (ISO 639-1), time, and content controls
+  rest: search
+- name: news_search
+  category: search
+  description: Same engine as search, fixed to news
+  rest: news-search
+- name: broad_search
+  category: search
+  description: Decompose a query into up to max_queries sub-queries, search concurrently, return grouped results
+  rest: broad-search
+- name: extract
+  category: content
+  description: Fetch 1-20 URLs and return clean content, labels, and optional highlights
+  rest: extract
+- name: image_search
+  category: search
+  description: In Beta — Search the web for images by text query (optional reference image_url)
+  rest: image-search
+- name: video_search
+  category: search
+  description: In Beta — Search the web for videos by text query
+  rest: video-search
+notes:
+- Tool names are as PUBLISHED in the octen-mcp README and docs page; the live tools/list is gated (401) so inputSchemas were not read from the server
+- A separate docs-platform MCP (Mintlify) at https://docs.octen.ai/mcp answers tools/list unauthenticated with search_octen_docs / query_docs_filesystem; it is the documentation search server, not the product API

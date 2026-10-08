@@ -1,0 +1,56 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/integrations/python-sdk.md; https://docs.octen.ai/integrations/octen-cli.md; https://docs.octen.ai/integrations/octen-mcp-server.md; registry metadata from pypi.org, registry.npmjs.org and the Octen-Team/homebrew-tap formula (read 2026-10-07)
+packages:
+- name: octen
+  registry: pypi
+  url: https://pypi.org/project/octen/
+  language: python
+  official: true
+  version: 0.10.0
+  published: '2026-09-29'
+  note: Official Python SDK (pip install octen), documented at docs.octen.ai/integrations/python-sdk
+- name: '@octen.ai/cli'
+  registry: npm
+  url: https://www.npmjs.com/package/@octen.ai/cli
+  language: typescript
+  official: true
+  version: 0.10.0
+  published: '2026-09-29'
+  repository: https://github.com/Octen-Team/octen-cli
+  note: Official CLI (npm i -g @octen.ai/cli); npmjs.com page answers 403 to a crawler but registry.npmjs.org metadata resolves
+- name: octen-mcp
+  registry: npm
+  url: https://www.npmjs.com/package/octen-mcp
+  language: javascript
+  official: true
+  version: 0.6.0
+  published: '2026-09-29'
+  repository: https://github.com/Octen-Team/octen-mcp
+  note: Official MCP server package for local stdio use (npx -y octen-mcp)
+- name: Octen-Team/tap/octen
+  registry: homebrew
+  url: https://github.com/Octen-Team/homebrew-tap
+  language: binary
+  official: true
+  version: 0.10.0
+  published: null
+  note: Homebrew tap for the standalone CLI binary; version read from Formula/octen.rb, no publish date in the formula
+- name: langchain-octen
+  registry: pypi
+  url: https://pypi.org/project/langchain-octen/
+  language: python
+  official: true
+  version: 0.1.1
+  published: '2026-03-30'
+  repository: https://github.com/Octen-Team/langchain-octen
+  note: LangChain integration maintained in the Octen-Team GitHub org
+- name: llama-index-tools-octen
+  registry: pypi
+  url: https://pypi.org/project/llama-index-tools-octen/
+  language: python
+  official: true
+  version: 0.1.0
+  published: '2026-03-31'
+  repository: https://github.com/Octen-Team/llama-index-tools-octen
+  note: LlamaIndex tools integration maintained in the Octen-Team GitHub org

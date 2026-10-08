@@ -1,0 +1,1152 @@
+{
+  "@context": {
+    "@vocab": "https://octen.ai/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "octen": "https://octen.ai/schema#",
+    "SearchRequest": "octen:SearchRequest",
+    "query": {
+      "@id": "octen:query",
+      "@type": "xsd:string"
+    },
+    "HighlightOptions": "octen:HighlightOptions",
+    "enable": {
+      "@id": "octen:enable",
+      "@type": "xsd:boolean"
+    },
+    "max_tokens": {
+      "@id": "octen:max_tokens",
+      "@type": "xsd:integer"
+    },
+    "FullContentOptions": "octen:FullContentOptions",
+    "SearchResponse": "octen:SearchResponse",
+    "code": {
+      "@id": "octen:code",
+      "@type": "xsd:integer"
+    },
+    "msg": {
+      "@id": "octen:msg",
+      "@type": "xsd:string"
+    },
+    "request_id": {
+      "@id": "octen:request_id",
+      "@type": "xsd:string"
+    },
+    "data": {
+      "@id": "octen:data",
+      "@type": "@id"
+    },
+    "meta": {
+      "@id": "octen:meta",
+      "@type": "@id"
+    },
+    "SearchData": "octen:SearchData",
+    "results": {
+      "@id": "octen:results",
+      "@container": "@list"
+    },
+    "SearchResult": "octen:SearchResult",
+    "title": {
+      "@id": "octen:title",
+      "@type": "xsd:string"
+    },
+    "url": {
+      "@id": "octen:url",
+      "@type": "xsd:string"
+    },
+    "highlight": {
+      "@id": "octen:highlight",
+      "@type": "xsd:string"
+    },
+    "full_content": {
+      "@id": "octen:full_content",
+      "@type": "xsd:string"
+    },
+    "authors": {
+      "@id": "octen:authors",
+      "@type": "xsd:string"
+    },
+    "time_published": {
+      "@id": "octen:time_published",
+      "@type": "xsd:dateTime"
+    },
+    "time_last_crawled": {
+      "@id": "octen:time_last_crawled",
+      "@type": "xsd:dateTime"
+    },
+    "favicon": {
+      "@id": "octen:favicon",
+      "@type": "xsd:string"
+    },
+    "cover_image": {
+      "@id": "octen:cover_image"
+    },
+    "images": {
+      "@id": "octen:images",
+      "@container": "@list"
+    },
+    "SearchMeta": "octen:SearchMeta",
+    "usage": {
+      "@id": "octen:usage",
+      "@type": "@id"
+    },
+    "latency": {
+      "@id": "octen:latency",
+      "@type": "xsd:decimal"
+    },
+    "warning": {
+      "@id": "octen:warning",
+      "@type": "xsd:string"
+    },
+    "SearchUsage": "octen:SearchUsage",
+    "num_search_queries": {
+      "@id": "octen:num_search_queries",
+      "@type": "xsd:integer"
+    },
+    "full_content_extra_count": {
+      "@id": "octen:full_content_extra_count",
+      "@type": "xsd:integer"
+    },
+    "NewsSearchRequest": "octen:NewsSearchRequest",
+    "count": {
+      "@id": "octen:count",
+      "@type": "xsd:integer"
+    },
+    "include_domains": {
+      "@id": "octen:include_domains",
+      "@container": "@list"
+    },
+    "exclude_domains": {
+      "@id": "octen:exclude_domains",
+      "@container": "@list"
+    },
+    "time_basis": {
+      "@id": "octen:time_basis",
+      "@type": "xsd:string"
+    },
+    "time_range": {
+      "@id": "octen:time_range",
+      "@type": "xsd:string"
+    },
+    "start_time": {
+      "@id": "octen:start_time",
+      "@type": "xsd:dateTime"
+    },
+    "end_time": {
+      "@id": "octen:end_time",
+      "@type": "xsd:dateTime"
+    },
+    "language": {
+      "@id": "octen:language",
+      "@container": "@list"
+    },
+    "subjects": {
+      "@id": "octen:subjects",
+      "@type": "@id"
+    },
+    "NewsSubjectOptions": "octen:NewsSubjectOptions",
+    "max_sub_news": {
+      "@id": "octen:max_sub_news",
+      "@type": "xsd:integer"
+    },
+    "NewsSearchResponse": "octen:NewsSearchResponse",
+    "NewsSearchData": "octen:NewsSearchData",
+    "NewsSearchResult": "octen:NewsSearchResult",
+    "NewsImage": "octen:NewsImage",
+    "description": {
+      "@id": "octen:description",
+      "@type": "xsd:string"
+    },
+    "NewsSubject": "octen:NewsSubject",
+    "name": {
+      "@id": "octen:name",
+      "@type": "xsd:string"
+    },
+    "summary": {
+      "@id": "octen:summary",
+      "@type": "xsd:string"
+    },
+    "time_start": {
+      "@id": "octen:time_start",
+      "@type": "xsd:dateTime"
+    },
+    "time_latest": {
+      "@id": "octen:time_latest",
+      "@type": "xsd:dateTime"
+    },
+    "top_news": {
+      "@id": "octen:top_news",
+      "@type": "@id"
+    },
+    "sub_news": {
+      "@id": "octen:sub_news",
+      "@container": "@list"
+    },
+    "NewsSubjectTopNews": "octen:NewsSubjectTopNews",
+    "NewsSubjectSubNews": "octen:NewsSubjectSubNews",
+    "NewsSearchMeta": "octen:NewsSearchMeta",
+    "NewsSearchUsage": "octen:NewsSearchUsage",
+    "num_subject_search_queries": {
+      "@id": "octen:num_subject_search_queries",
+      "@type": "xsd:integer"
+    },
+    "BusinessSearchRequest": "octen:BusinessSearchRequest",
+    "entities": {
+      "@id": "octen:entities",
+      "@type": "@id"
+    },
+    "BusinessEntityOptions": "octen:BusinessEntityOptions",
+    "max_activities": {
+      "@id": "octen:max_activities",
+      "@type": "xsd:integer"
+    },
+    "BusinessSearchResponse": "octen:BusinessSearchResponse",
+    "BusinessSearchData": "octen:BusinessSearchData",
+    "BusinessSearchResult": "octen:BusinessSearchResult",
+    "BusinessImage": "octen:BusinessImage",
+    "BusinessCompanyEntity": "octen:BusinessCompanyEntity",
+    "type": {
+      "@id": "octen:type",
+      "@type": "xsd:string"
+    },
+    "aliases": {
+      "@id": "octen:aliases",
+      "@container": "@list"
+    },
+    "identifiers": {
+      "@id": "octen:identifiers",
+      "@type": "@id"
+    },
+    "attributes": {
+      "@id": "octen:attributes",
+      "@type": "@id"
+    },
+    "metrics": {
+      "@id": "octen:metrics",
+      "@type": "@id"
+    },
+    "key_people": {
+      "@id": "octen:key_people",
+      "@container": "@list"
+    },
+    "logo": {
+      "@id": "octen:logo"
+    },
+    "activities": {
+      "@id": "octen:activities",
+      "@container": "@list"
+    },
+    "BusinessPersonEntity": "octen:BusinessPersonEntity",
+    "linkedin_url": {
+      "@id": "octen:linkedin_url",
+      "@type": "xsd:string"
+    },
+    "current_position": {
+      "@id": "octen:current_position",
+      "@type": "xsd:string"
+    },
+    "career": {
+      "@id": "octen:career",
+      "@container": "@list"
+    },
+    "photo": {
+      "@id": "octen:photo"
+    },
+    "BusinessEntityIdentifiers": "octen:BusinessEntityIdentifiers",
+    "website": {
+      "@id": "octen:website",
+      "@type": "xsd:string"
+    },
+    "stock_ticker": {
+      "@id": "octen:stock_ticker",
+      "@type": "xsd:string"
+    },
+    "sec_cik": {
+      "@id": "octen:sec_cik",
+      "@type": "xsd:string"
+    },
+    "BusinessEntityAttributes": "octen:BusinessEntityAttributes",
+    "industry": {
+      "@id": "octen:industry",
+      "@type": "xsd:string"
+    },
+    "hq_location": {
+      "@id": "octen:hq_location",
+      "@type": "xsd:string"
+    },
+    "founded_year": {
+      "@id": "octen:founded_year",
+      "@type": "xsd:integer"
+    },
+    "employee_range": {
+      "@id": "octen:employee_range",
+      "@type": "xsd:string"
+    },
+    "BusinessEntityMetrics": "octen:BusinessEntityMetrics",
+    "financials": {
+      "@id": "octen:financials",
+      "@container": "@list"
+    },
+    "stock": {
+      "@id": "octen:stock",
+      "@type": "@id"
+    },
+    "web_traffic": {
+      "@id": "octen:web_traffic",
+      "@type": "@id"
+    },
+    "BusinessFinancials": "octen:BusinessFinancials",
+    "revenue": {
+      "@id": "octen:revenue",
+      "@type": "xsd:decimal"
+    },
+    "net_income": {
+      "@id": "octen:net_income",
+      "@type": "xsd:decimal"
+    },
+    "gross_profit": {
+      "@id": "octen:gross_profit",
+      "@type": "xsd:decimal"
+    },
+    "period": {
+      "@id": "octen:period",
+      "@type": "xsd:string"
+    },
+    "currency": {
+      "@id": "octen:currency",
+      "@type": "xsd:string"
+    },
+    "BusinessStock": "octen:BusinessStock",
+    "price": {
+      "@id": "octen:price",
+      "@type": "xsd:decimal"
+    },
+    "todays_change_percent": {
+      "@id": "octen:todays_change_percent",
+      "@type": "xsd:decimal"
+    },
+    "week_52_high": {
+      "@id": "octen:week_52_high",
+      "@type": "xsd:decimal"
+    },
+    "week_52_low": {
+      "@id": "octen:week_52_low",
+      "@type": "xsd:decimal"
+    },
+    "date": {
+      "@id": "octen:date",
+      "@type": "xsd:string"
+    },
+    "BusinessWebTraffic": "octen:BusinessWebTraffic",
+    "visits_monthly": {
+      "@id": "octen:visits_monthly",
+      "@type": "xsd:integer"
+    },
+    "rank": {
+      "@id": "octen:rank",
+      "@type": "xsd:integer"
+    },
+    "BusinessKeyPerson": "octen:BusinessKeyPerson",
+    "BusinessCareerEntry": "octen:BusinessCareerEntry",
+    "organization": {
+      "@id": "octen:organization",
+      "@type": "xsd:string"
+    },
+    "start": {
+      "@id": "octen:start",
+      "@type": "xsd:string"
+    },
+    "end": {
+      "@id": "octen:end",
+      "@type": "xsd:string"
+    },
+    "BusinessSearchMeta": "octen:BusinessSearchMeta",
+    "BusinessSearchUsage": "octen:BusinessSearchUsage",
+    "BroadSearchRequest": "octen:BroadSearchRequest",
+    "max_queries": {
+      "@id": "octen:max_queries",
+      "@type": "xsd:integer"
+    },
+    "search_options": {
+      "@id": "octen:search_options"
+    },
+    "BroadSearchData": "octen:BroadSearchData",
+    "queries": {
+      "@id": "octen:queries",
+      "@container": "@list"
+    },
+    "search_results": {
+      "@id": "octen:search_results",
+      "@container": "@list"
+    },
+    "BroadSearchResponse": "octen:BroadSearchResponse",
+    "ExtractRequest": "octen:ExtractRequest",
+    "urls": {
+      "@id": "octen:urls",
+      "@container": "@list"
+    },
+    "mode": {
+      "@id": "octen:mode",
+      "@type": "xsd:string"
+    },
+    "max_age_seconds": {
+      "@id": "octen:max_age_seconds",
+      "@type": "xsd:integer"
+    },
+    "format": {
+      "@id": "octen:format",
+      "@type": "xsd:string"
+    },
+    "timeout": {
+      "@id": "octen:timeout",
+      "@type": "xsd:integer"
+    },
+    "include_images": {
+      "@id": "octen:include_images",
+      "@type": "xsd:boolean"
+    },
+    "include_videos": {
+      "@id": "octen:include_videos",
+      "@type": "xsd:boolean"
+    },
+    "include_audio": {
+      "@id": "octen:include_audio",
+      "@type": "xsd:boolean"
+    },
+    "include_links": {
+      "@id": "octen:include_links"
+    },
+    "ExtractResponse": "octen:ExtractResponse",
+    "ExtractData": "octen:ExtractData",
+    "ExtractResult": "octen:ExtractResult",
+    "status": {
+      "@id": "octen:status",
+      "@type": "xsd:string"
+    },
+    "resolved_mode": {
+      "@id": "octen:resolved_mode",
+      "@type": "xsd:string"
+    },
+    "highlights": {
+      "@id": "octen:highlights",
+      "@container": "@list"
+    },
+    "page_structure": {
+      "@id": "octen:page_structure"
+    },
+    "category": {
+      "@id": "octen:category"
+    },
+    "videos": {
+      "@id": "octen:videos",
+      "@container": "@list"
+    },
+    "audio": {
+      "@id": "octen:audio",
+      "@container": "@list"
+    },
+    "links": {
+      "@id": "octen:links",
+      "@container": "@list"
+    },
+    "error_message": {
+      "@id": "octen:error_message",
+      "@type": "xsd:string"
+    },
+    "ExtractPageStructure": "octen:ExtractPageStructure",
+    "primary": {
+      "@id": "octen:primary",
+      "@type": "xsd:string"
+    },
+    "secondary": {
+      "@id": "octen:secondary",
+      "@type": "xsd:string"
+    },
+    "ExtractCategory": "octen:ExtractCategory",
+    "ExtractMediaResource": "octen:ExtractMediaResource",
+    "ExtractLink": "octen:ExtractLink",
+    "anchor_text": {
+      "@id": "octen:anchor_text",
+      "@type": "xsd:string"
+    },
+    "is_external": {
+      "@id": "octen:is_external",
+      "@type": "xsd:boolean"
+    },
+    "ExtractMeta": "octen:ExtractMeta",
+    "ExtractUsage": "octen:ExtractUsage",
+    "total_urls": {
+      "@id": "octen:total_urls",
+      "@type": "xsd:integer"
+    },
+    "successful_urls": {
+      "@id": "octen:successful_urls",
+      "@type": "xsd:integer"
+    },
+    "successful_by_mode": {
+      "@id": "octen:successful_by_mode"
+    },
+    "EmbeddingRequest": "octen:EmbeddingRequest",
+    "input": {
+      "@id": "octen:input",
+      "@container": "@list"
+    },
+    "model": {
+      "@id": "octen:model",
+      "@type": "xsd:string"
+    },
+    "dimension": {
+      "@id": "octen:dimension",
+      "@type": "xsd:integer"
+    },
+    "input_type": {
+      "@id": "octen:input_type",
+      "@type": "xsd:string"
+    },
+    "EmbeddingResponse": "octen:EmbeddingResponse",
+    "EmbeddingData": "octen:EmbeddingData",
+    "EmbeddingResult": "octen:EmbeddingResult",
+    "index": {
+      "@id": "octen:index",
+      "@type": "xsd:integer"
+    },
+    "embedding": {
+      "@id": "octen:embedding",
+      "@container": "@list"
+    },
+    "EmbeddingMeta": "octen:EmbeddingMeta",
+    "EmbeddingUsage": "octen:EmbeddingUsage",
+    "input_tokens": {
+      "@id": "octen:input_tokens",
+      "@type": "xsd:integer"
+    },
+    "VLEmbeddingRequest": "octen:VLEmbeddingRequest",
+    "enable_fusion": {
+      "@id": "octen:enable_fusion",
+      "@type": "xsd:boolean"
+    },
+    "fps": {
+      "@id": "octen:fps",
+      "@type": "xsd:decimal"
+    },
+    "instruct": {
+      "@id": "octen:instruct",
+      "@type": "xsd:string"
+    },
+    "VLEmbeddingInput": "octen:VLEmbeddingInput",
+    "contents": {
+      "@id": "octen:contents",
+      "@container": "@list"
+    },
+    "VLEmbeddingContent": "octen:VLEmbeddingContent",
+    "text": {
+      "@id": "octen:text",
+      "@type": "xsd:string"
+    },
+    "image": {
+      "@id": "octen:image",
+      "@type": "xsd:string"
+    },
+    "video": {
+      "@id": "octen:video",
+      "@type": "xsd:string"
+    },
+    "VLEmbeddingResponse": "octen:VLEmbeddingResponse",
+    "VLEmbeddingData": "octen:VLEmbeddingData",
+    "VLEmbeddingResult": "octen:VLEmbeddingResult",
+    "VLEmbeddingMeta": "octen:VLEmbeddingMeta",
+    "VLEmbeddingUsage": "octen:VLEmbeddingUsage",
+    "text_tokens": {
+      "@id": "octen:text_tokens",
+      "@type": "xsd:integer"
+    },
+    "image_tokens": {
+      "@id": "octen:image_tokens",
+      "@type": "xsd:integer"
+    },
+    "image_count": {
+      "@id": "octen:image_count",
+      "@type": "xsd:integer"
+    },
+    "duration": {
+      "@id": "octen:duration",
+      "@type": "xsd:integer"
+    },
+    "ErrorResponse": "octen:ErrorResponse",
+    "ChatCompletionRequest": "octen:ChatCompletionRequest",
+    "messages": {
+      "@id": "octen:messages",
+      "@container": "@list"
+    },
+    "tools": {
+      "@id": "octen:tools",
+      "@container": "@list"
+    },
+    "tool_choice": {
+      "@id": "octen:tool_choice"
+    },
+    "parallel_tool_calls": {
+      "@id": "octen:parallel_tool_calls",
+      "@type": "xsd:boolean"
+    },
+    "stream": {
+      "@id": "octen:stream",
+      "@type": "xsd:boolean"
+    },
+    "max_completion_tokens": {
+      "@id": "octen:max_completion_tokens",
+      "@type": "xsd:integer"
+    },
+    "temperature": {
+      "@id": "octen:temperature",
+      "@type": "xsd:decimal"
+    },
+    "top_p": {
+      "@id": "octen:top_p",
+      "@type": "xsd:decimal"
+    },
+    "top_k": {
+      "@id": "octen:top_k",
+      "@type": "xsd:integer"
+    },
+    "min_p": {
+      "@id": "octen:min_p",
+      "@type": "xsd:decimal"
+    },
+    "top_a": {
+      "@id": "octen:top_a",
+      "@type": "xsd:decimal"
+    },
+    "repetition_penalty": {
+      "@id": "octen:repetition_penalty",
+      "@type": "xsd:decimal"
+    },
+    "frequency_penalty": {
+      "@id": "octen:frequency_penalty",
+      "@type": "xsd:decimal"
+    },
+    "presence_penalty": {
+      "@id": "octen:presence_penalty",
+      "@type": "xsd:decimal"
+    },
+    "response_format": {
+      "@id": "octen:response_format",
+      "@type": "@id"
+    },
+    "stop": {
+      "@id": "octen:stop",
+      "@container": "@list"
+    },
+    "seed": {
+      "@id": "octen:seed",
+      "@type": "xsd:integer"
+    },
+    "reasoning": {
+      "@id": "octen:reasoning",
+      "@type": "@id"
+    },
+    "reasoning_effort": {
+      "@id": "octen:reasoning_effort",
+      "@type": "xsd:string"
+    },
+    "verbosity": {
+      "@id": "octen:verbosity",
+      "@type": "xsd:string"
+    },
+    "logit_bias": {
+      "@id": "octen:logit_bias"
+    },
+    "logprobs": {
+      "@id": "octen:logprobs",
+      "@type": "xsd:boolean"
+    },
+    "top_logprobs": {
+      "@id": "octen:top_logprobs",
+      "@type": "xsd:integer"
+    },
+    "user": {
+      "@id": "octen:user",
+      "@type": "xsd:string"
+    },
+    "modalities": {
+      "@id": "octen:modalities",
+      "@container": "@list"
+    },
+    "prompt_cache_key": {
+      "@id": "octen:prompt_cache_key",
+      "@type": "xsd:string"
+    },
+    "prompt_cache_options": {
+      "@id": "octen:prompt_cache_options"
+    },
+    "prompt_cache_retention": {
+      "@id": "octen:prompt_cache_retention",
+      "@type": "xsd:string"
+    },
+    "previous_response_id": {
+      "@id": "octen:previous_response_id",
+      "@type": "xsd:string"
+    },
+    "SystemMessage": "octen:SystemMessage",
+    "role": {
+      "@id": "octen:role",
+      "@type": "xsd:string"
+    },
+    "content": {
+      "@id": "octen:content"
+    },
+    "UserMessage": "octen:UserMessage",
+    "AssistantMessage": "octen:AssistantMessage",
+    "tool_calls": {
+      "@id": "octen:tool_calls",
+      "@container": "@list"
+    },
+    "ToolMessage": "octen:ToolMessage",
+    "tool_call_id": {
+      "@id": "octen:tool_call_id",
+      "@type": "xsd:string"
+    },
+    "ChatToolCall": "octen:ChatToolCall",
+    "id": {
+      "@id": "octen:id",
+      "@type": "xsd:string"
+    },
+    "function": {
+      "@id": "octen:function",
+      "@type": "@id"
+    },
+    "ChatToolCallFunction": "octen:ChatToolCallFunction",
+    "arguments": {
+      "@id": "octen:arguments",
+      "@type": "xsd:string"
+    },
+    "ChatContentBlock": "octen:ChatContentBlock",
+    "image_url": {
+      "@id": "octen:image_url"
+    },
+    "cache_control": {
+      "@id": "octen:cache_control",
+      "@type": "@id"
+    },
+    "ChatResponseFormat": "octen:ChatResponseFormat",
+    "json_schema": {
+      "@id": "octen:json_schema",
+      "@type": "@id"
+    },
+    "ChatReasoningOptions": "octen:ChatReasoningOptions",
+    "enabled": {
+      "@id": "octen:enabled",
+      "@type": "xsd:boolean"
+    },
+    "effort": {
+      "@id": "octen:effort",
+      "@type": "xsd:string"
+    },
+    "ChatFunctionTool": "octen:ChatFunctionTool",
+    "ChatOctenBroadSearchTool": "octen:ChatOctenBroadSearchTool",
+    "parameters": {
+      "@id": "octen:parameters"
+    },
+    "ChatOctenSearchTool": "octen:ChatOctenSearchTool",
+    "ChatFunctionDefinition": "octen:ChatFunctionDefinition",
+    "strict": {
+      "@id": "octen:strict",
+      "@type": "xsd:boolean"
+    },
+    "ChatCompletionResponse": "octen:ChatCompletionResponse",
+    "object": {
+      "@id": "octen:object",
+      "@type": "xsd:string"
+    },
+    "created": {
+      "@id": "octen:created",
+      "@type": "xsd:integer"
+    },
+    "choices": {
+      "@id": "octen:choices",
+      "@container": "@list"
+    },
+    "ChatCompletionChoice": "octen:ChatCompletionChoice",
+    "finish_reason": {
+      "@id": "octen:finish_reason",
+      "@type": "xsd:string"
+    },
+    "message": {
+      "@id": "octen:message",
+      "@type": "@id"
+    },
+    "ChatCompletionMessage": "octen:ChatCompletionMessage",
+    "annotations": {
+      "@id": "octen:annotations",
+      "@container": "@list"
+    },
+    "refusal": {
+      "@id": "octen:refusal",
+      "@type": "xsd:string"
+    },
+    "reasoning_details": {
+      "@id": "octen:reasoning_details",
+      "@container": "@list"
+    },
+    "ChatCompletionUsage": "octen:ChatCompletionUsage",
+    "prompt_tokens": {
+      "@id": "octen:prompt_tokens",
+      "@type": "xsd:integer"
+    },
+    "completion_tokens": {
+      "@id": "octen:completion_tokens",
+      "@type": "xsd:integer"
+    },
+    "total_tokens": {
+      "@id": "octen:total_tokens",
+      "@type": "xsd:integer"
+    },
+    "prompt_tokens_details": {
+      "@id": "octen:prompt_tokens_details"
+    },
+    "completion_tokens_details": {
+      "@id": "octen:completion_tokens_details"
+    },
+    "ChatCompletionChunk": "octen:ChatCompletionChunk",
+    "ChatCompletionChunkChoice": "octen:ChatCompletionChunkChoice",
+    "delta": {
+      "@id": "octen:delta",
+      "@type": "@id"
+    },
+    "ChatCompletionDelta": "octen:ChatCompletionDelta",
+    "ChatToolCallDelta": "octen:ChatToolCallDelta",
+    "ChatToolChoiceObject": "octen:ChatToolChoiceObject",
+    "ChatJsonSchemaSpec": "octen:ChatJsonSchemaSpec",
+    "AnswerRequest": "octen:AnswerRequest",
+    "web_search_options": {
+      "@id": "octen:web_search_options"
+    },
+    "AnswerResponse": "octen:AnswerResponse",
+    "SearchResultGroup": "octen:SearchResultGroup",
+    "AnswerMeta": "octen:AnswerMeta",
+    "SynthesisUsage": "octen:SynthesisUsage",
+    "AnswerChunk": "octen:AnswerChunk",
+    "DeepResearchRequest": "octen:DeepResearchRequest",
+    "tier": {
+      "@id": "octen:tier",
+      "@type": "xsd:string"
+    },
+    "extra_context": {
+      "@id": "octen:extra_context",
+      "@type": "xsd:string"
+    },
+    "skip_brief": {
+      "@id": "octen:skip_brief",
+      "@type": "xsd:boolean"
+    },
+    "skip_plan": {
+      "@id": "octen:skip_plan",
+      "@type": "xsd:boolean"
+    },
+    "skip_plan_confirm": {
+      "@id": "octen:skip_plan_confirm",
+      "@type": "xsd:boolean"
+    },
+    "plan_id": {
+      "@id": "octen:plan_id",
+      "@type": "xsd:string"
+    },
+    "selections": {
+      "@id": "octen:selections",
+      "@container": "@list"
+    },
+    "DeepResearchMessage": "octen:DeepResearchMessage",
+    "DeepResearchTextContentBlock": "octen:DeepResearchTextContentBlock",
+    "DeepResearchSelection": "octen:DeepResearchSelection",
+    "term": {
+      "@id": "octen:term",
+      "@type": "xsd:string"
+    },
+    "chosen": {
+      "@id": "octen:chosen",
+      "@type": "xsd:string"
+    },
+    "indices": {
+      "@id": "octen:indices",
+      "@container": "@list"
+    },
+    "DeepResearchChunk": "octen:DeepResearchChunk",
+    "round": {
+      "@id": "octen:round",
+      "@type": "xsd:integer"
+    },
+    "plan": {
+      "@id": "octen:plan",
+      "@type": "@id"
+    },
+    "search_result_count": {
+      "@id": "octen:search_result_count",
+      "@type": "xsd:integer"
+    },
+    "analysis": {
+      "@id": "octen:analysis",
+      "@type": "@id"
+    },
+    "brief": {
+      "@id": "octen:brief",
+      "@type": "@id"
+    },
+    "visual": {
+      "@id": "octen:visual"
+    },
+    "html_delta": {
+      "@id": "octen:html_delta"
+    },
+    "DeepResearchPlan": "octen:DeepResearchPlan",
+    "overview": {
+      "@id": "octen:overview",
+      "@type": "xsd:string"
+    },
+    "interpretations": {
+      "@id": "octen:interpretations",
+      "@container": "@list"
+    },
+    "angles": {
+      "@id": "octen:angles",
+      "@container": "@list"
+    },
+    "requires_selection": {
+      "@id": "octen:requires_selection",
+      "@type": "xsd:boolean"
+    },
+    "DeepResearchInterpretation": "octen:DeepResearchInterpretation",
+    "meanings": {
+      "@id": "octen:meanings",
+      "@container": "@list"
+    },
+    "DeepResearchMeaning": "octen:DeepResearchMeaning",
+    "label": {
+      "@id": "octen:label",
+      "@type": "xsd:string"
+    },
+    "DeepResearchAngle": "octen:DeepResearchAngle",
+    "focus": {
+      "@id": "octen:focus",
+      "@type": "xsd:string"
+    },
+    "focus_desc": {
+      "@id": "octen:focus_desc",
+      "@type": "xsd:string"
+    },
+    "interpretation_id": {
+      "@id": "octen:interpretation_id",
+      "@type": "xsd:string"
+    },
+    "sub_question_ids": {
+      "@id": "octen:sub_question_ids",
+      "@container": "@list"
+    },
+    "DeepResearchAnalysis": "octen:DeepResearchAnalysis",
+    "findings": {
+      "@id": "octen:findings",
+      "@container": "@list"
+    },
+    "should_continue": {
+      "@id": "octen:should_continue",
+      "@type": "xsd:boolean"
+    },
+    "follow_up_suggestions": {
+      "@id": "octen:follow_up_suggestions",
+      "@container": "@list"
+    },
+    "DeepResearchBrief": "octen:DeepResearchBrief",
+    "report_type": {
+      "@id": "octen:report_type",
+      "@type": "xsd:string"
+    },
+    "secondary_report_types": {
+      "@id": "octen:secondary_report_types",
+      "@container": "@list"
+    },
+    "total_word_budget": {
+      "@id": "octen:total_word_budget",
+      "@type": "xsd:integer"
+    },
+    "assertiveness_required": {
+      "@id": "octen:assertiveness_required",
+      "@type": "xsd:boolean"
+    },
+    "verdict_scaffold": {
+      "@id": "octen:verdict_scaffold",
+      "@type": "@id"
+    },
+    "tables": {
+      "@id": "octen:tables",
+      "@container": "@list"
+    },
+    "presentation_notes": {
+      "@id": "octen:presentation_notes",
+      "@container": "@list"
+    },
+    "outline": {
+      "@id": "octen:outline",
+      "@container": "@list"
+    },
+    "sub_question_to_section_map": {
+      "@id": "octen:sub_question_to_section_map"
+    },
+    "unresolved": {
+      "@id": "octen:unresolved",
+      "@type": "@id"
+    },
+    "suggested_title": {
+      "@id": "octen:suggested_title",
+      "@type": "xsd:string"
+    },
+    "references": {
+      "@id": "octen:references",
+      "@container": "@list"
+    },
+    "DeepResearchVerdictScaffold": "octen:DeepResearchVerdictScaffold",
+    "verdict_type": {
+      "@id": "octen:verdict_type",
+      "@type": "xsd:string"
+    },
+    "items_expected": {
+      "@id": "octen:items_expected",
+      "@type": "xsd:integer"
+    },
+    "justification_dimensions": {
+      "@id": "octen:justification_dimensions",
+      "@container": "@list"
+    },
+    "DeepResearchTable": "octen:DeepResearchTable",
+    "table_id": {
+      "@id": "octen:table_id",
+      "@type": "xsd:string"
+    },
+    "columns": {
+      "@id": "octen:columns",
+      "@container": "@list"
+    },
+    "placement": {
+      "@id": "octen:placement",
+      "@type": "xsd:string"
+    },
+    "DeepResearchOutlineSection": "octen:DeepResearchOutlineSection",
+    "section_id": {
+      "@id": "octen:section_id",
+      "@type": "xsd:string"
+    },
+    "section_title": {
+      "@id": "octen:section_title",
+      "@type": "xsd:string"
+    },
+    "thesis": {
+      "@id": "octen:thesis",
+      "@type": "xsd:string"
+    },
+    "table_ids": {
+      "@id": "octen:table_ids",
+      "@container": "@list"
+    },
+    "covers_sub_questions": {
+      "@id": "octen:covers_sub_questions",
+      "@container": "@list"
+    },
+    "target_words": {
+      "@id": "octen:target_words",
+      "@type": "xsd:integer"
+    },
+    "evidence": {
+      "@id": "octen:evidence",
+      "@container": "@list"
+    },
+    "DeepResearchEvidence": "octen:DeepResearchEvidence",
+    "source_indices": {
+      "@id": "octen:source_indices",
+      "@container": "@list"
+    },
+    "confidence": {
+      "@id": "octen:confidence",
+      "@type": "xsd:string"
+    },
+    "layer": {
+      "@id": "octen:layer",
+      "@type": "xsd:string"
+    },
+    "DeepResearchUnresolved": "octen:DeepResearchUnresolved",
+    "contradictions": {
+      "@id": "octen:contradictions",
+      "@container": "@list"
+    },
+    "weak_claims": {
+      "@id": "octen:weak_claims",
+      "@container": "@list"
+    },
+    "depth_gaps": {
+      "@id": "octen:depth_gaps",
+      "@container": "@list"
+    },
+    "unanswered": {
+      "@id": "octen:unanswered",
+      "@container": "@list"
+    },
+    "DeepResearchReference": "octen:DeepResearchReference",
+    "DeepResearchVisual": "octen:DeepResearchVisual",
+    "DeepResearchVisualImage": "octen:DeepResearchVisualImage",
+    "thumbnail": {
+      "@id": "octen:thumbnail",
+      "@type": "xsd:string"
+    },
+    "caption": {
+      "@id": "octen:caption",
+      "@type": "xsd:string"
+    },
+    "visual_evidence": {
+      "@id": "octen:visual_evidence",
+      "@type": "xsd:string"
+    },
+    "source_page": {
+      "@id": "octen:source_page",
+      "@type": "xsd:string"
+    },
+    "width": {
+      "@id": "octen:width",
+      "@type": "xsd:integer"
+    },
+    "height": {
+      "@id": "octen:height",
+      "@type": "xsd:integer"
+    },
+    "DeepResearchVisualVideo": "octen:DeepResearchVisualVideo",
+    "cover_url": {
+      "@id": "octen:cover_url",
+      "@type": "xsd:string"
+    },
+    "duration_seconds": {
+      "@id": "octen:duration_seconds",
+      "@type": "xsd:integer"
+    },
+    "DeepResearchMeta": "octen:DeepResearchMeta",
+    "total_rounds": {
+      "@id": "octen:total_rounds",
+      "@type": "xsd:integer"
+    },
+    "total_search_count": {
+      "@id": "octen:total_search_count",
+      "@type": "xsd:integer"
+    },
+    "billed_tier": {
+      "@id": "octen:billed_tier",
+      "@type": "xsd:string"
+    },
+    "DeepResearchChunkChoice": "octen:DeepResearchChunkChoice",
+    "DeepResearchChunkDelta": "octen:DeepResearchChunkDelta",
+    "HtmlSnippetOptions": "octen:HtmlSnippetOptions",
+    "ImageSearchInput": "octen:ImageSearchInput"
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "Octen API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects Octen's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-07) from openapi/octen-ai-openapi.yml.",
+  "dcterms:created": "2026-10-07",
+  "dcterms:source": [
+    "openapi/octen-ai-openapi.yml"
+  ]
+}

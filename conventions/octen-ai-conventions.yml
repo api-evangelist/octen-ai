@@ -1,0 +1,40 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/overview/quickstart.md; https://docs.octen.ai/resources/error-codes.md; https://docs.octen.ai/resources/rate-limits.md; openapi/octen-ai-openapi.yml
+auth:
+  style: API key
+  header: x-api-key
+  alternative: 'Authorization: Bearer <key>'
+  note: A payment method is required to use the API (securityScheme description)
+idempotency:
+  coverage: none
+  note: No Idempotency-Key or replay-protection mechanism is documented. Every operation is a billed POST compute call (search, extract, embed, generate); a retried request is billed again.
+reversibility:
+  status: none
+  note: No cancel, refund, void or rollback operation exists. Operations are stateless compute calls, not mutations of durable resources; the only server-side objects are generation jobs (GET /v1/videos/{id}, GET /v1/grounded-generation/{generation_id}) and no cancel is published. Failed Extract URLs are not billed (error-codes page).
+  surfaces: []
+dry_run_mode: none
+pagination:
+  style: none
+  note: Search endpoints take a result count (e.g. count 1-100, max_queries 1-30) and return a single page; no cursor or offset pagination
+request_id:
+  body_field: request_id
+  header: x-request-id
+  note: x-request-id is returned on error by every endpoint; Model Gateway bodies omit request_id
+error_envelope:
+  shape: '{code, msg, request_id}'
+  success_code: 0
+  note: Successful search responses use code 0 and msg "success" with a data object and meta.usage
+rate_limit_signaling:
+  status: 429
+  headers: null
+  note: Docs state a 429 with a msg field; no RateLimit-* or Retry-After headers are documented
+versioning: mixed unversioned and /v1-prefixed paths; see lifecycle/octen-ai-lifecycle.yml
+compatibility:
+  openai: POST /v1/chat/completions and /v1/images/generations accept the OpenAI request/response shapes
+  anthropic: POST /v1/messages accepts the Anthropic Messages shape
+links:
+  errors: errors/octen-ai-problem-types.yml
+  lifecycle: lifecycle/octen-ai-lifecycle.yml
+  authentication: authentication/octen-ai-authentication.yml
+  rate_limits: rate-limits/octen-ai-rate-limits.yml

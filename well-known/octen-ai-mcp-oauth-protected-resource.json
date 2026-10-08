@@ -1,0 +1,1 @@
+{"resource":"https://mcp.octen.ai/mcp","authorization_servers":["https://auth.octen.ai"],"scopes_supported":["mcp:tools"],"bearer_methods_supported":["header"]}

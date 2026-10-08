@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/octen-ai/main/json-schema/octen-ai-business-search-request-schema.json",
+  "title": "BusinessSearchRequest",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/octen-ai-openapi.yml#/components/schemas/BusinessSearchRequest",
+  "type": "object",
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "The search query.\n\n**Operators**\n\n- `site:<domain>`: restrict results to a single domain. For multiple domains, use `include_domains` and `exclude_domains`.\n- `-site:<domain>`: exclude a single domain from the results."
+    },
+    "count": {
+      "type": "integer",
+      "default": 5,
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Number of results to return."
+    },
+    "include_domains": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 60
+      },
+      "maxItems": 1200,
+      "description": "A list of domains to specifically include in the search results. The `site:` query operator adds to this list. Applies to `results` only; entity cards do not support domain filtering."
+    },
+    "exclude_domains": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 60
+      },
+      "maxItems": 1200,
+      "description": "A list of domains to specifically exclude from the search results. The `-site:` query operator adds to this list. If a domain appears in both `include_domains` and `exclude_domains`, `exclude_domains` takes precedence. Applies to `results` only; entity cards do not support domain filtering."
+    },
+    "time_basis": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "published",
+        "crawled"
+      ],
+      "default": "auto",
+      "description": "Determines which time field is used for time filtering. `published` uses time_published; `crawled` uses time_last_crawled. Results missing this field are excluded when filtering by time. Applies to `results` only; entity cards do not support time filtering."
+    },
+    "time_range": {
+      "type": "string",
+      "enum": [
+        "day",
+        "week",
+        "month",
+        "year",
+        "d",
+        "w",
+        "m",
+        "y"
+      ],
+      "description": "Relative time window counting back from the current time based on `time_basis`. Mutually exclusive with `start_time`/`end_time`: if both are provided, `start_time`/`end_time` take precedence."
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start time for filtering results. ISO 8601 format."
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End time for filtering results. ISO 8601 format."
+    },
+    "language": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ar",
+          "de",
+          "en",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "it",
+          "ja",
+          "ko",
+          "nl",
+          "pl",
+          "pt",
+          "ru",
+          "th",
+          "tr",
+          "vi",
+          "zh"
+        ]
+      },
+      "default": [],
+      "description": "A list of languages to restrict results to, as ISO 639-1 codes."
+    },
+    "highlight": {
+      "$ref": "#/$defs/HighlightOptions"
+    },
+    "full_content": {
+      "$ref": "#/$defs/FullContentOptions"
+    },
+    "entities": {
+      "$ref": "#/$defs/BusinessEntityOptions"
+    }
+  },
+  "$defs": {
+    "BusinessEntityOptions": {
+      "type": "object",
+      "description": "Controls the entity cards returned for companies and people.",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, returns data.entities."
+        },
+        "count": {
+          "type": "integer",
+          "default": 2,
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Maximum number of entity cards to return."
+        },
+        "max_activities": {
+          "type": "integer",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Maximum number of recent activities to return per entity card."
+        }
+      }
+    },
+    "FullContentOptions": {
+      "type": "object",
+      "description": "Controls whether to return the full raw content of each result page.",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, returns full_content for each result."
+        },
+        "max_tokens": {
+          "type": "integer",
+          "default": 2048,
+          "minimum": 100,
+          "maximum": 100000,
+          "description": "Maximum tokens of full content included per result."
+        }
+      }
+    },
+    "HighlightOptions": {
+      "type": "object",
+      "description": "Controls highlight extraction from result pages.",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, returns query-relevant highlight in each result."
+        },
+        "max_tokens": {
+          "type": "integer",
+          "default": 512,
+          "minimum": 100,
+          "maximum": 20000,
+          "description": "Max tokens returned per highlight."
+        }
+      }
+    }
+  }
+}

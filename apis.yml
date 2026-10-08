@@ -1,23 +1,684 @@
 aid: octen-ai
 name: Octen
-description: 'Octen is a company surfaced via the API Evangelist harvest backlog (source: monid-connectors)
-  and added to the network as a stub for full-pipeline profiling.'
+description: Octen (Octen.AI) is an AI-native web search and retrieval platform built for LLM applications and agents. Its REST API at api.octen.ai exposes Broad Search (multi-angle query decomposition), Web Search, News Search, Business Search, Image Search, Video Search, URL Extract, text and vision-language Embeddings, Answer, Deep Research, Grounded Generation, and an OpenAI/Anthropic-compatible Model Gateway, alongside a hosted MCP server (mcp.octen.ai), a CLI, a Python SDK, and published agent skills.
 url: https://raw.githubusercontent.com/api-evangelist/octen-ai/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:monid-connectors
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-10-07 (local-v5; was harvest)
 specificationVersion: '0.20'
 created: '2026-10-07'
 modified: '2026-10-07'
 tags:
+- Search
+- Web Search
+- AI
+- LLM
+- Embeddings
+- Content Extraction
+- Model Gateway
+- MCP
+- Agents
+- Deep Research
 - Company
-apis: []
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+image: https://octen.ai/_next/static/media/octen-cover.dc74905e.png
 common:
+- type: Overlay
+  url: overlays/octen-ai-openapi-overlay.yaml
+- type: AgenticAccess
+  url: agentic-access/octen-ai-agentic-access.yml
+- type: RateLimits
+  url: rate-limits/octen-ai-rate-limits.yml
+- type: Plans
+  url: plans/octen-ai-plans-pricing.yml
+- type: Spectral
+  url: rules/octen-ai-rules.yml
+- type: JSONLD
+  url: json-ld/octen-ai-context.jsonld
+- type: Vocabulary
+  url: vocabulary/octen-ai-vocabulary.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: DataModel
+  url: data-model/octen-ai-data-model.yml
+- type: CLI
+  url: cli/octen-ai-cli.yml
+- type: ChangeLog
+  url: changelog/octen-ai-changelog.yml
+- type: Conventions
+  url: conventions/octen-ai-conventions.yml
+- type: Compliance
+  url: https://docs.octen.ai/resources/security-&-compliance
+- type: TrustCenter
+  url: security/octen-ai-trust-center.yml
+- type: StatusPage
+  url: https://status.octen.ai
+- type: Lifecycle
+  url: lifecycle/octen-ai-lifecycle.yml
+- type: ErrorCatalog
+  url: errors/octen-ai-problem-types.yml
+- type: Conformance
+  url: conformance/octen-ai-conformance.yml
+- type: LLMsTxt
+  url: llms/octen-ai-llms.txt
+- type: AgentCard
+  url: a2a/octen-ai-a2a.yml
+- type: ToolCrosswalk
+  url: mcp/octen-ai-tool-crosswalk.yml
+- type: MCPServer
+  url: mcp/octen-ai-mcp.yml
+- type: WellKnown
+  url: well-known/octen-ai-well-known.yml
+- type: Hosts
+  url: hosts/octen-ai-hosts.yml
+- type: Vendors
+  url: vendors/octen-ai-vendors.yml
+- type: SDKs
+  url: packages/octen-ai-packages.yml
+- type: Packages
+  url: packages/octen-ai-packages.yml
+- type: Authentication
+  url: authentication/octen-ai-authentication.yml
 - type: Website
   url: https://octen.ai
+- type: Documentation
+  url: https://docs.octen.ai
+- type: APIReference
+  url: https://docs.octen.ai/api-reference/broad-search
+- type: GettingStarted
+  url: https://docs.octen.ai/overview/quickstart
+- type: DeveloperPortal
+  url: https://octen.ai/platform/api-keys
+- type: SignUp
+  url: https://auth.octen.ai
+- type: Blog
+  url: https://octen.ai/blog
+- type: GitHubOrganization
+  url: https://github.com/Octen-Team
+- type: Pricing
+  url: https://octen.ai/pricing
+- type: ChangeLog
+  name: Changelog (docs)
+  url: https://docs.octen.ai/resources/changelog
+- type: PrivacyPolicy
+  url: https://octen.ai/privacy-policy
+- type: TermsOfService
+  url: https://octen.ai/terms-of-service
+- type: SLA
+  url: https://docs.octen.ai/resources/sla
+- type: Support
+  url: mailto:support@octen.ai
+- type: DomainSecurity
+  url: security/octen-ai-domain-security.yml
+apis:
+- name: Octen MCP Server
+  description: >-
+    Hosted Model Context Protocol server exposing Octen broad_search, search, image_search, video_search
+    and extract tools at https://mcp.octen.ai/mcp (x-api-key or OAuth), also runnable locally via npx
+    octen-mcp.
+  humanURL: https://docs.octen.ai/integrations/octen-mcp-server
+  baseURL: https://mcp.octen.ai
+  tags:
+  - MCP
+  - Agents
+  - Search
+  properties:
+  - type: Documentation
+    url: https://docs.octen.ai/integrations/octen-mcp-server
+  - type: SourceCode
+    url: https://github.com/Octen-Team/octen-mcp
+  aid: octen-ai:octen-mcp-server
+- aid: octen-ai:octen-ai-answer-api
+  name: Octen Answer API
+  description: The Answer API from Octen — 1 operation(s) for answer.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Answer
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-answer-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-broad-search-api
+  name: Octen Broad Search API
+  description: The Broad Search API from Octen — 1 operation(s) for broad search.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Broad Search
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-broad-search-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-business-search-api
+  name: Octen Business Search API
+  description: The Business Search API from Octen — 1 operation(s) for business search.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Business Search
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-business-search-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-embedding-api
+  name: Octen Embedding API
+  description: The Embedding API from Octen — 1 operation(s) for embedding.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Embedding
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-embedding-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-extract-api
+  name: Octen Extract API
+  description: The Extract API from Octen — 1 operation(s) for extract.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Extract
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-extract-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-grounded-generation-api
+  name: Octen Grounded Generation API
+  description: The Grounded Generation API from Octen — 2 operation(s) for grounded generation.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Grounded Generation
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-grounded-generation-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-image-search-api
+  name: Octen Image Search API
+  description: The Image Search API from Octen — 1 operation(s) for image search.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Image Search
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-image-search-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-images-api
+  name: Octen Images API
+  description: The Images API from Octen — 1 operation(s) for images.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Images
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-images-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-messages-api
+  name: Octen Messages API
+  description: The Messages API from Octen — 1 operation(s) for messages.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Messages
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-messages-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-news-search-api
+  name: Octen News Search API
+  description: The News Search API from Octen — 1 operation(s) for news search.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - News Search
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-news-search-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-research-api
+  name: Octen Research API
+  description: The Research API from Octen — 1 operation(s) for research.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Research
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-research-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-search-api
+  name: Octen Search API
+  description: The Search API from Octen — 1 operation(s) for search.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Search
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-search-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-video-search-api
+  name: Octen Video Search API
+  description: The Video Search API from Octen — 1 operation(s) for video search.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Video Search
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-video-search-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-videos-api
+  name: Octen Videos API
+  description: The Videos API from Octen — 2 operation(s) for videos.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Videos
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-videos-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-vl-embedding-api
+  name: Octen Vl Embedding API
+  description: The Vl Embedding API from Octen — 1 operation(s) for vl embedding.
+  humanURL: https://docs.octen.ai/api-reference/broad-search
+  baseURL: https://api.octen.ai
+  tags:
+  - Vl Embedding
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-vl-embedding-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+- aid: octen-ai:octen-ai-chat-completions-api
+  name: Octen Chat Completions API
+  description: The Chat Completions API from Octen — 1 operation(s) for chat completions.
+  humanURL: https://docs.octen.ai/integrations/octen-mcp-server
+  baseURL: https://mcp.octen.ai
+  tags:
+  - Chat Completions
+  properties:
+  - type: OpenAPI
+    url: openapi/octen-ai-chat-completions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.octen.ai
+  - type: APIReference
+    url: https://docs.octen.ai/api-reference/broad-search
+  - type: GettingStarted
+    url: https://docs.octen.ai/overview/quickstart
+  - type: RateLimits
+    url: https://docs.octen.ai/resources/rate-limits
+  - type: ErrorCodes
+    url: https://docs.octen.ai/resources/error-codes
+  - type: SLA
+    url: https://docs.octen.ai/resources/sla
+  - type: JSONSchema
+    url: json-schema/octen-ai-chat-completion-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-messages-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-deep-research-chunk-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-business-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-news-search-request-schema.json
+  - type: JSONSchema
+    url: json-schema/octen-ai-extract-request-schema.json
+x-enrichment:
+  date: '2026-10-07'
+  status: enriched
+  artifacts_added: 48
+  pass: local-v5

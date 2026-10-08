@@ -1,0 +1,25 @@
+generated: '2026-10-07'
+method: searched
+source: 'openapi/octen-ai-openapi.yml; https://docs.octen.ai/overview/quickstart.md (x-api-key header example); OpenAPI securitySchemes: bearerAuth + apiKeyAuth, payment method required'
+summary:
+  types:
+  - apiKey
+  - http
+  api_key_in:
+  - header
+schemes:
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+  sources:
+  - openapi/octen-ai-openapi.yml
+- name: apiKeyAuth
+  type: apiKey
+  in: header
+  parameter: x-api-key
+  description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+  sources:
+  - openapi/octen-ai-openapi.yml
+docs: https://docs.octen.ai/overview/quickstart
+key_management: https://octen.ai/platform/api-keys

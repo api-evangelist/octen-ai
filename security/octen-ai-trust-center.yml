@@ -1,0 +1,24 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/resources/security-&-compliance.md
+url: https://docs.octen.ai/resources/security-&-compliance
+platform: self-hosted-or-unknown
+certifications:
+- SOC 2 Type II (Certified)
+- HIPAA (In progress)
+frameworks:
+- name: SOC 2 Type II
+  status: certified
+- name: HIPAA
+  status: in progress
+- name: GDPR
+  status: supported
+- name: CCPA
+  status: supported
+data_handling:
+- Customer data is processed solely to provide the requested services
+- Customer data is not used for model training
+- Data encrypted in transit (TLS 1.2+) and at rest (AES-256)
+- Data deletion available upon request
+contact: support@octen.ai
+note: No third-party trust-center portal (Vanta/Drata/SafeBase) was found; the claims live on a docs page with no downloadable report

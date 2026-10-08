@@ -1,0 +1,622 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Images API
+  version: 1.0.0
+  description: 'Operations tagged Images across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Images
+paths:
+  /v1/images/generations:
+    post:
+      summary: Generate an image
+      description: Compatible with the OpenAI Images protocol. Text-to-image when no image is provided; image editing when an image is provided.
+      operationId: images-generations
+      x-mint:
+        href: /api-reference/images-generations
+        metadata:
+          title: Image Generation
+          sidebarTitle: Image Generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImageGenerationRequest'
+            examples:
+              textToImageGpt:
+                summary: Text-to-image (gpt-image-2)
+                value:
+                  model: openai/gpt-image-2
+                  prompt: A shiba inu wearing an astronaut helmet, flat illustration, starry background
+                  n: 1
+                  size: 1536x1024
+                  quality: high
+                  output_format: png
+              textToImageGemini:
+                summary: Text-to-image (Nano Banana 2)
+                value:
+                  model: google/gemini-3.1-flash-image
+                  prompt: Cyberpunk Hong Kong street, neon lights, rainy night
+                  size: 1024x1536
+              imageEdit:
+                summary: Image editing
+                value:
+                  model: openai/gpt-image-2
+                  prompt: Replace the dog's hat with a Santa hat
+                  image: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+                  mask: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+                  size: 1024x1024
+              layoutGemini:
+                summary: Complex layout and in-image text (gemini-3-pro-image)
+                value:
+                  model: google/gemini-3-pro-image
+                  prompt: A cafe menu poster, big title MORNING BREW, four drinks with prices laid out clearly below, retro hand-drawn style
+                  size: 1024x1536
+                  thinking_level: high
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImageGenerationFormRequest'
+      responses:
+        '200':
+          description: Successful image response. When `stream=false`, returns a single object. When `stream=true` (GPT only), returns an SSE stream of `image_generation.partial_image` / `image_edit.partial_image` preview events followed by a `image_generation.completed` / `image_edit.completed` event.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ImageGenerationResponse'
+                - $ref: '#/components/schemas/ImageGenerationStreamEvent'
+              examples:
+                textToImage:
+                  summary: Text-to-image (gpt-image-2)
+                  value:
+                    id: img-9f2c1a7b3e6d4082
+                    created: 1749812456
+                    background: opaque
+                    output_format: png
+                    quality: high
+                    size: 1536x1024
+                    data:
+                    - b64_json: iVBORw0KGgoAAAANSUhEUgAA...
+                    usage:
+                      input_tokens: 22
+                      input_tokens_details:
+                        text_tokens: 22
+                        image_tokens: 0
+                      output_tokens: 1056
+                      output_tokens_details:
+                        image_tokens: 1056
+                        text_tokens: 0
+                      total_tokens: 1078
+                imageEdit:
+                  summary: Image editing
+                  value:
+                    id: img-4b8e2d1f6a9c7035
+                    created: 1749812680
+                    background: opaque
+                    output_format: png
+                    quality: high
+                    size: 1024x1024
+                    data:
+                    - b64_json: iVBORw0KGgoAAAANSUhEUgAA...
+                    usage:
+                      input_tokens: 552
+                      input_tokens_details:
+                        text_tokens: 40
+                        image_tokens: 512
+                      output_tokens: 1056
+                      output_tokens_details:
+                        image_tokens: 1024
+                        text_tokens: 32
+                      total_tokens: 1608
+                interleaved:
+                  summary: Interleaved text and images (gemini-3-pro-image)
+                  value:
+                    id: img-7c3a5e9d2b1f8460
+                    created: 1749812900
+                    output_format: png
+                    data:
+                    - b64_json: iVBORw0KGgoAAAANSUhEUgAA...img1...
+                    - b64_json: iVBORw0KGgoAAAANSUhEUgAA...img2...
+                    text: 'Step 1: mix flour and water into shreds.
+
+                      Step 2: knead into a smooth dough, rest 30 min.'
+                    parts:
+                    - type: text
+                      text: 'Step 1: mix flour and water into shreds.'
+                    - type: image
+                      index: 0
+                    - type: text
+                      text: 'Step 2: knead into a smooth dough, rest 30 min.'
+                    - type: image
+                      index: 1
+                    usage:
+                      input_tokens: 20
+                      input_tokens_details:
+                        text_tokens: 20
+                        image_tokens: 0
+                      output_tokens: 2600
+                      output_tokens_details:
+                        image_tokens: 2560
+                        text_tokens: 40
+                      total_tokens: 2620
+                streamPartialImage:
+                  summary: Streaming, partial_image event
+                  value:
+                    id: img-2e7a9c4f1b8d6053
+                    type: image_generation.partial_image
+                    b64_json: iVBORw0KGgoAAAANSUhEUg...
+                    created_at: 1749812456
+                    size: 1536x1024
+                    quality: high
+                    background: opaque
+                    output_format: png
+                    partial_image_index: 0
+                streamCompleted:
+                  summary: Streaming, completed event (with usage)
+                  value:
+                    id: img-2e7a9c4f1b8d6053
+                    type: image_generation.completed
+                    b64_json: iVBORw0KGgoAAAANSUhEUg...
+                    created_at: 1749812461
+                    size: 1536x1024
+                    quality: high
+                    background: opaque
+                    output_format: png
+                    usage:
+                      input_tokens: 22
+                      input_tokens_details:
+                        text_tokens: 22
+                        image_tokens: 0
+                      output_tokens: 1256
+                      output_tokens_details:
+                        image_tokens: 1256
+                        text_tokens: 0
+                      total_tokens: 1278
+        '400':
+          description: Missing or invalid parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIErrorResponse'
+              example:
+                error:
+                  message: Missing or invalid parameter
+                  type: invalid_request_error
+                  param: null
+                  code: null
+        '401':
+          description: Invalid API Key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIErrorResponse'
+              example:
+                error:
+                  message: Invalid API Key
+                  type: authentication_error
+                  param: null
+                  code: null
+        '403':
+          description: Insufficient balance in account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIErrorResponse'
+              example:
+                error:
+                  message: Insufficient balance in account
+                  type: permission_error
+                  param: null
+                  code: null
+        '404':
+          description: Model or resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIErrorResponse'
+              example:
+                error:
+                  message: Model or resource not found
+                  type: not_found_error
+                  param: null
+                  code: null
+        '429':
+          description: Exceeding the rate limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIErrorResponse'
+              example:
+                error:
+                  message: Exceeding the rate limit
+                  type: rate_limit_error
+                  param: null
+                  code: null
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIErrorResponse'
+              example:
+                error:
+                  message: Internal error
+                  type: api_error
+                  param: null
+                  code: null
+      tags:
+      - Images
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    OpenAIErrorResponse:
+      type: object
+      description: Error body in the OpenAI protocol format.
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: A human-readable description of the error.
+            type:
+              type: string
+              description: The error category, e.g. `invalid_request_error`.
+            param:
+              type: string
+              nullable: true
+              description: The parameter related to the error, if any.
+            code:
+              type: string
+              nullable: true
+              description: A machine-readable error code, if any.
+          required:
+          - message
+          - type
+    ImageGenerationStreamEvent:
+      type: object
+      required:
+      - id
+      - type
+      - b64_json
+      description: A streaming SSE event. Partial preview images arrive first (each with `partial_image_index`), then one `completed` event with `usage`. The event type prefix is `image_generation` for text-to-image and `image_edit` for editing.
+      properties:
+        id:
+          type: string
+          description: Request identifier. Identical across all events of one request.
+        type:
+          type: string
+          enum:
+          - image_generation.partial_image
+          - image_generation.completed
+          - image_edit.partial_image
+          - image_edit.completed
+          description: The event type.
+        b64_json:
+          type: string
+          description: 'Base64 image for this event: the current preview for `partial_image`, the final image for `completed`.'
+        created_at:
+          type: integer
+          description: Unix timestamp when the event was generated.
+        size:
+          type: string
+          description: (GPT only) The output size actually applied; useful when `size` was `auto`.
+        quality:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          description: (GPT only) The quality tier actually applied.
+        background:
+          type: string
+          enum:
+          - transparent
+          - opaque
+          description: (GPT only) The background setting actually applied.
+        output_format:
+          type: string
+          enum:
+          - png
+          - jpeg
+          - webp
+          description: The output format actually applied; for Gemini, derived from the mimeType.
+        partial_image_index:
+          type: integer
+          description: Present only in `partial_image` events. Preview index, starting at 0.
+        usage:
+          allOf:
+          - $ref: '#/components/schemas/ImageUsage'
+          description: Present only in `completed` events. Same structure as the non-streaming `usage`.
+    ImageGenerationFormRequest:
+      description: Multipart form for the Image Generation API. Same fields as the JSON body, except image inputs are uploaded as files.
+      allOf:
+      - $ref: '#/components/schemas/ImageGenerationBaseRequest'
+      - type: object
+        properties:
+          image:
+            type: string
+            format: binary
+            description: Reference/source image file. Providing an image enters edit mode. For multiple reference images, use the `image[]` field instead.
+          image[]:
+            type: array
+            items:
+              type: string
+              format: binary
+            description: Multiple reference image files, combined by the model. Per-model limits apply.
+          mask:
+            type: string
+            format: binary
+            description: (GPT only) Mask image file (PNG matching the input size). Transparent areas are repainted. Effective only when an image is provided.
+    ImageGenerationRequest:
+      description: JSON request body for the Image Generation API.
+      allOf:
+      - $ref: '#/components/schemas/ImageGenerationBaseRequest'
+      - type: object
+        properties:
+          image:
+            description: Reference/source image(s) for editing, a data URL prefix or a raw base64 string. Providing an image enters edit mode. An array passes multiple reference images.
+            oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          mask:
+            type: string
+            description: (GPT only) Mask image, base64-encoded PNG matching the input size. Transparent areas are repainted. Effective only when `image` is provided.
+    ImagePart:
+      type: object
+      description: An ordered content part preserving the original text/image interleaving.
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          - image
+          description: The part type.
+        text:
+          type: string
+          description: Text content. Present when `type` is `text`.
+        index:
+          type: integer
+          description: Index into the `data` array. Present when `type` is `image`; read the image bytes from `data[index].b64_json`.
+    ImageGenerationBaseRequest:
+      type: object
+      required:
+      - model
+      - prompt
+      description: Shared parameters for the Image Generation API. Text-to-image when no image is provided; image editing when an image is provided. Parameters marked (GPT only) or (Gemini only) apply only to those model families; unsupported parameters are ignored.
+      properties:
+        model:
+          type: string
+          enum:
+          - openai/gpt-image-2.5-flare
+          - openai/gpt-image-2.5-sunburst
+          - openai/gpt-image-2
+          - openai/gpt-image-1-mini
+          - google/gemini-3-pro-image
+          - google/gemini-3.1-flash-image
+          description: The model to use. Aliases `nano-banana-pro` (= `google/gemini-3-pro-image`) and `nano-banana-2` (= `google/gemini-3.1-flash-image`) are also accepted.
+        prompt:
+          type: string
+          description: The text description for the model. The length limit is set by the model.
+        n:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 1
+          description: (GPT only) Number of images to generate. For Gemini, request multiple images in the `prompt` instead.
+        size:
+          type: string
+          default: auto
+          description: Output size as `width x height` (e.g. `1024x1024`) or `auto`.
+        quality:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          - auto
+          default: auto
+          description: (GPT only) Generation quality.
+        background:
+          type: string
+          enum:
+          - transparent
+          - opaque
+          - auto
+          default: auto
+          description: (GPT only) Background setting.
+        output_format:
+          type: string
+          enum:
+          - png
+          - jpeg
+          - webp
+          default: png
+          description: Output image format. GPT supports png/jpeg/webp; Gemini supports png/jpeg (webp falls back to png).
+        output_compression:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 100
+          description: (GPT only) Compression level (percent). Effective only when `output_format` is jpeg or webp.
+        moderation:
+          type: string
+          enum:
+          - low
+          - auto
+          default: auto
+          description: (GPT only) Content moderation strength.
+        thinking_level:
+          type: string
+          enum:
+          - minimal
+          - high
+          default: minimal
+          description: (Gemini only) Thinking effort before generation.
+        response_modalities:
+          type: array
+          items:
+            type: string
+            enum:
+            - text
+            - image
+          default:
+          - text
+          - image
+          description: (Gemini only) Controls returned modalities. `["text","image"]` returns the image plus accompanying text; `["image"]` returns only the image.
+        media_resolution:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          description: (Gemini only) Processing resolution for input reference images.
+        response_format:
+          type: string
+          enum:
+          - b64_json
+          default: b64_json
+          description: Return format.
+        stream:
+          type: boolean
+          default: false
+          description: (GPT only) Whether to stream the response.
+        partial_images:
+          type: integer
+          minimum: 0
+          maximum: 3
+          default: 0
+          description: (GPT only) Number of intermediate preview images to stream. Effective only when `stream=true`. Each preview costs an extra 100 image output tokens.
+        user:
+          type: string
+          description: A unique identifier for the end user. Use hashed or pseudonymous identifiers to avoid passing personally identifiable information.
+    ImageUsage:
+      type: object
+      required:
+      - input_tokens
+      - output_tokens
+      - total_tokens
+      description: Token usage information.
+      properties:
+        input_tokens:
+          type: integer
+          description: Input tokens (text prompt + input image tokens).
+        input_tokens_details:
+          type: object
+          properties:
+            text_tokens:
+              type: integer
+              description: Text tokens of the prompt.
+            image_tokens:
+              type: integer
+              description: Tokens of the input images.
+        output_tokens:
+          type: integer
+          description: Output tokens (generated image tokens + reasoning text tokens).
+        output_tokens_details:
+          type: object
+          properties:
+            text_tokens:
+              type: integer
+              description: Output tokens used by reasoning text.
+            image_tokens:
+              type: integer
+              description: Tokens of the generated images.
+        total_tokens:
+          type: integer
+          description: Total tokens (input_tokens + output_tokens).
+    ImageGenerationResponse:
+      type: object
+      required:
+      - id
+      - created
+      - data
+      - usage
+      description: A non-streaming image response. Images are always returned as base64.
+      properties:
+        id:
+          type: string
+          description: The unique identifier for this request.
+        created:
+          type: integer
+          description: Unix timestamp (in seconds) of when the request was created.
+        background:
+          type: string
+          enum:
+          - transparent
+          - opaque
+          description: (GPT only) The background setting actually applied.
+        output_format:
+          type: string
+          enum:
+          - png
+          - jpeg
+          - webp
+          description: The output format actually applied; for Gemini, derived from the mimeType.
+        quality:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          description: (GPT only) The quality tier actually applied.
+        size:
+          type: string
+          description: (GPT only) The output size actually applied; useful when `size` was `auto`.
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              b64_json:
+                type: string
+                description: Base64-encoded image content.
+          description: The generated images, one element per image.
+        text:
+          type: string
+          description: (Gemini only) Plain-text summary of text the model produced alongside the image. For exact interleaving, read `parts`.
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImagePart'
+          description: (Gemini only) Content parts in the model's original order, preserving text/image interleaving.
+        usage:
+          $ref: '#/components/schemas/ImageUsage'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

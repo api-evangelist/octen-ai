@@ -1,0 +1,432 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Grounded Generation API
+  version: 1.0.0
+  description: 'Operations tagged Grounded Generation across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Grounded Generation
+paths:
+  /v1/grounded-generation:
+    post:
+      summary: Generate an image or a video
+      description: Generates an image or a video from a text prompt, grounded in reference material found by search.
+      operationId: post-grounded-generation
+      x-mint:
+        href: /api-reference/post-grounded-generation
+        metadata:
+          title: Grounded Generation
+          sidebarTitle: Grounded Generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroundedGenerationRequest'
+            examples:
+              image:
+                summary: Generate an image
+                value:
+                  modality: image
+                  prompt: Ronaldo lifting the World Cup trophy, stadium lights
+                  model: google/gemini-3-pro-image
+                  aspect_ratio: '16:9'
+              video:
+                summary: Generate a video
+                value:
+                  modality: video
+                  prompt: A Tesla Cybertruck driving through a snowy mountain pass at dawn
+                  aspect_ratio: '9:16'
+                  duration: 10
+      responses:
+        '200':
+          description: Successful grounded generation response. The task starts in `queued`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroundedGenerationResponse'
+              example:
+                request_id: 20260924020604287FV3DLUK7ZX
+                generation_id: mm-3ca3c4ff37c546b6b59f2e9cde09f2f6
+                modality: image
+                status: queued
+                created_at: 1790215572
+        '400':
+          description: Invalid params — Returned when a required parameter is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Unsupported multimodal model.
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Grounded Generation
+    servers:
+    - url: https://api.octen.ai
+  /v1/grounded-generation/{generation_id}:
+    get:
+      summary: Get a generation result
+      description: Returns a grounded generation task by id.
+      operationId: get-grounded-generation
+      x-mint:
+        href: /api-reference/get-grounded-generation
+        metadata:
+          title: Generation Result
+          sidebarTitle: Generation Result
+      parameters:
+      - name: generation_id
+        in: path
+        required: true
+        schema:
+          type: string
+        example: mm-3ca3c4ff37c546b6b59f2e9cde09f2f6
+        description: The task id returned by the Grounded Generation API.
+      responses:
+        '200':
+          description: Successful grounded generation task response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroundedGenerationTask'
+              example:
+                request_id: 20260924021635985E9WHYPV4FI
+                generation_id: mm-3ca3c4ff37c546b6b59f2e9cde09f2f6
+                modality: image
+                status: succeeded
+                output_url: https://apt-multimodal-output.octen.ai/apt-multimodal-output/images%2F2026_09_24%2Fmm-3ca3c4ff37c546b6b59f2e9cde09f2f6.jpg?se=...&sig=...
+                references:
+                - source_id: source1
+                  url: https://upload.wikimedia.org/wikipedia/commons/2/26/Cristiano_Ronaldo_2026.jpg
+                  title: Cristiano Ronaldo - Wikipedia
+                  cover_url: https://encrypted-tbn0.gstatic.com/images?q=tbn:...
+                search_results:
+                - query: Cristiano Ronaldo
+                  results:
+                  - type: image
+                    title: Cristiano Ronaldo - Wikipedia
+                    url: https://upload.wikimedia.org/wikipedia/commons/2/26/Cristiano_Ronaldo_2026.jpg
+                    source_page: https://en.wikipedia.org/wiki/Cristiano_Ronaldo
+                    description: en.wikipedia.org
+                    cover_url: https://encrypted-tbn0.gstatic.com/images?q=tbn:...
+                created_at: 1790215572
+                updated_at: 1790215601
+                usage:
+                  image_count: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Task not found or expired — Returned when the generation id does not exist or is older than 7 days.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 404
+                msg: Task not found or expired.
+                request_id: req_abc123def456
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Grounded Generation
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    GroundedGenerationUsage:
+      type: object
+      description: Metering for the task. Present only when `status` is `succeeded`.
+      properties:
+        image_count:
+          type: integer
+          description: Number of images generated. Returned when `modality` is `image`.
+        video_count:
+          type: integer
+          description: Number of videos generated. Returned when `modality` is `video`.
+        video_seconds:
+          type: integer
+          description: Length of the generated video in seconds. Returned when `modality` is `video`.
+    GroundedGenerationSearchGroup:
+      type: object
+      description: The results for one search query.
+      properties:
+        query:
+          type: string
+          description: The query the task searched for.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroundedGenerationSearchResult'
+          description: Results for this query.
+    GroundedGenerationSearchResult:
+      type: object
+      description: A single search result.
+      properties:
+        type:
+          type: string
+          enum:
+          - image
+          - video
+          description: Media type of the result.
+        title:
+          type: string
+          description: The title of the result.
+        url:
+          type: string
+          description: The media URL.
+        source_page:
+          type: string
+          description: URL of the original page hosting the media.
+        description:
+          type: string
+          description: Description of the result.
+        cover_url:
+          type: string
+          description: Thumbnail URL.
+    GroundedGenerationReference:
+      type: object
+      description: A single piece of reference material.
+      properties:
+        source_id:
+          type: string
+          description: Identifier of the reference, such as `source1`.
+        url:
+          type: string
+          description: The media URL.
+        title:
+          type: string
+          description: The title of the reference.
+        cover_url:
+          type: string
+          description: Thumbnail URL.
+    GroundedGenerationTask:
+      type: object
+      required:
+      - generation_id
+      - modality
+      - status
+      - created_at
+      - updated_at
+      properties:
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+        generation_id:
+          type: string
+          description: Unique task id.
+        modality:
+          type: string
+          enum:
+          - image
+          - video
+          description: The type of output this task generates.
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - succeeded
+          - failed
+          description: Task state.
+        output_url:
+          type: string
+          description: Signed download URL for the output, present when `status` is `succeeded`. Requires no API key, and is valid for 7 days after the task was created.
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroundedGenerationReference'
+          description: The reference material used to generate the output.
+        search_results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroundedGenerationSearchGroup'
+          description: The search results the references were selected from, grouped by query.
+        error:
+          $ref: '#/components/schemas/GroundedGenerationError'
+        created_at:
+          type: integer
+          description: Unix timestamp in seconds when the task was created.
+        updated_at:
+          type: integer
+          description: Unix timestamp in seconds when the task was last updated.
+        usage:
+          $ref: '#/components/schemas/GroundedGenerationUsage'
+    GroundedGenerationResponse:
+      type: object
+      required:
+      - generation_id
+      - modality
+      - status
+      - created_at
+      properties:
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+        generation_id:
+          type: string
+          description: Unique task id, used to retrieve the result.
+        modality:
+          type: string
+          enum:
+          - image
+          - video
+          description: The type of output this task generates.
+        status:
+          type: string
+          enum:
+          - queued
+          description: Task state.
+        created_at:
+          type: integer
+          description: Unix timestamp in seconds when the task was created.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    GroundedGenerationRequest:
+      type: object
+      required:
+      - modality
+      - prompt
+      description: Request body for the Grounded Generation API.
+      properties:
+        modality:
+          type: string
+          enum:
+          - image
+          - video
+          description: The type of output to generate.
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 8000
+          description: The text description of what to generate.
+        model:
+          type: string
+          enum:
+          - google/gemini-3-pro-image
+          - google/gemini-3.1-flash-image
+          - minimax/hailuo-3
+          description: The model to use. When omitted, the model default applies.
+        aspect_ratio:
+          type: string
+          enum:
+          - '16:9'
+          - '1:1'
+          - '9:16'
+          default: '16:9'
+          description: Aspect ratio of the output.
+        duration:
+          type: integer
+          default: 5
+          minimum: 5
+          maximum: 10
+          description: Video length in seconds. Applies when `modality` is `video`. Values outside the allowed range are adjusted to the nearest bound.
+    GroundedGenerationError:
+      type: object
+      description: Failure reason, present when `status` is `failed`. Failed tasks are not billed.
+      properties:
+        code:
+          type: string
+          enum:
+          - MM_GENERATION_CONTENT_POLICY
+          - MM_GENERATION_INPUT_IMAGE_PRIVACY_BLOCKED
+          - MM_GENERATION_CONTENT_NOT_SUPPORTED
+          - MM_GENERATION_NO_REFERENCE_MATERIAL
+          - MM_GENERATION_REJECTED
+          - MM_GENERATION_TIMEOUT
+          - MM_GENERATION_FAILED
+          description: 'Machine-readable failure code. `MM_GENERATION_CONTENT_POLICY`: the prompt triggered a content policy; `MM_GENERATION_INPUT_IMAGE_PRIVACY_BLOCKED`: the reference material was blocked for privacy; `MM_GENERATION_CONTENT_NOT_SUPPORTED`: the content is not supported; `MM_GENERATION_NO_REFERENCE_MATERIAL`: no usable reference material was found; `MM_GENERATION_REJECTED`: the model rejected the request; `MM_GENERATION_TIMEOUT`: generation timed out, retry; `MM_GENERATION_FAILED`: generation failed for another reason, retry.'
+        message:
+          type: string
+          description: A message describing the failure.
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

@@ -1,0 +1,261 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Embedding API
+  version: 1.0.0
+  description: 'Operations tagged Embedding across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Embedding
+paths:
+  /embedding:
+    post:
+      summary: Embedding
+      description: Converts text into vector representations. Supports batch input, multiple models, and configurable output dimensions.
+      operationId: embedding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmbeddingRequest'
+            examples:
+              singleInput:
+                summary: Single Input
+                value:
+                  input:
+                  - What is vector search?
+                  model: octen-embedding-8b
+                  dimension: 4096
+                  input_type: query
+              batchInput:
+                summary: Batch Input
+                value:
+                  input:
+                  - Vector databases store embeddings.
+                  - Embeddings enable semantic search.
+                  model: octen-embedding-0.6b
+                  input_type: document
+      responses:
+        '200':
+          description: Successful embedding response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingResponse'
+              example:
+                code: 0
+                msg: success
+                request_id: req_abc123def456
+                data:
+                  results:
+                  - index: 0
+                    embedding:
+                    - 0.0123
+                    - -0.0456
+                    - 0.0789
+                  - index: 1
+                    embedding:
+                    - -0.0011
+                    - 0.0234
+                    - 0.0567
+                  model: octen-embedding-0.6b
+                meta:
+                  usage:
+                    input_tokens: 128
+                  warning: Input was truncated for one or more items.
+        '400':
+          description: Missing required parameter — Returned when a required parameter is missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Missing required parameter
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Embedding
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    EmbeddingResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/EmbeddingData'
+        meta:
+          $ref: '#/components/schemas/EmbeddingMeta'
+    EmbeddingRequest:
+      type: object
+      required:
+      - input
+      properties:
+        input:
+          type: array
+          items:
+            type: string
+          default:
+          - What is vector search?
+          maxItems: 1000
+          description: 'The text to be converted into embeddings. Maximum characters per element: 10000. Maximum request body size: 2MB'
+        model:
+          type: string
+          enum:
+          - octen-embedding-0.6b
+          - octen-embedding-4b
+          - octen-embedding-8b
+          default: octen-embedding-4b
+          description: 'The embedding model used for this request. `octen-embedding-0.6b` (max dim: 1024) for cost/throughput priority; `octen-embedding-4b` (max dim: 2560) for most applications; `octen-embedding-8b` (max dim: 4096) for accuracy-critical tasks.'
+        dimension:
+          type: integer
+          description: 'The dimensionality of the output embedding vectors. Defaults to the model''s max dimension (0.6b: 1024, 4b: 2560, 8b: 4096). If set to a value smaller than the model default, the embedding will be truncated to the first N values. Any positive integer ≤ model default dimension is allowed.'
+        input_type:
+          type: string
+          enum:
+          - query
+          - document
+          nullable: true
+          default: null
+          description: 'Specifies whether the input is a query or a document for retrieval. Different values apply different internal prompts: `query` → "Represent the query for retrieving supporting" (prepended and counted in input_tokens); `document` and `null` mean no special prompt is applied.'
+    EmbeddingData:
+      type: object
+      description: The main embedding response payload.
+      properties:
+        results:
+          type: array
+          description: A list of embedding results. Each item corresponds to one input.
+          items:
+            $ref: '#/components/schemas/EmbeddingResult'
+        model:
+          type: string
+          description: The embedding model used for this request.
+    EmbeddingUsage:
+      type: object
+      description: Usage information for the embedding request.
+      properties:
+        input_tokens:
+          type: integer
+          description: The number of input tokens processed in this request.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    EmbeddingMeta:
+      type: object
+      description: Additional metadata for the embedding request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/EmbeddingUsage'
+        warning:
+          type: string
+          nullable: true
+          description: Optional warning message.
+    EmbeddingResult:
+      type: object
+      description: A single embedding result.
+      properties:
+        index:
+          type: integer
+          description: The position of the embedding in the input array (useful when input is a list).
+        embedding:
+          type: array
+          items:
+            type: number
+          description: The generated embedding vector.
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

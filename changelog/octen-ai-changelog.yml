@@ -1,0 +1,70 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/resources/changelog.md
+scheme: dated monthly entries, no version numbers; no breaking changes announced
+current_version: null
+entries:
+- version: null
+  date: '2026-09-28'
+  breaking: false
+  highlights:
+  - 'Extract: mode standard/advanced/auto, link prioritisation and caps'
+- version: null
+  date: '2026-09-20'
+  breaking: false
+  highlights:
+  - 'News Search: dedicated /news-search endpoint with subject grouping, minute-fresh index'
+- version: null
+  date: '2026-09-16'
+  breaking: false
+  highlights:
+  - 'Model Gateway: video generation via POST /v1/videos and GET /v1/videos/{id}'
+- version: null
+  date: '2026-08-26'
+  breaking: false
+  highlights:
+  - 'Broad Search & Web Search: full content of the first 10 results free; beyond that $0.5 per 1,000 results'
+- version: null
+  date: 2026-08
+  breaking: false
+  highlights:
+  - 'Extract: native PDF and page labels'
+- version: null
+  date: 2026-07
+  breaking: false
+  highlights:
+  - Multimodal Deep Research reports (text, images, videos)
+  - Broad/Web Search language filter
+  - Web Search promotional pricing
+  - Model Gateway frontier models with built-in search
+- version: null
+  date: 2026-06
+  breaking: false
+  highlights:
+  - Image Search
+  - Video Search
+  - Multimodal Chat
+  - Grounded Generation (images and videos from real content)
+  - News-focused results in Search
+- version: null
+  date: 2026-05
+  breaking: false
+  highlights:
+  - Extract API launched
+  - VL Embedding (multimodal embeddings)
+- version: null
+  date: 2026-04
+  breaking: false
+  highlights:
+  - Deep Research autonomous agent
+  - Broad Search rebuilt for LLMs
+- version: null
+  date: 2026-03
+  breaking: false
+  highlights:
+  - Octen public beta open to all users
+- version: null
+  date: 2026-02
+  breaking: false
+  highlights:
+  - Octen beta opened

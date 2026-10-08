@@ -1,0 +1,768 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Business Search API
+  version: 1.0.0
+  description: 'Operations tagged Business Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Business Search
+paths:
+  /business-search:
+    post:
+      summary: Business Search
+      description: Searches the web for business content. The companies and people behind the query are also returned as entity cards.
+      operationId: business-search
+      security:
+      - bearerAuthNoPayment: []
+      - apiKeyAuthNoPayment: []
+      x-mint:
+        href: /api-reference/business-search
+        metadata:
+          title: Business Search
+          sidebarTitle: Business Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusinessSearchRequest'
+            examples:
+              basic:
+                summary: Basic Business Search
+                value:
+                  query: NVIDIA quarterly results
+                  count: 5
+              entities:
+                summary: Entity Cards
+                value:
+                  query: NVIDIA quarterly results
+                  count: 5
+                  entities:
+                    enable: true
+                    count: 2
+                    max_activities: 5
+              filtering:
+                summary: Domain Filtering + Time Range + Language
+                value:
+                  query: semiconductor export controls
+                  count: 10
+                  include_domains:
+                  - reuters.com
+                  language:
+                  - en
+                  time_basis: published
+                  start_time: '2026-08-22T00:00:00Z'
+                  end_time: '2026-08-24T00:00:00Z'
+                  highlight:
+                    enable: true
+                    max_tokens: 300
+                  entities:
+                    enable: false
+      responses:
+        '200':
+          description: Successful business search response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessSearchResponse'
+              examples:
+                company:
+                  summary: Company Entity
+                  value:
+                    code: 0
+                    msg: success
+                    request_id: req_abc123def456
+                    data:
+                      query: NVIDIA quarterly results
+                      results:
+                      - title: NVIDIA Announces Financial Results for Fourth Quarter and Fiscal 2026 | NVIDIA Newsroom
+                        url: https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2026
+                        highlight: 'NVIDIA (NASDAQ: NVDA) today reported record revenue for the fourth quarter ended January 25, 2026...'
+                        time_published: '2026-02-25T00:00:00Z'
+                        time_last_crawled: '2026-09-23T01:25:05Z'
+                        favicon: https://nvidianews.nvidia.com/media/sites/219/images/itouch.png
+                        cover_image:
+                          url: https://iprsoftwaremedia.com/219/files/20224/DH1L4415-HDR-20220527-r5-prv.jpg
+                          description: NVIDIA Voyager
+                      entities:
+                      - type: company
+                        name: NVIDIA
+                        summary: 'Since its founding in 1993, NVIDIA (NASDAQ: NVDA) has been a pioneer in accelerated computing. The company''s invention of the GPU in 1999 sparked the growth of the PC gaming market, redefined computer graphics, ignited the era of modern AI and is fueling the creation of the metaverse.'
+                        aliases:
+                        - nvidia
+                        - nvidia corporation
+                        identifiers:
+                          website: nvidia.com
+                          linkedin_url: https://www.linkedin.com/company/nvidia
+                          stock_ticker: NASDAQ:NVDA
+                          sec_cik: 0001045810
+                        attributes:
+                          industry: Computer Hardware Manufacturing
+                          hq_location: 2701 San Tomas Expressway, Santa Clara, CA 95050, US
+                          founded_year: 1993
+                        metrics:
+                          financials:
+                          - revenue: 81615003648
+                            net_income: 58320998400
+                            gross_profit: 61156999168
+                            period: Q1, 2027
+                            currency: USD
+                          - revenue: 215938007040
+                            net_income: 120066998272
+                            gross_profit: 153462996992
+                            period: FY, 2026
+                            currency: USD
+                          stock:
+                            price: 230.43
+                            todays_change_percent: 2.381478132712727
+                            week_52_high: 236.53999
+                            week_52_low: 164.27
+                            date: '2026-09-28'
+                            currency: USD
+                          web_traffic:
+                            visits_monthly: 38505903
+                            rank: 903
+                            period: 2026-08
+                        key_people:
+                        - name: Jensen Huang
+                          title: Founder and CEO
+                        - name: Colette Kress
+                          title: EVP CFO
+                        logo:
+                          url: https://media.licdn.com/dms/image/v2/D560BAQGV36q2EowSyw/company-logo_200_200/0/1724881581208/nvidia_logo
+                        activities:
+                        - title: AI is technology that is built and improved by people, who have a responsibility to develop and deploy it thoughtfully.
+                          url: https://www.linkedin.com/feed/update/urn:li:activity:7508569677040893954/
+                          highlight: And helping people benefit from AI means taking its challenges seriously. The technology industry needs to do that work...
+                          authors: NVIDIA
+                          time_published: '2026-09-23T16:55:13Z'
+                    meta:
+                      usage:
+                        num_search_queries: 1
+                      latency: 235
+                      warning: ''
+                person:
+                  summary: Person Entity
+                  value:
+                    code: 0
+                    msg: success
+                    request_id: req_abc123def456
+                    data:
+                      query: Jensen Huang NVIDIA CEO
+                      results:
+                      - title: Jensen Huang | NVIDIA
+                        url: https://nvidia.com/en-eu/about-nvidia/governance/management-team/jensen-huang
+                        highlight: Jensen Huang founded NVIDIA in 1993 and has served since its inception as president, chief executive officer and a member of the board of directors...
+                        time_last_crawled: '2026-08-21T06:13:33Z'
+                        images:
+                        - url: https://nvidia.com/content/dam/en-zz/Solutions/about-nvidia/management-team/jensen-huang.jpg
+                          description: Jensen Huang
+                      entities:
+                      - type: person
+                        name: Jensen Huang
+                        summary: In 1993, I founded NVIDIA with Chris Malachowsky and Curtis Priem to solve the problem of 3D graphics for the PC. Our pioneering work in accelerated computing led to the redefinition of modern computer graphics and the creation of modern AI...
+                        linkedin_url: https://www.linkedin.com/in/jenhsunhuang
+                        current_position: Founder and CEO, NVIDIA
+                        career:
+                        - organization: NVIDIA
+                          title: Founder and CEO
+                          start: '1993'
+                        photo:
+                          url: https://media.licdn.com/dms/image/v2/D5603AQEM7Pb1ndhi0Q/profile-displayphoto-scale_200_200/0/1765583176636/jensen_huang
+                        activities:
+                        - title: AI factories are the defining infrastructure of the AI era. In the AI economy, compute is revenue.
+                          url: https://www.linkedin.com/posts/jenhsunhuang_securing-the-infrastructure-of-intelligence-activity-7495098872218701824-QY2V
+                          highlight: AI factories are the defining infrastructure of the AI era. In the AI economy, compute is revenue.
+                          authors: Jensen Huang
+                          time_published: '2026-08-17T12:47:03Z'
+                          time_last_crawled: '2026-08-24T14:15:01Z'
+                    meta:
+                      usage:
+                        num_search_queries: 1
+                      latency: 289
+                      warning: ''
+        '400':
+          description: Invalid or missing parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Invalid params. Missing parameter query
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Business Search
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    BusinessEntityIdentifiers:
+      type: object
+      description: Identifiers for the company.
+      properties:
+        website:
+          type: string
+          description: The official website.
+        linkedin_url:
+          type: string
+          description: LinkedIn company page URL.
+        stock_ticker:
+          type: string
+          description: Stock ticker, prefixed with the exchange.
+        sec_cik:
+          type: string
+          description: SEC Central Index Key.
+    BusinessStock:
+      type: object
+      description: Live stock data from Octen. Returned for listed companies.
+      properties:
+        price:
+          type: number
+          description: Current stock price.
+        todays_change_percent:
+          type: number
+          description: Change from the previous close, as a percentage.
+        week_52_high:
+          type: number
+          description: Highest price over the past 52 weeks.
+        week_52_low:
+          type: number
+          description: Lowest price over the past 52 weeks.
+        date:
+          type: string
+          description: The trading date the figures belong to.
+        currency:
+          type: string
+          description: The currency the figures are reported in.
+    BusinessKeyPerson:
+      type: object
+      description: A key person at the company.
+      properties:
+        name:
+          type: string
+          description: The person's name.
+        title:
+          type: string
+          description: The person's title.
+    BusinessImage:
+      type: object
+      description: An image attached to a page.
+      properties:
+        url:
+          type: string
+          description: The image URL.
+        description:
+          type: string
+          description: Text description of the image.
+    BusinessEntityAttributes:
+      type: object
+      description: Basic attributes of the company.
+      properties:
+        industry:
+          type: string
+          description: The industry the company operates in.
+        hq_location:
+          type: string
+          description: Headquarters location.
+        founded_year:
+          type: integer
+          description: The year the company was founded.
+        employee_range:
+          type: string
+          description: Employee count, as a range.
+    FullContentOptions:
+      type: object
+      description: Controls whether to return the full raw content of each result page.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
+    BusinessSearchUsage:
+      type: object
+      description: Usage information for the search request.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of text search queries executed.
+        full_content_extra_count:
+          type: integer
+          description: Billable full_content results beyond the free allowance.
+    BusinessSearchData:
+      type: object
+      description: The main response payload. Fields without data are omitted, at every level.
+      properties:
+        query:
+          type: string
+          description: The original query.
+        results:
+          type: array
+          description: A list of business results.
+          items:
+            $ref: '#/components/schemas/BusinessSearchResult'
+        entities:
+          type: array
+          description: A list of entity cards for the companies and people in the query. Returned only when entities.enable is true and the query matches at least one entity.
+          items:
+            $ref: '#/components/schemas/BusinessEntity'
+    BusinessSearchResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/BusinessSearchData'
+        meta:
+          $ref: '#/components/schemas/BusinessSearchMeta'
+    BusinessCompanyEntity:
+      type: object
+      title: Company
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - company
+          description: The kind of entity this card describes. Always `company`.
+        name:
+          type: string
+          description: The company name.
+        summary:
+          type: string
+          description: A profile of the company.
+        aliases:
+          type: array
+          items:
+            type: string
+          description: Other names and spellings for the company.
+        identifiers:
+          $ref: '#/components/schemas/BusinessEntityIdentifiers'
+        attributes:
+          $ref: '#/components/schemas/BusinessEntityAttributes'
+        metrics:
+          $ref: '#/components/schemas/BusinessEntityMetrics'
+        key_people:
+          type: array
+          description: Key people at the company.
+          items:
+            $ref: '#/components/schemas/BusinessKeyPerson'
+        logo:
+          type: object
+          description: The company logo.
+          properties:
+            url:
+              type: string
+              description: The logo image URL.
+        activities:
+          type: array
+          description: Recent activity from the company's own channels.
+          items:
+            $ref: '#/components/schemas/BusinessSearchResult'
+    BusinessCareerEntry:
+      type: object
+      description: One role in a person's career history.
+      properties:
+        organization:
+          type: string
+          description: The organization.
+        title:
+          type: string
+          description: The role held.
+        start:
+          type: string
+          description: When the role started, as a year or a year and month.
+        end:
+          type: string
+          description: When the role ended, as a year or a year and month. Omitted while the role is current.
+    BusinessWebTraffic:
+      type: object
+      description: Web traffic for the company's website.
+      properties:
+        visits_monthly:
+          type: integer
+          description: Monthly visits.
+        rank:
+          type: integer
+          description: Global traffic rank.
+        period:
+          type: string
+          description: The month the figures belong to.
+          example: 2026-08
+    BusinessSearchRequest:
+      type: object
+      required:
+      - query
+      properties:
+        query:
+          type: string
+          maxLength: 500
+          description: 'The search query.
+
+
+            **Operators**
+
+
+            - `site:<domain>`: restrict results to a single domain. For multiple domains, use `include_domains` and `exclude_domains`.
+
+            - `-site:<domain>`: exclude a single domain from the results.'
+        count:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 100
+          description: Number of results to return.
+        include_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically include in the search results. The `site:` query operator adds to this list. Applies to `results` only; entity cards do not support domain filtering.
+          example:
+          - reuters.com
+          - bloomberg.com
+        exclude_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically exclude from the search results. The `-site:` query operator adds to this list. If a domain appears in both `include_domains` and `exclude_domains`, `exclude_domains` takes precedence. Applies to `results` only; entity cards do not support domain filtering.
+          example:
+          - spam.com
+          - ads.example.net
+        time_basis:
+          type: string
+          enum:
+          - auto
+          - published
+          - crawled
+          default: auto
+          description: Determines which time field is used for time filtering. `published` uses time_published; `crawled` uses time_last_crawled. Results missing this field are excluded when filtering by time. Applies to `results` only; entity cards do not support time filtering.
+        time_range:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          - year
+          - d
+          - w
+          - m
+          - y
+          description: 'Relative time window counting back from the current time based on `time_basis`. Mutually exclusive with `start_time`/`end_time`: if both are provided, `start_time`/`end_time` take precedence.'
+        start_time:
+          type: string
+          format: date-time
+          description: Start time for filtering results. ISO 8601 format.
+          example: '2026-08-22T00:00:00Z'
+        end_time:
+          type: string
+          format: date-time
+          description: End time for filtering results. ISO 8601 format.
+          example: '2026-08-24T00:00:00Z'
+        language:
+          type: array
+          items:
+            type: string
+            enum:
+            - ar
+            - de
+            - en
+            - es
+            - fr
+            - hi
+            - id
+            - it
+            - ja
+            - ko
+            - nl
+            - pl
+            - pt
+            - ru
+            - th
+            - tr
+            - vi
+            - zh
+          default: []
+          description: A list of languages to restrict results to, as ISO 639-1 codes.
+          example:
+          - en
+          - zh
+        highlight:
+          $ref: '#/components/schemas/HighlightOptions'
+        full_content:
+          $ref: '#/components/schemas/FullContentOptions'
+        entities:
+          $ref: '#/components/schemas/BusinessEntityOptions'
+    BusinessSearchResult:
+      type: object
+      description: A single business result.
+      properties:
+        title:
+          type: string
+          description: The title of the page.
+        url:
+          type: string
+          description: The URL of the page.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the source site.
+        cover_image:
+          $ref: '#/components/schemas/BusinessImage'
+        images:
+          type: array
+          description: In-body images of the page, in order of appearance.
+          items:
+            $ref: '#/components/schemas/BusinessImage'
+    BusinessEntityMetrics:
+      type: object
+      description: Quantitative metrics for the company.
+      properties:
+        financials:
+          type: array
+          description: Financial results by reporting period.
+          items:
+            $ref: '#/components/schemas/BusinessFinancials'
+        stock:
+          $ref: '#/components/schemas/BusinessStock'
+        web_traffic:
+          $ref: '#/components/schemas/BusinessWebTraffic'
+    BusinessPersonEntity:
+      type: object
+      title: Person
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - person
+          description: The kind of entity this card describes. Always `person`.
+        name:
+          type: string
+          description: The person's name.
+        summary:
+          type: string
+          description: A profile of the person.
+        linkedin_url:
+          type: string
+          description: LinkedIn profile URL.
+        current_position:
+          type: string
+          description: Current role and organization.
+        career:
+          type: array
+          description: Career history.
+          items:
+            $ref: '#/components/schemas/BusinessCareerEntry'
+        photo:
+          type: object
+          description: A photo of the person.
+          properties:
+            url:
+              type: string
+              description: The photo URL.
+        activities:
+          type: array
+          description: Recent activity from the person's own channels.
+          items:
+            $ref: '#/components/schemas/BusinessSearchResult'
+    BusinessFinancials:
+      type: object
+      description: Financial results for one reporting period.
+      properties:
+        revenue:
+          type: number
+          description: Revenue.
+        net_income:
+          type: number
+          description: Net income. Negative for a loss.
+        gross_profit:
+          type: number
+          description: Gross profit.
+        period:
+          type: string
+          description: The reporting period.
+          example: Q1, 2026
+        currency:
+          type: string
+          description: The currency the figures are reported in.
+    HighlightOptions:
+      type: object
+      description: Controls highlight extraction from result pages.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns query-relevant highlight in each result.
+        max_tokens:
+          type: integer
+          default: 512
+          minimum: 100
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    BusinessSearchMeta:
+      type: object
+      description: Additional metadata for the search request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/BusinessSearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
+          type: string
+          description: Warning message, if any.
+    BusinessEntityOptions:
+      type: object
+      description: Controls the entity cards returned for companies and people.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns data.entities.
+        count:
+          type: integer
+          default: 2
+          minimum: 1
+          maximum: 20
+          description: Maximum number of entity cards to return.
+        max_activities:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 20
+          description: Maximum number of recent activities to return per entity card.
+    BusinessEntity:
+      oneOf:
+      - $ref: '#/components/schemas/BusinessCompanyEntity'
+      - $ref: '#/components/schemas/BusinessPersonEntity'
+      discriminator:
+        propertyName: type
+        mapping:
+          company: '#/components/schemas/BusinessCompanyEntity'
+          person: '#/components/schemas/BusinessPersonEntity'
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

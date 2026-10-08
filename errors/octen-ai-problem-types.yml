@@ -1,0 +1,50 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/resources/error-codes.md
+format: custom JSON envelope
+envelope:
+  code: integer HTTP status code
+  msg: human-readable message
+  request_id: unique request identifier
+  note: Model Gateway endpoints (/v1/chat/completions, /v1/messages, /v1/images/generations) return native OpenAI/Anthropic error formats without request_id in the body; read the x-request-id response header instead
+problems:
+- status: 400
+  title: Bad Request
+  description: Missing required parameter or invalid request format
+  remediation: Verify all required parameters are included and properly formatted
+- status: 401
+  title: Unauthorized
+  description: Invalid or missing API key
+  remediation: Ensure your API key is correct and included in request headers
+- status: 403
+  title: Forbidden
+  description: Insufficient account balance
+  remediation: Check your account balance and add credits if needed
+- status: 413
+  title: Request Entity Too Large
+  description: Request payload exceeds the allowed size limit
+  remediation: Reduce payload size (e.g., shorten input or split into smaller requests)
+- status: 429
+  title: Too Many Requests
+  description: Request rate limit exceeded
+  remediation: Implement exponential backoff and reduce request rate
+- status: 500
+  title: Internal Server Error
+  description: Unexpected server-side error occurred
+  remediation: Retry your request after a brief delay. Contact support if issue persists
+partial_failures:
+  operation: extract
+  note: Extract may return 200 overall while individual URLs fail with status "failed" and an error_message; failed URLs are not billed
+  error_messages:
+  - Invalid URL format
+  - PDF has no extractable text (likely scanned)
+  - Failed to resolve domain
+  - Target host unreachable
+  - Target returned HTTP {code}
+  - Target server error (HTTP {code})
+  - Blocked by target anti-bot protection
+  - Target rate limited (HTTP 429)
+  - Extraction timed out after {timeout}s
+  - Page requires JavaScript rendering but failed
+  - 'Content type not supported: {content_type}'
+  - Failed to parse page content

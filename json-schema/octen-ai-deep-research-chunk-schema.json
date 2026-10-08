@@ -1,0 +1,773 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/octen-ai/main/json-schema/octen-ai-deep-research-chunk-schema.json",
+  "title": "DeepResearchChunk",
+  "description": "A streaming chunk of a Deep Research response.",
+  "x-generated": "2026-10-07",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/octen-ai-openapi.yml#/components/schemas/DeepResearchChunk",
+  "type": "object",
+  "required": [
+    "request_id",
+    "created"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "status",
+        "plan",
+        "queries",
+        "search_done",
+        "analysis",
+        "brief",
+        "content",
+        "visual",
+        "html_delta",
+        "html",
+        "finish",
+        "usage",
+        "error"
+      ],
+      "description": "The type of this streaming chunk. On the `pro-visual` tier, `html_delta` chunks stream an HTML version of the report after the report content completes, and a final `html` chunk marks the end of that stream."
+    },
+    "request_id": {
+      "type": "string",
+      "description": "The unique identifier for this request."
+    },
+    "object": {
+      "type": "string",
+      "enum": [
+        "research.chunk"
+      ],
+      "description": "The object type, always `research.chunk`."
+    },
+    "created": {
+      "type": "number",
+      "description": "Unix timestamp (in seconds) of when the chunk was created."
+    },
+    "round": {
+      "type": "integer",
+      "description": "Current research round. Present only in `queries`, `search_done`, and `analysis` chunks."
+    },
+    "latency": {
+      "type": "integer",
+      "description": "Latency in milliseconds for the stage represented by this chunk."
+    },
+    "status": {
+      "type": "string",
+      "description": "Pipeline progress copy. Present only in `status` chunks."
+    },
+    "plan": {
+      "$ref": "#/$defs/DeepResearchPlan"
+    },
+    "plan_id": {
+      "type": "string",
+      "description": "Plan ID carried by `plan` chunks. The client must echo this back as `plan_id` when entering Phase 2."
+    },
+    "queries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Sub-queries generated for this round. Present only in `queries` chunks."
+    },
+    "search_result_count": {
+      "type": "integer",
+      "description": "Total number of search results returned this round. Present only in `search_done` chunks."
+    },
+    "search_results": {
+      "type": "array",
+      "description": "Search results for this round, one group per sub-query. Present only in `search_done` chunks.",
+      "items": {
+        "$ref": "#/$defs/SearchResultGroup"
+      }
+    },
+    "analysis": {
+      "$ref": "#/$defs/DeepResearchAnalysis"
+    },
+    "brief": {
+      "$ref": "#/$defs/DeepResearchBrief"
+    },
+    "choices": {
+      "type": "array",
+      "description": "Incremental choices for the final report. Present in `content` and `finish` chunks.",
+      "items": {
+        "$ref": "#/$defs/DeepResearchChunkChoice"
+      }
+    },
+    "visual": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/DeepResearchVisual"
+        }
+      ],
+      "description": "Visual material for one report section. Present only in `visual` chunks, emitted on the `pro-visual` tier."
+    },
+    "html_delta": {
+      "type": "object",
+      "description": "An incremental fragment of the HTML report. Present only in `html_delta` chunks. Concatenate the fragments in order to rebuild the full page.",
+      "properties": {
+        "delta": {
+          "type": "string",
+          "description": "The next fragment of the HTML page."
+        }
+      }
+    },
+    "meta": {
+      "$ref": "#/$defs/DeepResearchMeta"
+    }
+  },
+  "$defs": {
+    "DeepResearchAnalysis": {
+      "type": "object",
+      "description": "Analysis output for one research round. Carried by `analysis` chunks.",
+      "properties": {
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Key findings extracted from this round."
+        },
+        "should_continue": {
+          "type": "boolean",
+          "description": "Whether the pipeline should run another research round."
+        },
+        "follow_up_suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Suggested research directions for the next round."
+        }
+      }
+    },
+    "DeepResearchAngle": {
+      "type": "object",
+      "description": "A single research angle within the plan.",
+      "properties": {
+        "focus": {
+          "type": "string",
+          "description": "Angle name."
+        },
+        "focus_desc": {
+          "type": "string",
+          "description": "Angle description."
+        },
+        "interpretation_id": {
+          "type": "string",
+          "description": "The meaning ID this angle serves. `\"general\"` denotes a cross-interpretation angle."
+        },
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Search queries planned for this angle."
+        },
+        "sub_question_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Sub-question IDs covered by this angle."
+        }
+      }
+    },
+    "DeepResearchBrief": {
+      "type": "object",
+      "description": "Report outline and evidence set. Carried by `brief` chunks.",
+      "properties": {
+        "report_type": {
+          "type": "string",
+          "enum": [
+            "general",
+            "comparison",
+            "trend",
+            "how-to",
+            "evaluation",
+            "framework",
+            "deep_explainer",
+            "theoretical_analysis",
+            "landscape_mapping",
+            "multi_part"
+          ],
+          "description": "Report type, classified by the LLM from the question. `general`: general synthesis; `comparison`: cross-entity comparison; `trend`: time-axis trend analysis; `how-to`: step-by-step guide; `evaluation`: ranked or scored evaluation; `framework`: methodology or scoring framework; `deep_explainer`: deep explanation of a single topic; `theoretical_analysis`: scholarly analysis across multiple theoretical lenses; `landscape_mapping`: taxonomy and players in a domain; `multi_part`: composite question with explicit sub-questions."
+        },
+        "secondary_report_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Secondary type tags for hybrid reports, combined with `report_type`."
+        },
+        "total_word_budget": {
+          "type": "integer",
+          "description": "Total word budget for the report."
+        },
+        "assertiveness_required": {
+          "type": "boolean",
+          "description": "Whether the report must deliver a clear verdict."
+        },
+        "verdict_scaffold": {
+          "$ref": "#/$defs/DeepResearchVerdictScaffold"
+        },
+        "tables": {
+          "type": "array",
+          "description": "Table metadata to render in the report. Mutually exclusive with `presentation_notes`.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchTable"
+          }
+        },
+        "presentation_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Presentation notes for reports that do not use tables. Mutually exclusive with `tables`."
+        },
+        "outline": {
+          "type": "array",
+          "description": "Report outline in section order.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchOutlineSection"
+          }
+        },
+        "sub_question_to_section_map": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Mapping from sub-question ID to section ID."
+        },
+        "unresolved": {
+          "$ref": "#/$defs/DeepResearchUnresolved"
+        },
+        "suggested_title": {
+          "type": "string",
+          "description": "Suggested title for the report."
+        },
+        "references": {
+          "type": "array",
+          "description": "List of cited references.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchReference"
+          }
+        }
+      }
+    },
+    "DeepResearchChunkChoice": {
+      "type": "object",
+      "description": "A single choice in a Deep Research streaming chunk. Carried by `content` and `finish` chunks.",
+      "properties": {
+        "index": {
+          "type": "number",
+          "description": "The index of this choice. Usually `0`."
+        },
+        "delta": {
+          "$ref": "#/$defs/DeepResearchChunkDelta"
+        },
+        "finish_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "stop",
+            "length",
+            "content_filter",
+            "error"
+          ],
+          "description": "The reason generation stopped. `null` in `content` chunks; populated in the `finish` chunk."
+        }
+      }
+    },
+    "DeepResearchChunkDelta": {
+      "type": "object",
+      "description": "Incremental content in a Deep Research streaming chunk.",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Incremental report text. Concatenate across `content` chunks to build the final report."
+        }
+      }
+    },
+    "DeepResearchEvidence": {
+      "type": "object",
+      "description": "A single piece of evidence within a section.",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Evidence content."
+        },
+        "source_indices": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "Source indices cited by this evidence (matching `brief.references[].index`)."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "strong",
+            "moderate",
+            "weak",
+            "conflicting"
+          ],
+          "description": "Confidence level of the evidence."
+        },
+        "layer": {
+          "type": "string",
+          "enum": [
+            "phenomenon",
+            "mechanism",
+            "evidence",
+            "implication"
+          ],
+          "description": "Depth layer of the evidence."
+        }
+      }
+    },
+    "DeepResearchInterpretation": {
+      "type": "object",
+      "description": "An ambiguous term and its candidate meanings.",
+      "properties": {
+        "term": {
+          "type": "string",
+          "description": "The ambiguous term."
+        },
+        "meanings": {
+          "type": "array",
+          "description": "All candidate meanings for this term.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchMeaning"
+          }
+        },
+        "chosen": {
+          "type": "string",
+          "description": "The meaning ID the LLM picked by default."
+        },
+        "reasoning": {
+          "type": "string",
+          "description": "The LLM's rationale for the chosen meaning."
+        }
+      }
+    },
+    "DeepResearchMeaning": {
+      "type": "object",
+      "description": "A candidate meaning for an ambiguous term.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique meaning ID."
+        },
+        "label": {
+          "type": "string",
+          "description": "Description of the meaning."
+        }
+      }
+    },
+    "DeepResearchMeta": {
+      "type": "object",
+      "description": "Usage and latency metadata for the Deep Research call. Carried by `usage` chunks.",
+      "properties": {
+        "usage": {
+          "type": "object",
+          "description": "Search usage.",
+          "properties": {
+            "num_search_queries": {
+              "type": "integer",
+              "description": "Total number of search queries executed across all rounds."
+            }
+          }
+        },
+        "latency": {
+          "type": "integer",
+          "description": "Total request latency in milliseconds."
+        },
+        "total_rounds": {
+          "type": "integer",
+          "description": "Total number of research rounds completed."
+        },
+        "total_search_count": {
+          "type": "integer",
+          "description": "Total search results accumulated across all rounds."
+        },
+        "billed_tier": {
+          "type": "string",
+          "description": "The tier actually billed for this request."
+        }
+      }
+    },
+    "DeepResearchOutlineSection": {
+      "type": "object",
+      "description": "A single section in the report outline.",
+      "properties": {
+        "section_id": {
+          "type": "string",
+          "description": "Unique section ID, referenced by `sub_question_to_section_map` and `table.placement`."
+        },
+        "section_title": {
+          "type": "string",
+          "description": "Section title."
+        },
+        "thesis": {
+          "type": "string",
+          "description": "Central claim of this section."
+        },
+        "table_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Table IDs belonging to this section."
+        },
+        "covers_sub_questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Sub-question IDs covered by this section."
+        },
+        "target_words": {
+          "type": "integer",
+          "description": "Target word count for this section."
+        },
+        "evidence": {
+          "type": "array",
+          "description": "Evidence supporting this section.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchEvidence"
+          }
+        }
+      }
+    },
+    "DeepResearchPlan": {
+      "type": "object",
+      "description": "Research plan generated in Phase 1. Carried by `plan` chunks.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Plan title."
+        },
+        "overview": {
+          "type": "string",
+          "description": "Plan overview."
+        },
+        "interpretations": {
+          "type": "array",
+          "description": "Ambiguous terms in the question along with their possible meanings. Empty when the question has no ambiguity.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchInterpretation"
+          }
+        },
+        "angles": {
+          "type": "array",
+          "description": "Research angles the plan will explore.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchAngle"
+          }
+        },
+        "requires_selection": {
+          "type": "boolean",
+          "description": "When `true`, the SSE stream ends at this `plan` chunk and waits for the client to continue via Phase 2 (`plan_id` + `selections`). When `false`, research continues automatically."
+        }
+      }
+    },
+    "DeepResearchReference": {
+      "type": "object",
+      "description": "A single cited reference.",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "description": "Reference index; cited in the report body as `[^N]`."
+        },
+        "url": {
+          "type": "string",
+          "description": "Source URL."
+        },
+        "title": {
+          "type": "string",
+          "description": "Source title."
+        }
+      }
+    },
+    "DeepResearchTable": {
+      "type": "object",
+      "description": "Table metadata referenced from an outline section.",
+      "properties": {
+        "table_id": {
+          "type": "string",
+          "description": "Unique table ID, referenced by `outline.table_ids`."
+        },
+        "title": {
+          "type": "string",
+          "description": "Table title."
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Column names."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the table contents, guiding how the report-writing stage should populate the cells."
+        },
+        "placement": {
+          "type": "string",
+          "description": "Section ID this table belongs to."
+        }
+      }
+    },
+    "DeepResearchUnresolved": {
+      "type": "object",
+      "description": "Items the brief stage flagged as unresolved.",
+      "properties": {
+        "contradictions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Contradictions between sources."
+        },
+        "weak_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Claims with thin evidence."
+        },
+        "depth_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Depth-layer gaps across sections."
+        },
+        "unanswered": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Sub-questions left unanswered."
+        }
+      }
+    },
+    "DeepResearchVerdictScaffold": {
+      "type": "object",
+      "description": "Structured scaffold for reports that need to deliver a verdict.",
+      "properties": {
+        "verdict_type": {
+          "type": "string",
+          "enum": [
+            "ranked_list",
+            "single_pick",
+            "tiered_recommendation",
+            "qualified_pick"
+          ],
+          "description": "Shape of the verdict. `ranked_list`: ordered ranking; `single_pick`: a single best answer; `tiered_recommendation`: tiered recommendation; `qualified_pick`: conditional recommendation."
+        },
+        "items_expected": {
+          "type": "integer",
+          "description": "Expected number of items in the verdict."
+        },
+        "justification_dimensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Data dimensions supporting the verdict."
+        }
+      }
+    },
+    "DeepResearchVisual": {
+      "type": "object",
+      "description": "Visual material for one report section. Carried by `visual` chunks on the `pro-visual` tier.",
+      "properties": {
+        "section_id": {
+          "type": "string",
+          "description": "The report section this material belongs to, matching `brief.outline[].section_id`."
+        },
+        "images": {
+          "type": "array",
+          "description": "Images selected for this section.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchVisualImage"
+          }
+        },
+        "videos": {
+          "type": "array",
+          "description": "Videos selected for this section.",
+          "items": {
+            "$ref": "#/$defs/DeepResearchVisualVideo"
+          }
+        }
+      }
+    },
+    "DeepResearchVisualImage": {
+      "type": "object",
+      "description": "An image selected for a report section.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "The image URL."
+        },
+        "thumbnail": {
+          "type": "string",
+          "description": "Thumbnail URL."
+        },
+        "caption": {
+          "type": "string",
+          "description": "A short caption for the image."
+        },
+        "visual_evidence": {
+          "type": "string",
+          "description": "Why this image supports the section's content."
+        },
+        "source_page": {
+          "type": "string",
+          "description": "URL of the page the image was found on."
+        },
+        "width": {
+          "type": "integer",
+          "description": "Image width in pixels."
+        },
+        "height": {
+          "type": "integer",
+          "description": "Image height in pixels."
+        },
+        "confidence": {
+          "type": "number",
+          "description": "Relevance confidence score."
+        }
+      }
+    },
+    "DeepResearchVisualVideo": {
+      "type": "object",
+      "description": "A video selected for a report section.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "The video URL."
+        },
+        "cover_url": {
+          "type": "string",
+          "description": "Video cover image URL."
+        },
+        "title": {
+          "type": "string",
+          "description": "The video title."
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "description": "Video duration in seconds."
+        },
+        "source_page": {
+          "type": "string",
+          "description": "URL of the page the video was found on."
+        },
+        "time_published": {
+          "type": "string",
+          "description": "Publish time in ISO 8601."
+        }
+      }
+    },
+    "SearchResult": {
+      "type": "object",
+      "description": "A single search result.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the result page."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the result page."
+        },
+        "highlight": {
+          "type": "string",
+          "description": "Query-relevant highlight snippets. Returned only if highlight.enable is true."
+        },
+        "full_content": {
+          "type": "string",
+          "description": "Full raw page content. Returned only if full_content.enable is true."
+        },
+        "authors": {
+          "type": "string",
+          "description": "Website name or author."
+        },
+        "time_published": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Publish time in ISO 8601."
+        },
+        "time_last_crawled": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last crawl time in ISO 8601."
+        },
+        "favicon": {
+          "type": "string",
+          "description": "The favicon URL of the result site."
+        },
+        "cover_image": {
+          "type": "object",
+          "description": "The page cover image. Returned only when `include_images` is true and the page has a cover image.",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The cover image URL."
+            },
+            "description": {
+              "type": "string",
+              "description": "Text description of the cover image."
+            }
+          }
+        },
+        "images": {
+          "type": "array",
+          "description": "In-body images of the page, in order of appearance. Returned only when `include_images` is true.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "The image URL."
+              },
+              "description": {
+                "type": "string",
+                "description": "Text description of the image."
+              }
+            }
+          }
+        }
+      }
+    },
+    "SearchResultGroup": {
+      "type": "object",
+      "description": "A group of search results for a single sub-query.",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The sub-query that produced these results."
+        },
+        "results": {
+          "type": "array",
+          "description": "The search results for this sub-query.",
+          "items": {
+            "$ref": "#/$defs/SearchResult"
+          }
+        },
+        "latency": {
+          "type": "integer",
+          "description": "Search latency for this query in milliseconds."
+        }
+      }
+    }
+  }
+}

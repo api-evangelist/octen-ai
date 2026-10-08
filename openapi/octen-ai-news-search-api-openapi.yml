@@ -1,0 +1,594 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai News Search API
+  version: 1.0.0
+  description: 'Operations tagged News Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: News Search
+paths:
+  /news-search:
+    post:
+      summary: News Search
+      description: Searches live news and returns ranked articles with model-ready highlights, images, and optional full content. Related articles are also grouped into subjects, each with a summary, a representative article, and its own timeline.
+      operationId: news-search
+      security:
+      - bearerAuthNoPayment: []
+      - apiKeyAuthNoPayment: []
+      x-mint:
+        href: /api-reference/news-search
+        metadata:
+          title: News Search
+          sidebarTitle: News Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsSearchRequest'
+            examples:
+              basic:
+                summary: Basic News Search
+                value:
+                  query: Federal Reserve interest rate decision
+                  count: 5
+              subjects:
+                summary: Subject Grouping
+                value:
+                  query: Federal Reserve interest rate decision
+                  count: 5
+                  subjects:
+                    enable: true
+                    count: 3
+                    max_sub_news: 5
+              filtering:
+                summary: Domain Filtering + Time Range + Language
+                value:
+                  query: semiconductor export controls
+                  count: 10
+                  include_domains:
+                  - reuters.com
+                  language:
+                  - en
+                  time_basis: published
+                  start_time: '2026-08-22T00:00:00Z'
+                  end_time: '2026-08-24T00:00:00Z'
+                  highlight:
+                    enable: true
+                    max_tokens: 300
+                  subjects:
+                    enable: false
+      responses:
+        '200':
+          description: Successful news search response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsSearchResponse'
+              example:
+                code: 0
+                msg: success
+                request_id: req_abc123def456
+                data:
+                  query: Federal Reserve interest rate decision
+                  results:
+                  - title: Federal Reserve raises interest rates by 25 basis points
+                    url: https://www.example-news.com/markets/fed-raises-rates
+                    highlight: The committee voted unanimously to lift the benchmark rate to a range of 3.75% to 4.00%...
+                    authors: Example News
+                    time_published: '2026-09-15T15:32:37Z'
+                    time_last_crawled: '2026-09-15T18:04:11Z'
+                    favicon: https://www.example-news.com/favicon.ico
+                    cover_image:
+                      url: https://cdn.example-news.com/2026/09/fed-building.png
+                      description: The Federal Reserve building in Washington.
+                    images:
+                    - url: https://cdn.example-news.com/2026/09/trading-floor.png
+                      description: A trading floor after the announcement.
+                  subjects:
+                  - name: Federal Reserve raises interest rates in first hike since 2023
+                    summary: The Federal Reserve voted unanimously to raise its benchmark rate by 25 basis points, the first increase since 2023, citing persistent inflation.
+                    time_start: '2026-09-15T05:53:22Z'
+                    time_latest: '2026-09-15T15:32:37Z'
+                    top_news:
+                      title: Fed delivers first rate hike in years with unanimous vote
+                      url: https://www.example-news.com/markets/fed-first-hike
+                      summary: Policymakers raised the benchmark rate by a quarter point and signaled that further increases depend on incoming inflation data.
+                      highlight: Every voting member backed the increase, an unusual show of consensus...
+                      authors: Example News
+                      time_published: '2026-09-15T15:32:37Z'
+                      time_last_crawled: '2026-09-15T18:04:11Z'
+                      favicon: https://www.example-news.com/favicon.ico
+                      cover_image:
+                        url: https://cdn.example-news.com/2026/09/fed-press-conference.png
+                        description: The chair speaking at the post-meeting press conference.
+                      images: []
+                    sub_news:
+                    - title: Mortgage rates climb after the Fed announcement
+                      url: https://www.example-news.com/markets/mortgage-rates-climb
+                      highlight: Lenders repriced within hours of the decision...
+                      authors: Example News
+                      time_published: '2026-09-15T09:11:02Z'
+                      time_last_crawled: '2026-09-15T12:40:55Z'
+                      favicon: https://www.example-news.com/favicon.ico
+                      cover_image:
+                        url: https://cdn.example-news.com/2026/09/mortgage-rates.png
+                        description: A chart of average mortgage rates.
+                      images: []
+                meta:
+                  usage:
+                    num_search_queries: 1
+                    num_subject_search_queries: 1
+                    full_content_extra_count: 0
+                  latency: 245
+                  warning: ''
+        '400':
+          description: Invalid or missing parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Invalid params. Missing parameter query
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - News Search
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    NewsSearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        query:
+          type: string
+          description: The original query.
+        results:
+          type: array
+          description: A list of news results.
+          items:
+            $ref: '#/components/schemas/NewsSearchResult'
+        subjects:
+          type: array
+          description: A list of subjects, each grouping related articles into one event. Returned only when subjects.enable is true and the query produces at least one subject.
+          items:
+            $ref: '#/components/schemas/NewsSubject'
+    NewsSubject:
+      type: object
+      description: A group of related articles covering one event.
+      properties:
+        name:
+          type: string
+          description: The event name.
+        summary:
+          type: string
+          description: A summary of the event.
+        time_start:
+          type: string
+          format: date-time
+          description: When the event started, in ISO 8601.
+        time_latest:
+          type: string
+          format: date-time
+          description: Publish time of the most recent article in the event, in ISO 8601.
+        top_news:
+          $ref: '#/components/schemas/NewsSubjectTopNews'
+        sub_news:
+          type: array
+          description: Sub-events within the subject, sorted by event time in descending order.
+          items:
+            $ref: '#/components/schemas/NewsSubjectSubNews'
+    NewsSubjectOptions:
+      type: object
+      description: Controls subject grouping, which clusters related articles into events.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns data.subjects.
+        count:
+          type: integer
+          default: 2
+          minimum: 1
+          maximum: 5
+          description: Maximum number of subjects to return.
+        max_sub_news:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 20
+          description: Maximum number of sub-events to return per subject.
+    NewsSubjectTopNews:
+      type: object
+      description: The representative article for the subject.
+      properties:
+        title:
+          type: string
+          description: The title of the article.
+        url:
+          type: string
+          description: The URL of the article.
+        summary:
+          type: string
+          description: A summary of the article, in the language of the original.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the source site.
+        cover_image:
+          $ref: '#/components/schemas/NewsImage'
+        images:
+          type: array
+          description: In-body images of the article, in order of appearance.
+          items:
+            $ref: '#/components/schemas/NewsImage'
+    FullContentOptions:
+      type: object
+      description: Controls whether to return the full raw content of each result page.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
+    HighlightOptions:
+      type: object
+      description: Controls highlight extraction from result pages.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns query-relevant highlight in each result.
+        max_tokens:
+          type: integer
+          default: 512
+          minimum: 100
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    NewsSearchUsage:
+      type: object
+      description: Usage information for the search request.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of text search queries executed.
+        num_subject_search_queries:
+          type: integer
+          description: Number of subject search queries executed. 0 when subjects.enable is false.
+        full_content_extra_count:
+          type: integer
+          description: Billable full_content results beyond the free allowance.
+    NewsSubjectSubNews:
+      type: object
+      description: The article representing one sub-event.
+      properties:
+        title:
+          type: string
+          description: The title of the article.
+        url:
+          type: string
+          description: The URL of the article.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the source site.
+        cover_image:
+          $ref: '#/components/schemas/NewsImage'
+        images:
+          type: array
+          description: In-body images of the article, in order of appearance.
+          items:
+            $ref: '#/components/schemas/NewsImage'
+    NewsSearchResult:
+      type: object
+      description: A single news result.
+      properties:
+        title:
+          type: string
+          description: The title of the article.
+        url:
+          type: string
+          description: The URL of the article.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the source site.
+        cover_image:
+          $ref: '#/components/schemas/NewsImage'
+        images:
+          type: array
+          description: In-body images of the article, in order of appearance.
+          items:
+            $ref: '#/components/schemas/NewsImage'
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    NewsSearchRequest:
+      type: object
+      required:
+      - query
+      properties:
+        query:
+          type: string
+          maxLength: 500
+          description: 'The search query.
+
+
+            **Operators**
+
+
+            - `site:<domain>`: restrict results to a single domain. For multiple domains, use `include_domains` and `exclude_domains`.
+
+            - `-site:<domain>`: exclude a single domain from the results.'
+        count:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 100
+          description: Number of results to return.
+        include_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically include in the search results. The `site:` query operator adds to this list. Applies to `results` only; subject grouping does not support domain filtering.
+          example:
+          - reuters.com
+          - apnews.com
+        exclude_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically exclude from the search results. The `-site:` query operator adds to this list. If a domain appears in both `include_domains` and `exclude_domains`, `exclude_domains` takes precedence. Applies to `results` only; subject grouping does not support domain filtering.
+          example:
+          - spam.com
+          - ads.example.net
+        time_basis:
+          type: string
+          enum:
+          - auto
+          - published
+          - crawled
+          default: auto
+          description: Determines which time field is used for time filtering. `published` uses time_published; `crawled` uses time_last_crawled. Results missing this field are excluded when filtering by time.
+        time_range:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          - year
+          - d
+          - w
+          - m
+          - y
+          description: 'Relative time window counting back from the current time based on `time_basis`. Mutually exclusive with `start_time`/`end_time`: if both are provided, `start_time`/`end_time` take precedence.'
+        start_time:
+          type: string
+          format: date-time
+          description: Start time for filtering results. ISO 8601 format.
+          example: '2026-08-22T00:00:00Z'
+        end_time:
+          type: string
+          format: date-time
+          description: End time for filtering results. ISO 8601 format.
+          example: '2026-08-24T00:00:00Z'
+        language:
+          type: array
+          items:
+            type: string
+            enum:
+            - ar
+            - de
+            - en
+            - es
+            - fr
+            - hi
+            - id
+            - it
+            - ja
+            - ko
+            - nl
+            - pl
+            - pt
+            - ru
+            - th
+            - tr
+            - vi
+            - zh
+          default: []
+          description: A list of languages to restrict results to, as ISO 639-1 codes. Applies to both `results` and `subjects`.
+          example:
+          - en
+          - zh
+        highlight:
+          $ref: '#/components/schemas/HighlightOptions'
+        full_content:
+          $ref: '#/components/schemas/FullContentOptions'
+        subjects:
+          $ref: '#/components/schemas/NewsSubjectOptions'
+    NewsSearchMeta:
+      type: object
+      description: Additional metadata for the search request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/NewsSearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
+          type: string
+          nullable: true
+          description: Warning message, if any.
+    NewsSearchResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/NewsSearchData'
+        meta:
+          $ref: '#/components/schemas/NewsSearchMeta'
+    NewsImage:
+      type: object
+      description: An image attached to an article.
+      properties:
+        url:
+          type: string
+          description: The image URL.
+        description:
+          type: string
+          description: Text description of the image.
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

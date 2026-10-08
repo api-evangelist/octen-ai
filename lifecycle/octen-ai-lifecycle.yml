@@ -1,0 +1,26 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/resources/sla.md; https://docs.octen.ai/resources/changelog.md; openapi/octen-ai-openapi.yml
+versioning:
+  scheme: 'mixed: search/extract/embedding endpoints are unversioned paths, Model Gateway, Deep Research and generation endpoints carry a /v1 prefix'
+  policy: null
+  note: No versioning policy page is published; the changelog is dated, not versioned
+deprecation:
+  policy: null
+  headers: null
+  deprecated_operations: []
+  note: No deprecation policy, Sunset or Deprecation headers are documented; the OpenAPI marks no operation deprecated
+status_page: https://status.octen.ai
+sla:
+  url: https://docs.octen.ai/resources/sla
+  uptime: Monthly Uptime Percentage of at least 99.9%
+  downtime_definition: five or more consecutive minutes with HTTP 5xx exceeding 5% of total requests
+  credits:
+  - uptime: 99.0% - < 99.9%
+    credit: 10% of monthly subscription fees
+  - uptime: < 99.0%
+    credit: 25% of monthly subscription fees
+  exclusions:
+  - Pay-as-you-go API calls are not subject to SLA commitments or Service Credits
+  - Enterprise customers with a separate SLA are governed by that agreement
+changelog: https://docs.octen.ai/resources/changelog

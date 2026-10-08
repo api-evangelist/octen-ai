@@ -1,0 +1,309 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Video Search API
+  version: 1.0.0
+  description: 'Operations tagged Video Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Video Search
+paths:
+  /video-search:
+    post:
+      summary: Video Search
+      operationId: video-search
+      description: Searches the web for videos from a text query. Contact us to request beta access.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VideoSearchRequest'
+            examples:
+              text:
+                summary: Text query
+                value:
+                  inputs:
+                  - type: text
+                    data: how to make sourdough bread at home
+                  count: 5
+      responses:
+        '200':
+          description: Successful video search response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoSearchResponse'
+              example:
+                code: 0
+                msg: success
+                request_id: 20260627120000001ABCDE12345
+                data:
+                  results:
+                  - title: How to Make Sourdough Bread at Home (Beginner's Guide)
+                    url: https://videos.example.com/watch/sourdough-beginners-guide.mp4
+                    source_page: https://www.example.com/blog/sourdough-beginners-guide
+                    description: A step-by-step beginner tutorial covering starter feeding, autolyse, stretch-and-fold, shaping, and baking in a Dutch oven.
+                    cover_url: https://cdn.example.com/thumbs/sourdough-beginners-guide.jpg
+                    duration_seconds: 842
+                    authors: The Home Baker
+                    time_published: '2026-02-14T09:30:00Z'
+                    time_last_crawled: '2026-06-20T11:02:18Z'
+                  - title: Easy No-Knead Sourdough for Beginners
+                    url: https://videos.example.com/watch/no-knead-sourdough.mp4
+                    source_page: https://www.example.com/recipes/no-knead-sourdough
+                    description: Demonstrates a simplified no-knead method, from mixing a high-hydration dough to scoring and baking a crusty loaf in a home oven.
+                    cover_url: https://cdn.example.com/thumbs/no-knead-sourdough.jpg
+                    duration_seconds: 615
+                    authors: Everyday Sourdough
+                    time_published: '2026-01-28T17:45:00Z'
+                    time_last_crawled: '2026-06-19T22:14:55Z'
+                meta:
+                  usage:
+                    num_search_queries: 1
+                  latency: 482
+        '400':
+          description: Missing parameter inputs — Returned when a required parameter is missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Missing parameter inputs
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Video Search
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    VideoSearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        results:
+          type: array
+          description: A list of video search results.
+          items:
+            $ref: '#/components/schemas/VideoSearchResult'
+    VideoSearchInput:
+      type: object
+      required:
+      - type
+      description: A single text input. At most one input per request.
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          description: The input type.
+        data:
+          type: string
+          description: The query content, max 500 characters.
+    VideoSearchMeta:
+      type: object
+      description: Additional metadata for the Video Search request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/VideoSearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
+          type: string
+          nullable: true
+          description: Warning message, if any.
+    VideoSearchUsage:
+      type: object
+      description: Usage information for the Video Search request.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of search queries executed.
+    VideoSearchRequest:
+      type: object
+      required:
+      - inputs
+      description: Request body for the Video Search API.
+      properties:
+        inputs:
+          type: array
+          maxItems: 1
+          description: Input array carrying a text query (at most 1).
+          items:
+            $ref: '#/components/schemas/VideoSearchInput'
+        count:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
+          description: Number of results to return.
+        time_range:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          - year
+          - d
+          - w
+          - m
+          - y
+          description: Relative time window counting back from the current time, filtered by publish time. Mutually exclusive with `start_time`/`end_time` — if both are provided, `start_time`/`end_time` take precedence.
+        start_time:
+          type: string
+          format: date-time
+          description: Start time for filtering results by publish time. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        end_time:
+          type: string
+          format: date-time
+          description: End time for filtering results by publish time. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        safesearch:
+          type: string
+          enum:
+          - 'off'
+          - strict
+          default: strict
+          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
+    VideoSearchResult:
+      type: object
+      description: A single video search result.
+      properties:
+        title:
+          type: string
+          description: The title of the video.
+        url:
+          type: string
+          description: The video URL.
+        source_page:
+          type: string
+          description: URL of the original page hosting the video.
+        description:
+          type: string
+          description: Server-generated text description of the video content.
+        cover_url:
+          type: string
+          description: Video cover image URL.
+        duration_seconds:
+          type: integer
+          description: Video duration in seconds.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    VideoSearchResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/VideoSearchData'
+        meta:
+          $ref: '#/components/schemas/VideoSearchMeta'
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

@@ -1,0 +1,28 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist overlay for the Octen API
+  version: 1.0.0
+  x-generated: '2026-10-07'
+  x-method: generated
+  x-source: openapi/octen-ai-openapi.yml; docs.octen.ai (rate-limits, error-codes, sla pages)
+extends: ../openapi/_original/octen-ai-openapi.yml
+actions:
+  - target: $.info
+    update:
+      x-apievangelist-provider: octen-ai
+      x-documentation: https://docs.octen.ai
+      x-status-page: https://status.octen.ai
+      x-error-reference: https://docs.octen.ai/resources/error-codes
+      x-rate-limits: https://docs.octen.ai/resources/rate-limits
+      x-sla: https://docs.octen.ai/resources/sla
+  - target: $
+    update:
+      externalDocs:
+        description: Octen API reference
+        url: https://docs.octen.ai/api-reference/broad-search
+  - target: $.paths['/v1/research'].post
+    update:
+      x-concurrency-limit: 'Only a single concurrent request is supported.'
+  - target: $.paths['/extract'].post
+    update:
+      x-partial-failures: 'Extract may return 200 overall while individual URLs fail with status "failed" and an error_message; failed URLs are not billed.'

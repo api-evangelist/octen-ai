@@ -1,0 +1,80 @@
+generated: '2026-10-07'
+method: derived
+source: mcp/octen-ai-mcp.yml tool names (documented) bound to openapi/octen-ai-openapi.yml operationIds by name and documented parameters
+surfaces:
+  openapi: openapi/_original/octen-ai-openapi.yml
+  mcp: 'https://mcp.octen.ai/mcp (gated: 401 without x-api-key/OAuth)'
+  graphql: null
+crosswalk:
+- tool: search
+  category: search
+  rest:
+  - search
+  binding: direct
+  confidence: high
+  note: README parameters (query, topic, count, include/exclude domains, time filters, highlight/full_content) match POST /search
+- tool: news_search
+  category: search
+  rest:
+  - news-search
+  binding: direct
+  confidence: high
+- tool: broad_search
+  category: search
+  rest:
+  - broad-search
+  binding: direct
+  confidence: high
+  note: max_queries 1-30 matches the Broad Search API
+- tool: extract
+  category: content
+  rest:
+  - extract
+  binding: direct
+  confidence: high
+  note: 1-20 URLs, highlights/full_content, mode standard/auto/advanced
+- tool: image_search
+  category: search
+  rest:
+  - image-search
+  binding: direct
+  confidence: high
+  note: beta on both surfaces
+- tool: video_search
+  category: search
+  rest:
+  - video-search
+  binding: direct
+  confidence: high
+  note: beta on both surfaces
+mcp_only: []
+rest_only:
+- operation: business-search
+  reason: no MCP tool published
+- operation: embedding
+  reason: no MCP tool published
+- operation: vl-embedding
+  reason: no MCP tool published
+- operation: chat-completions
+  reason: no MCP tool published
+- operation: answer
+  reason: no MCP tool published
+- operation: deep-research
+  reason: no MCP tool published
+- operation: messages
+  reason: no MCP tool published
+- operation: images-generations
+  reason: no MCP tool published
+- operation: post-video
+  reason: no MCP tool published
+- operation: get-video
+  reason: no MCP tool published
+- operation: post-grounded-generation
+  reason: no MCP tool published
+- operation: get-grounded-generation
+  reason: no MCP tool published
+coverage:
+  tools: 6
+  mapped: 6
+  rest_operations: 18
+  rest_covered: 6

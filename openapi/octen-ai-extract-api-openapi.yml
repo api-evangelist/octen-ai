@@ -1,0 +1,510 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Extract API
+  version: 1.0.0
+  description: 'Operations tagged Extract across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Extract
+paths:
+  /extract:
+    post:
+      summary: Extract
+      description: Extracts clean markdown content from URLs. Supports batch processing, query-focused highlights, page classification, and multimedia resources.
+      operationId: extract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractRequest'
+            examples:
+              basic:
+                summary: Basic Extract
+                value:
+                  urls:
+                  - https://octen.ai/
+                  - https://docs.octen.ai/api-reference/search
+              intentQuery:
+                summary: Intent-focused Highlights with Query
+                value:
+                  urls:
+                  - https://www.who.int/news-room/fact-sheets/detail/influenza-(seasonal)
+                  query: vaccination guidelines
+              withMedia:
+                summary: With Multimedia Resources
+                value:
+                  urls:
+                  - https://octen.ai/
+                  include_images: true
+                  include_videos: true
+                  include_audio: true
+              advancedMode:
+                summary: Advanced Mode
+                value:
+                  urls:
+                  - https://x.com/kzouapt
+                  mode: advanced
+              withLinks:
+                summary: With Page Links
+                value:
+                  urls:
+                  - https://octen.ai/
+                  include_links:
+                    scope: prefer_internal
+                    max_links: 200
+      responses:
+        '200':
+          description: Successful extraction response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtractResponse'
+              example:
+                code: 0
+                msg: success
+                request_id: req_abc123def456
+                data:
+                  results:
+                  - url: https://octen.ai/
+                    status: success
+                    resolved_mode: standard
+                    title: Octen | The Search infrastructure for AI
+                    full_content: '# Search infrastructure for AI
+
+
+                      Real-time indexing | Low latency | High reliability
+
+
+                      Start Building | View Docs
+
+
+                      ## Search Beyond Text
+
+
+                      Beyond text queries: Octen''s multimodal search understands images and videos alongside text...'
+                    highlights: null
+                    time_published: null
+                    time_last_crawled: '2026-07-03T09:35:43Z'
+                    page_structure:
+                      primary: Index Page
+                      secondary: Home Page
+                    category:
+                      primary: Computers, Electronics & Technology
+                      secondary: Search Engines
+                    favicon: https://octen.ai/favicon.ico
+                    cover_image:
+                      url: https://octen.ai/_next/static/media/octen-cover.dc74905e.png
+                    images:
+                    - url: https://octen.ai/_next/static/media/multi-modal-img.ccffddff.png
+                    - url: https://octen.ai/_next/static/media/showcase-multimodal1.449ae003.png
+                    videos:
+                    - url: https://octen.ai/static/video/multimodal-video.mp4
+                    links:
+                    - url: https://octen.ai/pricing
+                      anchor_text: Pricing
+                      is_external: false
+                    - url: https://docs.octen.ai/overview/welcome
+                      anchor_text: View Docs
+                      is_external: false
+                    - url: https://github.com/Octen-Team/octen-skills
+                      anchor_text: GitHub
+                      is_external: true
+                  - url: https://docs.octen.ai/api-reference/search
+                    status: success
+                    resolved_mode: standard
+                    title: Search - Octen
+                    full_content: '# Search API
+
+
+                      Octen Search API enables ranked web results with query-focused highlights, time filtering, and multimodal assets...'
+                    highlights: null
+                    time_published: '2024-10-15T00:00:00Z'
+                    time_last_crawled: '2026-07-03T09:34:29Z'
+                    page_structure:
+                      primary: Content Page
+                      secondary: Code
+                    category:
+                      primary: Computers, Electronics & Technology
+                      secondary: Search Engines
+                    favicon: https://docs.octen.ai/favicon.ico
+                    cover_image:
+                      url: https://octen.ai/_next/static/media/octen-cover.dc74905e.png
+                meta:
+                  usage:
+                    total_urls: 2
+                    successful_urls: 2
+                    successful_by_mode:
+                      standard_urls: 2
+                      advanced_urls: 0
+                  latency: 1832
+                  warning: ''
+        '400':
+          description: Invalid params — Returned when a required parameter is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Invalid params. Missing parameter urls
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Extract
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    ExtractPageStructure:
+      type: object
+      description: Detected page structure for an extraction result.
+      properties:
+        primary:
+          type: string
+          enum:
+          - Index Page
+          - Content Page
+          - No Main Content
+          description: Top-level page type.
+        secondary:
+          type: string
+          nullable: true
+          description: Sub-type within the primary structure. 50+ possible values. `null` when no sub-type applies.
+    ExtractResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/ExtractData'
+        meta:
+          $ref: '#/components/schemas/ExtractMeta'
+    ExtractRequest:
+      type: object
+      required:
+      - urls
+      description: Request body for the Extract API.
+      properties:
+        urls:
+          type: array
+          items:
+            type: string
+          description: 'List of URLs to extract content from. Maximum URLs per request: 20. Maximum length per URL: 2048. Failed URLs are not billed.'
+          example:
+          - https://example.com/article-1
+          - https://example.com/article-2
+        mode:
+          type: string
+          enum:
+          - standard
+          - advanced
+          - auto
+          default: standard
+          description: Processing mode. `standard` prioritizes speed, `advanced` prioritizes success rate on hard-to-reach pages, and `auto` picks one per URL. `advanced` and `auto` can take longer, so raise `timeout` accordingly.
+        query:
+          type: string
+          maxLength: 500
+          description: Intent-focused keywords. When provided, returns query-relevant highlights per URL; otherwise returns the complete page content.
+        max_age_seconds:
+          type: integer
+          default: 86400
+          minimum: 300
+          maximum: 31536000
+          description: Maximum age (in seconds) of cached content. URLs whose cached version exceeds this threshold will be re-fetched. Values outside the allowed range are adjusted to the nearest bound.
+        format:
+          type: string
+          enum:
+          - markdown
+          - text
+          default: markdown
+          description: Format of the returned content.
+        timeout:
+          type: integer
+          default: 30
+          minimum: 1
+          maximum: 60
+          description: Per-URL extraction timeout in seconds. Values outside the allowed range are adjusted to the nearest bound.
+        include_images:
+          type: boolean
+          default: false
+          description: Whether to return image URLs detected on the page.
+        include_videos:
+          type: boolean
+          default: false
+          description: Whether to return video URLs detected on the page.
+        include_audio:
+          type: boolean
+          default: false
+          description: Whether to return audio URLs detected on the page.
+        include_links:
+          type: object
+          description: Controls whether to return links detected on the page.
+          properties:
+            scope:
+              type: string
+              enum:
+              - prefer_internal
+              - prefer_external
+              default: prefer_internal
+              description: Which links to prioritize. `prefer_internal` favors links within the page's registered domain; `prefer_external` favors external links. Prioritized links come first, and links of the same kind keep their order on the page.
+            max_links:
+              type: integer
+              default: 200
+              minimum: 1
+              maximum: 1000
+              description: Maximum number of links to return per URL.
+    ExtractMediaResource:
+      type: object
+      description: A single multimedia resource detected on the page.
+      properties:
+        url:
+          type: string
+          description: Resource URL.
+    ExtractData:
+      type: object
+      description: The main extract response payload.
+      properties:
+        results:
+          type: array
+          description: Extraction result for each requested URL. Order matches the input urls array.
+          items:
+            $ref: '#/components/schemas/ExtractResult'
+    ExtractCategory:
+      type: object
+      description: Detected content category for an extraction result.
+      properties:
+        primary:
+          type: string
+          description: Top-level content category. 23 possible values.
+        secondary:
+          type: string
+          nullable: true
+          description: Sub-category within the primary category. 160+ possible values. `null` when no sub-category applies.
+    ExtractLink:
+      type: object
+      description: A single link found on the page.
+      properties:
+        url:
+          type: string
+          description: Absolute URL of the link target.
+        anchor_text:
+          type: string
+          description: The link's visible text on the page. Empty when the link has no visible text.
+        is_external:
+          type: boolean
+          description: Whether the link points to a different registered domain than the page.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    ExtractResult:
+      type: object
+      description: 'A single extraction result. Batch requests may return 200 OK overall while individual items fail; failed items are marked with `status: "failed"` and an `error_message`, and are not billed.'
+      properties:
+        url:
+          type: string
+          description: The requested URL.
+        status:
+          type: string
+          enum:
+          - success
+          - failed
+          description: Extraction status for this URL.
+        resolved_mode:
+          type: string
+          enum:
+          - standard
+          - advanced
+          description: The mode this URL is billed at. For `auto`, the mode chosen for this URL. Returned when `status` is `success`.
+        title:
+          type: string
+          nullable: true
+          description: Page title, extracted from HTML `<title>` or `<meta>` tags.
+        full_content:
+          type: string
+          nullable: true
+          description: Complete page content in the requested format. Returned when `query` is not provided.
+        highlights:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Query-relevant snippets, sorted by relevance. Returned when `query` is provided.
+        time_published:
+          type: string
+          format: date-time
+          nullable: true
+          description: Content publication time, ISO 8601 format.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Most recent time Octen crawled this URL, ISO 8601 format.
+        page_structure:
+          allOf:
+          - $ref: '#/components/schemas/ExtractPageStructure'
+          description: Detected page structure. Returns `null` when the structure cannot be determined.
+        category:
+          allOf:
+          - $ref: '#/components/schemas/ExtractCategory'
+          description: Detected content category. Returns `null` when the category cannot be determined.
+        favicon:
+          type: string
+          nullable: true
+          description: The page's favicon URL. Returned by default when available.
+        cover_image:
+          type: object
+          nullable: true
+          description: The page cover image. Returned only when `include_images` is `true` and the page has a cover image.
+          properties:
+            url:
+              type: string
+              description: Image URL.
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtractMediaResource'
+          description: Image resources detected on the page. Returned when `include_images` is `true` and the page contains images.
+        videos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtractMediaResource'
+          description: Video resources detected on the page. Returned when `include_videos` is `true` and the page contains videos.
+        audio:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtractMediaResource'
+          description: Audio resources detected on the page. Returned when `include_audio` is `true` and the page contains audio.
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtractLink'
+          description: Links detected on the page, deduplicated. Returned for successful results when `include_links` is set and links are detected on the page.
+        error_message:
+          type: string
+          description: Failure reason. Only present when `status` is `failed`. See the Error Codes reference for the complete list of result-level error messages.
+    ExtractMeta:
+      type: object
+      description: Additional metadata for the extract request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/ExtractUsage'
+        latency:
+          type: integer
+          description: Total request latency in milliseconds.
+        warning:
+          type: string
+          description: Warning messages for the request, separated by semicolons. An empty string when there is nothing to report.
+    ExtractUsage:
+      type: object
+      description: Usage and billing breakdown for the extract request.
+      properties:
+        total_urls:
+          type: integer
+          description: Total number of URLs in the request.
+        successful_urls:
+          type: integer
+          description: Number of successfully extracted URLs (billed). Failed URLs are not counted.
+        successful_by_mode:
+          type: object
+          description: Breakdown of successful URLs by `resolved_mode`.
+          properties:
+            standard_urls:
+              type: integer
+              description: Successful URLs billed at the standard rate.
+            advanced_urls:
+              type: integer
+              description: Successful URLs billed at the advanced rate.
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml

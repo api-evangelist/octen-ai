@@ -1,0 +1,59 @@
+generated: '2026-10-07'
+method: searched
+source: https://docs.octen.ai/integrations/octen-cli.md
+name: octen
+repository: https://github.com/Octen-Team/octen-cli
+package: https://www.npmjs.com/package/@octen.ai/cli
+install:
+- method: npm
+  command: npm i -g @octen.ai/cli
+  note: Requires Node.js 18+
+- method: npx
+  command: npx @octen.ai/cli <command>
+- method: homebrew
+  command: brew install Octen-Team/tap/octen
+  note: standalone binary, no Node.js required
+auth: OCTEN_API_KEY environment variable or `octen configure`; keys from https://octen.ai/platform/api-keys
+commands:
+- group: search
+  command: octen broad-search <query>
+  description: Broad, multi-angle web search across auto-generated sub-queries
+  operation: broad-search
+- group: search
+  command: octen search <query>
+  description: Live web search with model-ready highlights and optional full content
+  operation: search
+- group: search
+  command: octen news <query>
+  description: News search for current events and headlines
+  operation: news-search
+- group: search
+  command: octen image-search <query>
+  description: Image search by text or a reference image (beta)
+  operation: image-search
+- group: search
+  command: octen video-search <query>
+  description: Video search by text query (beta)
+  operation: video-search
+- group: content
+  command: octen extract <urls...>
+  description: Content extraction from 1-20 URLs into clean, LLM-ready markdown or text
+  operation: extract
+- group: models
+  command: octen chat [prompt]
+  description: Chat completions from leading models, with optional live web search
+  operation: chat-completions
+- group: models
+  command: octen embed [text...]
+  description: Text embeddings
+  operation: embedding
+- group: models
+  command: octen vl-embed <content...>
+  description: Multimodal embeddings from text, images and video
+  operation: vl-embedding
+- group: agent-setup
+  command: octen configure-skills --claude-code --set-key
+  description: Install the Octen agent skills into a coding agent
+- group: agent-setup
+  command: octen configure-mcp --claude-code
+  description: Register the Octen MCP server with a coding agent

@@ -1,0 +1,29 @@
+generated: '2026-10-07'
+method: generated
+generator: finish-artifacts.py (index from skill frontmatter)
+source: skills/*.md frontmatter; every operationId checked against openapi/
+skills:
+- file: skills/octen-ai-broad-search-research.md
+  name: octen-ai-broad-search-research
+  api: openapi/octen-ai-openapi.yml
+  operations:
+  - broad-search
+  - extract
+- file: skills/octen-ai-deep-research-report.md
+  name: octen-ai-deep-research-report
+  api: openapi/octen-ai-openapi.yml
+  operations:
+  - deep-research
+  - answer
+- file: skills/octen-ai-grounded-chat.md
+  name: octen-ai-grounded-chat
+  api: openapi/octen-ai-openapi.yml
+  operations:
+  - chat-completions
+  - messages
+- file: skills/octen-ai-web-search-with-content.md
+  name: octen-ai-web-search-with-content
+  api: openapi/octen-ai-openapi.yml
+  operations:
+  - search
+  - news-search

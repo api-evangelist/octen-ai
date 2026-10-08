@@ -1,0 +1,1173 @@
+generated: '2026-10-07'
+method: derived
+generator: derive-data-model.py
+source:
+- openapi/octen-ai-openapi.yml
+notation: has_one = property $ref; has_many = array of $ref; belongs_to = <entity>_id field
+summary:
+  entities: 181
+  entities_in_spec: 181
+  relationships: 156
+entities:
+- name: AnswerChunk
+  fields: 9
+  description: 'A streaming chunk of an Answer response. Returned when `stream=true`. The `type` field indicates
+    the chunk kind: `queries`, `search_done`, `content`, `finish`, `usage`.'
+- name: AnswerMeta
+  fields: 2
+  description: Metadata for the Answer response.
+- name: AnswerRequest
+  fields: 6
+  description: Request body for the Answer API.
+- name: AnswerResponse
+  fields: 9
+  description: A non-streaming Answer response. Returned when `stream=false`.
+- name: AnthropicErrorResponse
+  fields: 2
+  description: Error body in the Anthropic protocol format.
+- name: AssistantMessage
+  fields: 3
+- name: BroadSearchData
+  fields: 3
+  description: The main response payload.
+- name: BroadSearchRequest
+  fields: 3
+- name: BroadSearchResponse
+  fields: 4
+- name: BusinessCareerEntry
+  fields: 4
+  description: One role in a person's career history.
+- name: BusinessCompanyEntity
+  fields: 10
+- name: BusinessEntityAttributes
+  fields: 4
+  description: Basic attributes of the company.
+- name: BusinessEntityIdentifiers
+  fields: 4
+  description: Identifiers for the company.
+- name: BusinessEntityMetrics
+  fields: 3
+  description: Quantitative metrics for the company.
+- name: BusinessEntityOptions
+  fields: 3
+  description: Controls the entity cards returned for companies and people.
+- name: BusinessFinancials
+  fields: 5
+  description: Financial results for one reporting period.
+- name: BusinessImage
+  fields: 2
+  description: An image attached to a page.
+- name: BusinessKeyPerson
+  fields: 2
+  description: A key person at the company.
+- name: BusinessPersonEntity
+  fields: 8
+- name: BusinessSearchData
+  fields: 3
+  description: The main response payload. Fields without data are omitted, at every level.
+- name: BusinessSearchMeta
+  fields: 3
+  description: Additional metadata for the search request.
+- name: BusinessSearchRequest
+  fields: 12
+- name: BusinessSearchResponse
+  fields: 5
+- name: BusinessSearchResult
+  fields: 10
+  description: A single business result.
+- name: BusinessSearchUsage
+  fields: 2
+  description: Usage information for the search request.
+- name: BusinessStock
+  fields: 6
+  description: Live stock data from Octen. Returned for listed companies.
+- name: BusinessWebTraffic
+  fields: 3
+  description: Web traffic for the company's website.
+- name: CacheControl
+  fields: 2
+  description: Prompt caching marker. Sets a cache breakpoint so the stable prefix up to this block can be reused.
+- name: ChatAnnotation
+  fields: 2
+  description: A citation annotation. Returned only when `octen_search` was used, currently only for `anthropic/`
+    models. For other models, results are still available in `search_results`.
+- name: ChatCompletionChoice
+  fields: 4
+  description: A single completion choice in a non-streaming response.
+- name: ChatCompletionChunk
+  fields: 8
+  description: 'A streaming chunk. Returned when `stream=true`. The `type` field indicates the chunk kind: `search_done`,
+    `content`, `finish`, `usage`. After the last chunk, `data: [DONE]` is sent.'
+- name: ChatCompletionChunkChoice
+  fields: 4
+  description: A single choice in a streaming chunk.
+- name: ChatCompletionDelta
+  fields: 3
+  description: Incremental content in a streaming chunk. Contains only the new fields for this chunk.
+- name: ChatCompletionMessage
+  fields: 7
+  description: The assistant's response message.
+- name: ChatCompletionRequest
+  fields: 31
+  description: Request body for the Chat Completions API. Some parameters apply only to certain models; unsupported
+    parameters are ignored for the selected model.
+- name: ChatCompletionResponse
+  fields: 8
+  description: A non-streaming chat completion response. Returned when `stream=false`.
+- name: ChatCompletionUsage
+  fields: 7
+  description: Token usage information. When `stream=true`, returned only in the final `usage` chunk.
+- name: ChatContentBlock
+  fields: 5
+  description: A content block within a message.
+- name: ChatFunctionDefinition
+  fields: 4
+  description: A custom function definition.
+- name: ChatFunctionTool
+  fields: 2
+  description: A custom function tool, executed by the caller.
+- name: ChatJsonSchemaSpec
+  fields: 4
+  description: JSON Schema specification for structured output. Required when `response_format.type` is `json_schema`.
+- name: ChatLogprobs
+  fields: 1
+  description: Log probability information for the output tokens. Present only when `logprobs` is `true`, otherwise
+    `null`.
+- name: ChatOctenBroadSearchTool
+  fields: 2
+  description: The built-in `octen_broad_search` server tool, executed by Octen.
+- name: ChatOctenSearchTool
+  fields: 2
+  description: The built-in `octen_search` server tool, executed by Octen.
+- name: ChatReasoningDetail
+  fields: 6
+  description: Detailed reasoning information. Returned only for reasoning models.
+- name: ChatReasoningOptions
+  fields: 3
+  description: Options for reasoning models. Turns thinking on or off and sets the effort and budget.
+- name: ChatResponseFormat
+  fields: 2
+  description: Controls the output format. Some models may not support structured output and will automatically
+    fall back to `text`.
+- name: ChatSearchResultGroup
+  fields: 2
+  description: Search results for a single auto-generated query. One element per search.
+- name: ChatSearchResultItem
+  fields: 7
+  description: A single search result.
+- name: ChatToolCall
+  fields: 4
+  description: A custom function call generated by the model.
+- name: ChatToolCallDelta
+  fields: 4
+  description: Incremental tool call data in a streaming chunk. The first chunk for a tool call includes `id`, `type`,
+    and `function.name`. Subsequent chunks append to `function.arguments`.
+- name: ChatToolCallFunction
+  fields: 2
+  description: The function invocation details within a tool call.
+- name: ChatToolChoiceObject
+  fields: 2
+  description: Forces a specific tool. The named tool must be declared in `tools`.
+- name: DeepResearchAnalysis
+  fields: 3
+  description: Analysis output for one research round. Carried by `analysis` chunks.
+- name: DeepResearchAngle
+  fields: 5
+  description: A single research angle within the plan.
+- name: DeepResearchBrief
+  fields: 12
+  description: Report outline and evidence set. Carried by `brief` chunks.
+- name: DeepResearchChunk
+  fields: 18
+  description: A streaming chunk of a Deep Research response.
+- name: DeepResearchChunkChoice
+  fields: 3
+  description: A single choice in a Deep Research streaming chunk. Carried by `content` and `finish` chunks.
+- name: DeepResearchChunkDelta
+  fields: 1
+  description: Incremental content in a Deep Research streaming chunk.
+- name: DeepResearchEvidence
+  fields: 4
+  description: A single piece of evidence within a section.
+- name: DeepResearchInterpretation
+  fields: 4
+  description: An ambiguous term and its candidate meanings.
+- name: DeepResearchMeaning
+  fields: 2
+  description: A candidate meaning for an ambiguous term.
+- name: DeepResearchMessage
+  fields: 2
+  description: A single message in the Deep Research request.
+- name: DeepResearchMeta
+  fields: 5
+  description: Usage and latency metadata for the Deep Research call. Carried by `usage` chunks.
+- name: DeepResearchOutlineSection
+  fields: 7
+  description: A single section in the report outline.
+- name: DeepResearchPlan
+  fields: 5
+  description: Research plan generated in Phase 1. Carried by `plan` chunks.
+- name: DeepResearchReference
+  fields: 3
+  description: A single cited reference.
+- name: DeepResearchRequest
+  fields: 8
+  description: Request body for the Deep Research API.
+- name: DeepResearchSelection
+  fields: 3
+  description: A single user correction or angle filter applied against a Phase 1 plan.
+- name: DeepResearchTable
+  fields: 5
+  description: Table metadata referenced from an outline section.
+- name: DeepResearchTextContentBlock
+  fields: 2
+  description: A text content block.
+- name: DeepResearchUnresolved
+  fields: 4
+  description: Items the brief stage flagged as unresolved.
+- name: DeepResearchVerdictScaffold
+  fields: 3
+  description: Structured scaffold for reports that need to deliver a verdict.
+- name: DeepResearchVisual
+  fields: 3
+  description: Visual material for one report section. Carried by `visual` chunks on the `pro-visual` tier.
+- name: DeepResearchVisualImage
+  fields: 8
+  description: An image selected for a report section.
+- name: DeepResearchVisualVideo
+  fields: 6
+  description: A video selected for a report section.
+- name: DeveloperMessage
+  fields: 2
+  description: A developer message. The OpenAI-protocol equivalent of `system` (sent by newer OpenAI SDKs); handled
+    as `system`.
+- name: EmbeddingData
+  fields: 2
+  description: The main embedding response payload.
+- name: EmbeddingMeta
+  fields: 2
+  description: Additional metadata for the embedding request.
+- name: EmbeddingRequest
+  fields: 4
+- name: EmbeddingResponse
+  fields: 5
+- name: EmbeddingResult
+  fields: 2
+  description: A single embedding result.
+- name: EmbeddingUsage
+  fields: 1
+  description: Usage information for the embedding request.
+- name: ErrorResponse
+  fields: 3
+- name: ExtractCategory
+  fields: 2
+  description: Detected content category for an extraction result.
+- name: ExtractData
+  fields: 1
+  description: The main extract response payload.
+- name: ExtractLink
+  fields: 3
+  description: A single link found on the page.
+- name: ExtractMediaResource
+  fields: 1
+  description: A single multimedia resource detected on the page.
+- name: ExtractMeta
+  fields: 3
+  description: Additional metadata for the extract request.
+- name: ExtractPageStructure
+  fields: 2
+  description: Detected page structure for an extraction result.
+- name: ExtractRequest
+  fields: 10
+  description: Request body for the Extract API.
+- name: ExtractResponse
+  fields: 5
+- name: ExtractResult
+  fields: 17
+  description: 'A single extraction result. Batch requests may return 200 OK overall while individual items fail;
+    failed items are marked with `status: "failed"` and an `error_message`, and are not billed.'
+- name: ExtractUsage
+  fields: 3
+  description: Usage and billing breakdown for the extract request.
+- name: FullContentOptions
+  fields: 2
+  description: Controls whether to return the full raw content of each result page.
+- name: GroundedGenerationError
+  fields: 2
+  description: Failure reason, present when `status` is `failed`. Failed tasks are not billed.
+- name: GroundedGenerationReference
+  fields: 4
+  description: A single piece of reference material.
+- name: GroundedGenerationRequest
+  fields: 5
+  description: Request body for the Grounded Generation API.
+- name: GroundedGenerationResponse
+  fields: 5
+- name: GroundedGenerationSearchGroup
+  fields: 2
+  description: The results for one search query.
+- name: GroundedGenerationSearchResult
+  fields: 6
+  description: A single search result.
+- name: GroundedGenerationTask
+  fields: 11
+- name: GroundedGenerationUsage
+  fields: 3
+  description: Metering for the task. Present only when `status` is `succeeded`.
+- name: HighlightOptions
+  fields: 2
+  description: Controls highlight extraction from result pages.
+- name: HtmlSnippetOptions
+  fields: 2
+  description: Only effective when `topic=design`; controls whether an `html_snippet` is returned for each result.
+- name: ImageGenerationBaseRequest
+  fields: 16
+  description: Shared parameters for the Image Generation API. Text-to-image when no image is provided; image editing
+    when an image is provided. Parameters marked (GPT only) or (Gemini only) apply only to those mode
+- name: ImageGenerationFormRequest
+  fields: 0
+  description: Multipart form for the Image Generation API. Same fields as the JSON body, except image inputs are
+    uploaded as files.
+- name: ImageGenerationRequest
+  fields: 0
+  description: JSON request body for the Image Generation API.
+- name: ImageGenerationResponse
+  fields: 10
+  description: A non-streaming image response. Images are always returned as base64.
+- name: ImageGenerationStreamEvent
+  fields: 10
+  description: A streaming SSE event. Partial preview images arrive first (each with `partial_image_index`), then
+    one `completed` event with `usage`. The event type prefix is `image_generation` for text-to-image and
+- name: ImagePart
+  fields: 3
+  description: An ordered content part preserving the original text/image interleaving.
+- name: ImageSearchData
+  fields: 1
+  description: The main response payload.
+- name: ImageSearchInput
+  fields: 3
+  description: 'A single multimodal input. Currently each request accepts exactly one input: either one text input
+    or one image input.'
+- name: ImageSearchMeta
+  fields: 3
+  description: Additional metadata for the Image Search request.
+- name: ImageSearchRequest
+  fields: 7
+  description: Request body for the Image Search API.
+- name: ImageSearchResponse
+  fields: 5
+- name: ImageSearchResult
+  fields: 9
+  description: A single image search result.
+- name: ImageSearchUsage
+  fields: 1
+  description: Usage information for the Image Search request.
+- name: ImageUsage
+  fields: 5
+  description: Token usage information.
+- name: MessagesCitation
+  fields: 5
+  description: A citation into a search result. Returned only when `octen_search` was used and the text cites a
+    result.
+- name: MessagesContentBlock
+  fields: 13
+  description: A content block within a message. The fields used depend on `type`. For replaying a multi-turn conversation,
+    blocks such as `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `server_tool_use
+- name: MessagesCustomTool
+  fields: 5
+  description: A custom tool, executed by the caller and returned via a `tool_result` block.
+- name: MessagesMessage
+  fields: 2
+  description: A message in the conversation. Tool results are returned via a `tool_result` content block in a `user`
+    message.
+- name: MessagesOctenBroadSearchTool
+  fields: 4
+  description: The built-in `octen_broad_search` server tool, executed by Octen.
+- name: MessagesOctenSearchTool
+  fields: 4
+  description: The built-in `octen_search` server tool, executed by Octen.
+- name: MessagesRequest
+  fields: 15
+  description: Request body for the Messages API. Some parameters apply only to certain models; unsupported parameters
+    are ignored.
+- name: MessagesResponse
+  fields: 9
+  description: A non-streaming response. Returned when `stream=false`.
+- name: MessagesResponseContentBlock
+  fields: 11
+  description: A content block in the response. The fields present depend on `type`.
+- name: MessagesStreamEvent
+  fields: 7
+  description: 'A streaming SSE event. Returned when `stream=true`. Events arrive in order: `message_start` → `content_block_start`/`content_block_delta`/`content_block_stop`
+    → `message_delta` → `message_stop`. `ping'
+- name: MessagesSystemBlock
+  fields: 3
+  description: A system prompt text block.
+- name: MessagesThinking
+  fields: 3
+  description: Thinking options for reasoning models.
+- name: MessagesToolChoice
+  fields: 3
+  description: Controls whether and how the model calls tools.
+- name: MessagesUsage
+  fields: 8
+  description: Token usage information.
+- name: MessagesWebSearchResult
+  fields: 8
+  description: A single search result block.
+- name: NewsImage
+  fields: 2
+  description: An image attached to an article.
+- name: NewsSearchData
+  fields: 3
+  description: The main response payload.
+- name: NewsSearchMeta
+  fields: 3
+  description: Additional metadata for the search request.
+- name: NewsSearchRequest
+  fields: 12
+- name: NewsSearchResponse
+  fields: 5
+- name: NewsSearchResult
+  fields: 10
+  description: A single news result.
+- name: NewsSearchUsage
+  fields: 3
+  description: Usage information for the search request.
+- name: NewsSubject
+  fields: 6
+  description: A group of related articles covering one event.
+- name: NewsSubjectOptions
+  fields: 3
+  description: Controls subject grouping, which clusters related articles into events.
+- name: NewsSubjectSubNews
+  fields: 10
+  description: The article representing one sub-event.
+- name: NewsSubjectTopNews
+  fields: 11
+  description: The representative article for the subject.
+- name: OctenBroadSearchToolParameters
+  fields: 0
+  description: Behavior configuration for the built-in `octen_broad_search` tool. Identical to `octen_search` except
+    it accepts `max_queries` instead of `max_searches`. All parameters are optional and share the same
+- name: OctenSearchToolParameters
+  fields: 0
+  description: Behavior configuration for the built-in `octen_search` tool. All parameters are optional and share
+    the same semantics and defaults as the Web Search API. The query is generated automatically by the mo
+- name: OpenAIErrorResponse
+  fields: 1
+  description: Error body in the OpenAI protocol format.
+- name: SearchData
+  fields: 2
+  description: The main response payload.
+- name: SearchMeta
+  fields: 3
+  description: Additional metadata for the search request.
+- name: SearchRequest
+  fields: 1
+- name: SearchResponse
+  fields: 5
+- name: SearchResult
+  fields: 10
+  description: A single search result.
+- name: SearchResultGroup
+  fields: 3
+  description: A group of search results for a single sub-query.
+- name: SearchUsage
+  fields: 2
+  description: Usage information for the search request.
+- name: SynthesisUsage
+  fields: 4
+  description: Token usage information for the Answer response. When `stream=true`, this is only present in the
+    `usage` type chunk.
+- name: SystemMessage
+  fields: 2
+- name: ToolMessage
+  fields: 3
+- name: UserMessage
+  fields: 2
+- name: VLEmbeddingContent
+  fields: 3
+  description: A single content element. Each object should provide exactly one of `text`, `image`, or `video`.
+    For multiple images, include multiple content objects (one image per object).
+- name: VLEmbeddingData
+  fields: 2
+  description: The main VL embedding response payload.
+- name: VLEmbeddingInput
+  fields: 1
+  description: 'The multimodal content to be vectorized. Supports text, images, videos, and combinations. Maximum
+    total elements per request: 20. Maximum images per request: 5. Maximum videos per request: 1.'
+- name: VLEmbeddingMeta
+  fields: 2
+  description: Additional metadata for the VL embedding request.
+- name: VLEmbeddingRequest
+  fields: 6
+- name: VLEmbeddingResponse
+  fields: 5
+- name: VLEmbeddingResult
+  fields: 3
+  description: A single VL embedding result.
+- name: VLEmbeddingUsage
+  fields: 5
+  description: Usage information for the VL embedding request.
+- name: VideoFrameImage
+  fields: 2
+- name: VideoGenerationRequest
+  fields: 10
+  description: JSON request body for the Video Generation API.
+- name: VideoGenerationResponse
+  fields: 4
+- name: VideoInputReference
+  fields: 1
+- name: VideoSearchData
+  fields: 1
+  description: The main response payload.
+- name: VideoSearchInput
+  fields: 2
+  description: A single text input. At most one input per request.
+- name: VideoSearchMeta
+  fields: 3
+  description: Additional metadata for the Video Search request.
+- name: VideoSearchRequest
+  fields: 6
+  description: Request body for the Video Search API.
+- name: VideoSearchResponse
+  fields: 5
+- name: VideoSearchResult
+  fields: 9
+  description: A single video search result.
+- name: VideoSearchUsage
+  fields: 1
+  description: Usage information for the Video Search request.
+- name: VideoTask
+  fields: 11
+- name: VideoUsage
+  fields: 3
+  description: Metering for the task. Present only when `status` is `completed`.
+- name: WebSearchOptions
+  fields: 15
+relationships:
+- from: SearchResponse
+  to: SearchData
+  type: has_one
+  via: data
+- from: SearchResponse
+  to: SearchMeta
+  type: has_one
+  via: meta
+- from: SearchData
+  to: SearchResult
+  type: has_many
+  via: results
+- from: SearchMeta
+  to: SearchUsage
+  type: has_one
+  via: usage
+- from: NewsSearchRequest
+  to: HighlightOptions
+  type: has_one
+  via: highlight
+- from: NewsSearchRequest
+  to: FullContentOptions
+  type: has_one
+  via: full_content
+- from: NewsSearchRequest
+  to: NewsSubjectOptions
+  type: has_one
+  via: subjects
+- from: NewsSearchResponse
+  to: NewsSearchData
+  type: has_one
+  via: data
+- from: NewsSearchResponse
+  to: NewsSearchMeta
+  type: has_one
+  via: meta
+- from: NewsSearchData
+  to: NewsSearchResult
+  type: has_many
+  via: results
+- from: NewsSearchData
+  to: NewsSubject
+  type: has_many
+  via: subjects
+- from: NewsSearchResult
+  to: NewsImage
+  type: has_one
+  via: cover_image
+- from: NewsSearchResult
+  to: NewsImage
+  type: has_many
+  via: images
+- from: NewsSubject
+  to: NewsSubjectTopNews
+  type: has_one
+  via: top_news
+- from: NewsSubject
+  to: NewsSubjectSubNews
+  type: has_many
+  via: sub_news
+- from: NewsSubjectTopNews
+  to: NewsImage
+  type: has_one
+  via: cover_image
+- from: NewsSubjectTopNews
+  to: NewsImage
+  type: has_many
+  via: images
+- from: NewsSubjectSubNews
+  to: NewsImage
+  type: has_one
+  via: cover_image
+- from: NewsSubjectSubNews
+  to: NewsImage
+  type: has_many
+  via: images
+- from: NewsSearchMeta
+  to: NewsSearchUsage
+  type: has_one
+  via: usage
+- from: BusinessSearchRequest
+  to: HighlightOptions
+  type: has_one
+  via: highlight
+- from: BusinessSearchRequest
+  to: FullContentOptions
+  type: has_one
+  via: full_content
+- from: BusinessSearchRequest
+  to: BusinessEntityOptions
+  type: has_one
+  via: entities
+- from: BusinessSearchResponse
+  to: BusinessSearchData
+  type: has_one
+  via: data
+- from: BusinessSearchResponse
+  to: BusinessSearchMeta
+  type: has_one
+  via: meta
+- from: BusinessSearchData
+  to: BusinessSearchResult
+  type: has_many
+  via: results
+- from: BusinessSearchResult
+  to: BusinessImage
+  type: has_one
+  via: cover_image
+- from: BusinessSearchResult
+  to: BusinessImage
+  type: has_many
+  via: images
+- from: BusinessCompanyEntity
+  to: BusinessEntityIdentifiers
+  type: has_one
+  via: identifiers
+- from: BusinessCompanyEntity
+  to: BusinessEntityAttributes
+  type: has_one
+  via: attributes
+- from: BusinessCompanyEntity
+  to: BusinessEntityMetrics
+  type: has_one
+  via: metrics
+- from: BusinessCompanyEntity
+  to: BusinessKeyPerson
+  type: has_many
+  via: key_people
+- from: BusinessCompanyEntity
+  to: BusinessSearchResult
+  type: has_many
+  via: activities
+- from: BusinessPersonEntity
+  to: BusinessCareerEntry
+  type: has_many
+  via: career
+- from: BusinessPersonEntity
+  to: BusinessSearchResult
+  type: has_many
+  via: activities
+- from: BusinessEntityMetrics
+  to: BusinessFinancials
+  type: has_many
+  via: financials
+- from: BusinessEntityMetrics
+  to: BusinessStock
+  type: has_one
+  via: stock
+- from: BusinessEntityMetrics
+  to: BusinessWebTraffic
+  type: has_one
+  via: web_traffic
+- from: BusinessSearchMeta
+  to: BusinessSearchUsage
+  type: has_one
+  via: usage
+- from: BroadSearchRequest
+  to: WebSearchOptions
+  type: has_one
+  via: search_options
+- from: BroadSearchData
+  to: SearchResultGroup
+  type: has_many
+  via: search_results
+- from: BroadSearchResponse
+  to: BroadSearchData
+  type: has_one
+  via: data
+- from: BroadSearchResponse
+  to: SearchMeta
+  type: has_one
+  via: meta
+- from: ExtractResponse
+  to: ExtractData
+  type: has_one
+  via: data
+- from: ExtractResponse
+  to: ExtractMeta
+  type: has_one
+  via: meta
+- from: ExtractData
+  to: ExtractResult
+  type: has_many
+  via: results
+- from: ExtractResult
+  to: ExtractPageStructure
+  type: has_one
+  via: page_structure
+- from: ExtractResult
+  to: ExtractCategory
+  type: has_one
+  via: category
+- from: ExtractResult
+  to: ExtractMediaResource
+  type: has_many
+  via: images
+- from: ExtractResult
+  to: ExtractMediaResource
+  type: has_many
+  via: videos
+- from: ExtractResult
+  to: ExtractMediaResource
+  type: has_many
+  via: audio
+- from: ExtractResult
+  to: ExtractLink
+  type: has_many
+  via: links
+- from: ExtractMeta
+  to: ExtractUsage
+  type: has_one
+  via: usage
+- from: EmbeddingResponse
+  to: EmbeddingData
+  type: has_one
+  via: data
+- from: EmbeddingResponse
+  to: EmbeddingMeta
+  type: has_one
+  via: meta
+- from: EmbeddingData
+  to: EmbeddingResult
+  type: has_many
+  via: results
+- from: EmbeddingMeta
+  to: EmbeddingUsage
+  type: has_one
+  via: usage
+- from: VLEmbeddingRequest
+  to: VLEmbeddingInput
+  type: has_one
+  via: input
+- from: VLEmbeddingInput
+  to: VLEmbeddingContent
+  type: has_many
+  via: contents
+- from: VLEmbeddingResponse
+  to: VLEmbeddingData
+  type: has_one
+  via: data
+- from: VLEmbeddingResponse
+  to: VLEmbeddingMeta
+  type: has_one
+  via: meta
+- from: VLEmbeddingData
+  to: VLEmbeddingResult
+  type: has_many
+  via: results
+- from: VLEmbeddingMeta
+  to: VLEmbeddingUsage
+  type: has_one
+  via: usage
+- from: ChatCompletionRequest
+  to: ChatToolChoiceObject
+  type: has_one
+  via: tool_choice
+- from: ChatCompletionRequest
+  to: ChatResponseFormat
+  type: has_one
+  via: response_format
+- from: ChatCompletionRequest
+  to: ChatReasoningOptions
+  type: has_one
+  via: reasoning
+- from: AssistantMessage
+  to: ChatToolCall
+  type: has_many
+  via: tool_calls
+- from: ChatToolCall
+  to: ChatToolCallFunction
+  type: has_one
+  via: function
+- from: ChatContentBlock
+  to: CacheControl
+  type: has_one
+  via: cache_control
+- from: ChatResponseFormat
+  to: ChatJsonSchemaSpec
+  type: has_one
+  via: json_schema
+- from: ChatFunctionTool
+  to: ChatFunctionDefinition
+  type: has_one
+  via: function
+- from: ChatOctenBroadSearchTool
+  to: OctenBroadSearchToolParameters
+  type: has_one
+  via: parameters
+- from: ChatOctenSearchTool
+  to: OctenSearchToolParameters
+  type: has_one
+  via: parameters
+- from: ChatCompletionResponse
+  to: ChatCompletionChoice
+  type: has_many
+  via: choices
+- from: ChatCompletionResponse
+  to: ChatSearchResultGroup
+  type: has_many
+  via: search_results
+- from: ChatCompletionResponse
+  to: ChatCompletionUsage
+  type: has_one
+  via: usage
+- from: ChatCompletionChoice
+  to: ChatCompletionMessage
+  type: has_one
+  via: message
+- from: ChatCompletionChoice
+  to: ChatLogprobs
+  type: has_one
+  via: logprobs
+- from: ChatCompletionMessage
+  to: ChatToolCall
+  type: has_many
+  via: tool_calls
+- from: ChatCompletionMessage
+  to: ChatAnnotation
+  type: has_many
+  via: annotations
+- from: ChatCompletionMessage
+  to: ChatReasoningDetail
+  type: has_many
+  via: reasoning_details
+- from: ChatCompletionChunk
+  to: ChatCompletionChunkChoice
+  type: has_many
+  via: choices
+- from: ChatCompletionChunk
+  to: ChatSearchResultGroup
+  type: has_many
+  via: search_results
+- from: ChatCompletionChunk
+  to: ChatCompletionUsage
+  type: has_one
+  via: usage
+- from: ChatCompletionChunkChoice
+  to: ChatCompletionDelta
+  type: has_one
+  via: delta
+- from: ChatCompletionChunkChoice
+  to: ChatLogprobs
+  type: has_one
+  via: logprobs
+- from: ChatCompletionDelta
+  to: ChatToolCallDelta
+  type: has_many
+  via: tool_calls
+- from: AnswerRequest
+  to: WebSearchOptions
+  type: has_one
+  via: web_search_options
+- from: AnswerResponse
+  to: ChatCompletionChoice
+  type: has_many
+  via: choices
+- from: AnswerResponse
+  to: SearchResultGroup
+  type: has_many
+  via: search_results
+- from: AnswerResponse
+  to: AnswerMeta
+  type: has_one
+  via: meta
+- from: SearchResultGroup
+  to: SearchResult
+  type: has_many
+  via: results
+- from: AnswerMeta
+  to: SynthesisUsage
+  type: has_one
+  via: usage
+- from: AnswerChunk
+  to: ChatCompletionChunkChoice
+  type: has_many
+  via: choices
+- from: AnswerChunk
+  to: SearchResultGroup
+  type: has_many
+  via: search_results
+- from: AnswerChunk
+  to: AnswerMeta
+  type: has_one
+  via: meta
+- from: DeepResearchRequest
+  to: DeepResearchMessage
+  type: has_many
+  via: messages
+- from: DeepResearchRequest
+  to: DeepResearchSelection
+  type: has_many
+  via: selections
+- from: DeepResearchChunk
+  to: DeepResearchPlan
+  type: has_one
+  via: plan
+- from: DeepResearchChunk
+  to: SearchResultGroup
+  type: has_many
+  via: search_results
+- from: DeepResearchChunk
+  to: DeepResearchAnalysis
+  type: has_one
+  via: analysis
+- from: DeepResearchChunk
+  to: DeepResearchBrief
+  type: has_one
+  via: brief
+- from: DeepResearchChunk
+  to: DeepResearchChunkChoice
+  type: has_many
+  via: choices
+- from: DeepResearchChunk
+  to: DeepResearchVisual
+  type: has_one
+  via: visual
+- from: DeepResearchChunk
+  to: DeepResearchMeta
+  type: has_one
+  via: meta
+- from: DeepResearchPlan
+  to: DeepResearchInterpretation
+  type: has_many
+  via: interpretations
+- from: DeepResearchPlan
+  to: DeepResearchAngle
+  type: has_many
+  via: angles
+- from: DeepResearchInterpretation
+  to: DeepResearchMeaning
+  type: has_many
+  via: meanings
+- from: DeepResearchBrief
+  to: DeepResearchVerdictScaffold
+  type: has_one
+  via: verdict_scaffold
+- from: DeepResearchBrief
+  to: DeepResearchTable
+  type: has_many
+  via: tables
+- from: DeepResearchBrief
+  to: DeepResearchOutlineSection
+  type: has_many
+  via: outline
+- from: DeepResearchBrief
+  to: DeepResearchUnresolved
+  type: has_one
+  via: unresolved
+- from: DeepResearchBrief
+  to: DeepResearchReference
+  type: has_many
+  via: references
+- from: DeepResearchOutlineSection
+  to: DeepResearchEvidence
+  type: has_many
+  via: evidence
+- from: DeepResearchVisual
+  to: DeepResearchVisualImage
+  type: has_many
+  via: images
+- from: DeepResearchVisual
+  to: DeepResearchVisualVideo
+  type: has_many
+  via: videos
+- from: DeepResearchChunkChoice
+  to: DeepResearchChunkDelta
+  type: has_one
+  via: delta
+- from: ImageSearchRequest
+  to: ImageSearchInput
+  type: has_many
+  via: inputs
+- from: ImageSearchRequest
+  to: HtmlSnippetOptions
+  type: has_one
+  via: html_snippet
+- from: ImageSearchMeta
+  to: ImageSearchUsage
+  type: has_one
+  via: usage
+- from: ImageSearchData
+  to: ImageSearchResult
+  type: has_many
+  via: results
+- from: ImageSearchResponse
+  to: ImageSearchData
+  type: has_one
+  via: data
+- from: ImageSearchResponse
+  to: ImageSearchMeta
+  type: has_one
+  via: meta
+- from: VideoSearchRequest
+  to: VideoSearchInput
+  type: has_many
+  via: inputs
+- from: VideoSearchMeta
+  to: VideoSearchUsage
+  type: has_one
+  via: usage
+- from: VideoSearchData
+  to: VideoSearchResult
+  type: has_many
+  via: results
+- from: VideoSearchResponse
+  to: VideoSearchData
+  type: has_one
+  via: data
+- from: VideoSearchResponse
+  to: VideoSearchMeta
+  type: has_one
+  via: meta
+- from: WebSearchOptions
+  to: HighlightOptions
+  type: has_one
+  via: highlight
+- from: WebSearchOptions
+  to: FullContentOptions
+  type: has_one
+  via: full_content
+- from: ChatSearchResultGroup
+  to: ChatSearchResultItem
+  type: has_many
+  via: results
+- from: MessagesContentBlock
+  to: CacheControl
+  type: has_one
+  via: cache_control
+- from: MessagesSystemBlock
+  to: CacheControl
+  type: has_one
+  via: cache_control
+- from: MessagesCustomTool
+  to: CacheControl
+  type: has_one
+  via: cache_control
+- from: MessagesOctenBroadSearchTool
+  to: OctenBroadSearchToolParameters
+  type: has_one
+  via: parameters
+- from: MessagesOctenBroadSearchTool
+  to: CacheControl
+  type: has_one
+  via: cache_control
+- from: MessagesOctenSearchTool
+  to: OctenSearchToolParameters
+  type: has_one
+  via: parameters
+- from: MessagesOctenSearchTool
+  to: CacheControl
+  type: has_one
+  via: cache_control
+- from: MessagesRequest
+  to: MessagesMessage
+  type: has_many
+  via: messages
+- from: MessagesRequest
+  to: MessagesToolChoice
+  type: has_one
+  via: tool_choice
+- from: MessagesRequest
+  to: MessagesThinking
+  type: has_one
+  via: thinking
+- from: MessagesResponseContentBlock
+  to: MessagesCitation
+  type: has_many
+  via: citations
+- from: MessagesResponseContentBlock
+  to: MessagesWebSearchResult
+  type: has_many
+  via: content
+- from: MessagesResponse
+  to: MessagesResponseContentBlock
+  type: has_many
+  via: content
+- from: MessagesResponse
+  to: MessagesUsage
+  type: has_one
+  via: usage
+- from: ImageGenerationResponse
+  to: ImagePart
+  type: has_many
+  via: parts
+- from: ImageGenerationResponse
+  to: ImageUsage
+  type: has_one
+  via: usage
+- from: ImageGenerationStreamEvent
+  to: ImageUsage
+  type: has_one
+  via: usage
+- from: VideoGenerationRequest
+  to: VideoFrameImage
+  type: has_many
+  via: frame_images
+- from: VideoGenerationRequest
+  to: VideoInputReference
+  type: has_many
+  via: input_references
+- from: VideoTask
+  to: VideoUsage
+  type: has_one
+  via: usage
+- from: GroundedGenerationTask
+  to: GroundedGenerationReference
+  type: has_many
+  via: references
+- from: GroundedGenerationTask
+  to: GroundedGenerationSearchGroup
+  type: has_many
+  via: search_results
+- from: GroundedGenerationTask
+  to: GroundedGenerationError
+  type: has_one
+  via: error
+- from: GroundedGenerationTask
+  to: GroundedGenerationUsage
+  type: has_one
+  via: usage
+- from: GroundedGenerationSearchGroup
+  to: GroundedGenerationSearchResult
+  type: has_many
+  via: results

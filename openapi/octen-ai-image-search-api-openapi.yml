@@ -1,0 +1,417 @@
+openapi: 3.2.0
+info:
+  title: Octen Ai Image Search API
+  version: 1.0.0
+  description: 'Operations tagged Image Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://api.octen.ai
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+tags:
+- name: Image Search
+paths:
+  /image-search:
+    post:
+      summary: Image Search
+      operationId: image-search
+      description: Searches the web for images. Setting `topic` to `design` searches design assets and returns a structured `summary` and a reusable `html_snippet`. Contact us to request beta access.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImageSearchRequest'
+            examples:
+              designScenario:
+                summary: Design-asset search
+                value:
+                  inputs:
+                  - type: text
+                    data: Preview deployments card with dark theme
+                  topic: design
+                  count: 3
+                  include_domains:
+                  - unkey.dev
+                  - stripe.com
+                  - linear.app
+                  html_snippet:
+                    enable: true
+                    max_tokens: 5000
+              plainText:
+                summary: Plain text query
+                value:
+                  inputs:
+                  - type: text
+                    data: DJI Mavic 4 Pro review
+                  count: 5
+              imageByUrl:
+                summary: Search by image (image as URL)
+                value:
+                  inputs:
+                  - type: image
+                    url: https://cdn.example-fashion.com/refs/vintage-dress.jpg
+                  count: 5
+              imageByBase64:
+                summary: Search by image (base64 upload)
+                value:
+                  inputs:
+                  - type: image
+                    data: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=
+                  count: 5
+      responses:
+        '200':
+          description: Successful image search response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageSearchResponse'
+              examples:
+                general:
+                  summary: General image search
+                  value:
+                    code: 0
+                    msg: success
+                    request_id: req_9d1c4f7a2e6b0853
+                    data:
+                      results:
+                      - title: Scandinavian Minimalist Living Room
+                        url: https://images.unsplash.com/photo-scandi-living-room.jpg
+                        source_page: https://unsplash.com/photos/scandi-living-room
+                        description: A Scandinavian minimalist living room with light wood flooring, an off-white sofa, and greenery; the composition is very close to the uploaded image.
+                        width: 1920
+                        height: 1280
+                        thumbnail: https://images.unsplash.com/photo-scandi-living-room.jpg?w=200
+                      - title: Minimalist Interior Inspiration
+                        url: https://i.pinimg.com/originals/minimal-interior.jpg
+                        source_page: https://www.pinterest.com/pin/minimal-interior-inspiration
+                        description: Minimalist interior design inspiration; the palette and layout are close to the uploaded image.
+                        width: 736
+                        height: 981
+                        thumbnail: https://i.pinimg.com/236x/minimal-interior.jpg
+                    meta:
+                      usage:
+                        num_search_queries: 1
+                      latency: 642
+                design:
+                  summary: Design-asset search
+                  value:
+                    code: 0
+                    msg: success
+                    request_id: req_5e2a8c0b3d7f1946
+                    data:
+                      results:
+                      - title: Preview Deployment Card — Unkey
+                        url: https://unkey.dev/og/deployments-card-dark.png
+                        source_page: https://unkey.dev/docs/deployments
+                        description: 'A dark-themed preview deployment card: a Preview badge and branch name at the top, a preview-domain link in the middle, and a Ready status row at the bottom.'
+                        width: 1200
+                        height: 630
+                        thumbnail: https://unkey.dev/og/deployments-card-dark-thumb.png
+                        summary: 'Category: preview deployment card. Layout: a row with a badge and branch name at the top, a preview-domain link in the middle, and a status row at the bottom. Palette: dark theme, background #0b0b0e, border #1f1f24, Ready green badge #4ade80, link blue #60a5fa. Corner radius: 12px. Tags: dark-theme, card, deployment, preview, status, badge.'
+                        html_snippet: "<div class=\"deploy-card\">\n  <header class=\"deploy-card__top\">\n    <span class=\"deploy-card__badge\">Preview</span>\n    <span class=\"deploy-card__branch\">feat/new-dashboard</span>\n  </header>\n  <a class=\"deploy-card__url\" href=\"#\">preview-3f9a.unkey.dev</a>\n  <div class=\"deploy-card__meta\"><i class=\"dot\"></i>Ready &middot; 2m ago</div>\n</div>\n<style>\n.deploy-card{width:320px;padding:16px;background:#0b0b0e;border:1px solid #1f1f24;border-radius:12px;color:#e6e6e6;font-family:Inter,system-ui,sans-serif}\n.deploy-card__top{display:flex;align-items:center;gap:8px;margin-bottom:10px}\n.deploy-card__badge{padding:2px 8px;border-radius:999px;background:#13261a;color:#4ade80;font-size:12px}\n.deploy-card__branch{color:#9ca3af;font-size:13px}\n.deploy-card__url{display:block;color:#60a5fa;font-size:14px;margin-bottom:8px;text-decoration:none}\n.deploy-card__meta{display:flex;align-items:center;color:#6b7280;font-size:12px}\n.dot{width:6px;height:6px;border-radius:50%;background:#4ade80;margin-right:6px}\n</style>"
+                      - title: Deploy Status Card — Linear
+                        url: https://linear.app/assets/deploy-status-card-dark.png
+                        source_page: https://linear.app/features
+                        description: 'A dark-themed status/progress card: a title and a status pill on opposite ends of a row, with a progress bar below.'
+                        width: 1000
+                        height: 540
+                        thumbnail: https://linear.app/assets/deploy-status-card-dark-thumb.png
+                        summary: 'Category: status / progress card. Layout: a title and a status pill on opposite ends of a row, with a progress bar below. Palette: dark theme, background #101013, progress bar #5e6ad2, amber status pill #f5a623. Corner radius: 10px. Tags: dark-theme, card, status, progress, pill.'
+                        html_snippet: "<div class=\"status-card\">\n  <div class=\"status-card__row\">\n    <span class=\"status-card__title\">Deploy preview</span>\n    <span class=\"status-card__pill\">In progress</span>\n  </div>\n  <div class=\"status-card__bar\"><span></span></div>\n</div>\n<style>\n.status-card{width:300px;padding:14px 16px;background:#101013;border:1px solid #232329;border-radius:10px;font-family:Inter,system-ui,sans-serif}\n.status-card__row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}\n.status-card__title{color:#e8e8ea;font-size:14px}\n.status-card__pill{padding:2px 8px;border-radius:999px;background:#2a2118;color:#f5a623;font-size:12px}\n.status-card__bar{height:4px;border-radius:999px;background:#232329;overflow:hidden}\n.status-card__bar span{display:block;width:62%;height:100%;background:#5e6ad2}\n</style>"
+                    meta:
+                      usage:
+                        num_search_queries: 1
+                      latency: 1342
+        '400':
+          description: Missing parameter inputs — Returned when a required parameter is missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                msg: Missing parameter inputs
+                request_id: req_abc123def456
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/InsufficientBalance'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          description: Input unreadable or invalid — Returned when an input cannot be read or is otherwise invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 422
+                msg: Input unreadable or invalid
+                request_id: req_abc123def456
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+      - Image Search
+    servers:
+    - url: https://api.octen.ai
+components:
+  schemas:
+    ImageSearchRequest:
+      type: object
+      required:
+      - inputs
+      description: Request body for the Image Search API.
+      properties:
+        inputs:
+          type: array
+          minItems: 1
+          maxItems: 1
+          description: 'Multimodal input array. Currently only a single input is supported: either one text input or one image input.'
+          items:
+            $ref: '#/components/schemas/ImageSearchInput'
+        topic:
+          type: string
+          enum:
+          - general
+          - design
+          default: general
+          description: Use `general` for general image search, or `design` for design reference.
+        count:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
+          description: Number of results to return.
+        include_domains:
+          type: array
+          items:
+            type: string
+          description: Domains to include, matched against each result's `source_page` URL.
+        exclude_domains:
+          type: array
+          items:
+            type: string
+          description: Domains to exclude, matched against each result's `source_page` URL.
+        safesearch:
+          type: string
+          enum:
+          - 'off'
+          - strict
+          default: strict
+          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
+        html_snippet:
+          allOf:
+          - $ref: '#/components/schemas/HtmlSnippetOptions'
+          description: Only effective when `topic=design`; controls whether an `html_snippet` is returned for each result.
+    ImageSearchMeta:
+      type: object
+      description: Additional metadata for the Image Search request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/ImageSearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
+          type: string
+          nullable: true
+          description: Warning message, if any.
+    ImageSearchResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/ImageSearchData'
+        meta:
+          $ref: '#/components/schemas/ImageSearchMeta'
+    ImageSearchUsage:
+      type: object
+      description: Usage information for the Image Search request.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of search queries executed.
+    HtmlSnippetOptions:
+      type: object
+      description: Only effective when `topic=design`; controls whether an `html_snippet` is returned for each result.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If `true`, returns an `html_snippet` for each image result.
+        max_tokens:
+          type: integer
+          default: 5000
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of `html_snippet` returned per image result.
+    ImageSearchResult:
+      type: object
+      description: A single image search result.
+      properties:
+        title:
+          type: string
+          description: The title of the image.
+        url:
+          type: string
+          description: The image URL.
+        source_page:
+          type: string
+          description: URL of the original page hosting the image.
+        description:
+          type: string
+          description: Server-generated text description of the image content.
+        width:
+          type: integer
+          description: Image width in pixels.
+        height:
+          type: integer
+          description: Image height in pixels.
+        thumbnail:
+          type: string
+          description: Thumbnail URL.
+        summary:
+          type: string
+          description: Structured description of the design asset, covering category, layout, style, tags, and more. Returned only when `topic=design`.
+        html_snippet:
+          type: string
+          description: HTML/CSS snippet that an LLM can reuse directly. Returned only when `topic=design` and `html_snippet.enable` is `true`.
+    ImageSearchInput:
+      type: object
+      required:
+      - type
+      description: 'A single multimodal input. Currently each request accepts exactly one input: either one text input or one image input.'
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          - image
+          description: 'The input type. A single image must be at most 5MB and one of: JPEG, PNG, WEBP, BMP, TIFF, ICO, DIB, ICNS, SGI.'
+        url:
+          type: string
+          description: Image input as a public URL. For an image input, provide either `url` or `data`, not both.
+        data:
+          type: string
+          description: 'When `type` is `text`: the query content, max 500 characters. When `type` is `image`: base64-encoded image data, at most 5MB after encoding.'
+    ImageSearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        results:
+          type: array
+          description: A list of image search results.
+          items:
+            $ref: '#/components/schemas/ImageSearchResult'
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+  responses:
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
+    UnsupportedMediaType:
+      description: Unsupported media type — Returned when the input media format is not supported.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 415
+            msg: Unsupported media type
+            request_id: req_abc123def456
+    PayloadTooLarge:
+      description: Payload too large — Returned when the request payload exceeds the size limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 413
+            msg: Payload too large
+            request_id: req_abc123def456
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header. Note: A payment method is required to use the API.'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: 'API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header. Note: A payment method is required to use the API.'
+    bearerAuthNoPayment:
+      type: http
+      scheme: bearer
+      description: Bearer token used for request authentication. Alternatively, you can send the API key in the `x-api-key` header.
+    apiKeyAuthNoPayment:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
+x-refined-from:
+- octen-ai-openapi.json
+- octen-ai-openapi.yml
