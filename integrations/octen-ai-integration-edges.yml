@@ -1,0 +1,23 @@
+edges:
+- partner_name: OpenAI
+  partner: openai
+  partner_match: domain
+  type: contract
+  channel: provider-built
+  relationship: compatible
+  direction: provider-built
+  evidence: https://github.com/api-evangelist/octen-ai/blob/main/openapi/octen-ai-chat-completions-api-openapi.yml#L17
+  contract_reference:
+    repo: octen-ai
+    spec_file: octen-ai-chat-completions-api-openapi.yml
+    property: description
+    value: OpenAI-compatible
+    note: 'octen-ai declares OpenAI compatibility: ''description: Compatible with the OpenAI Chat Completions protocol,
+      with optional built-in `octen_broad_search` and `octen_search` tools.'''
+    detected_by: sweep-model-routing.py
+    detected: '2026-10-13'
+  detected_by: sweep-model-routing.py
+  first_seen: '2026-10-13'
+generated: '2026-10-13'
+method: searched
+checked: []
