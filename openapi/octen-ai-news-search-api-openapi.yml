@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai News Search API
+  title: Octen News Search API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged News Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -146,112 +146,21 @@ paths:
           $ref: '#/components/responses/InternalError'
       tags:
       - News Search
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
-    NewsSearchData:
+    NewsSearchUsage:
       type: object
-      description: The main response payload.
+      description: Usage information for the search request.
       properties:
-        query:
-          type: string
-          description: The original query.
-        results:
-          type: array
-          description: A list of news results.
-          items:
-            $ref: '#/components/schemas/NewsSearchResult'
-        subjects:
-          type: array
-          description: A list of subjects, each grouping related articles into one event. Returned only when subjects.enable is true and the query produces at least one subject.
-          items:
-            $ref: '#/components/schemas/NewsSubject'
-    NewsSubject:
-      type: object
-      description: A group of related articles covering one event.
-      properties:
-        name:
-          type: string
-          description: The event name.
-        summary:
-          type: string
-          description: A summary of the event.
-        time_start:
-          type: string
-          format: date-time
-          description: When the event started, in ISO 8601.
-        time_latest:
-          type: string
-          format: date-time
-          description: Publish time of the most recent article in the event, in ISO 8601.
-        top_news:
-          $ref: '#/components/schemas/NewsSubjectTopNews'
-        sub_news:
-          type: array
-          description: Sub-events within the subject, sorted by event time in descending order.
-          items:
-            $ref: '#/components/schemas/NewsSubjectSubNews'
-    NewsSubjectOptions:
-      type: object
-      description: Controls subject grouping, which clusters related articles into events.
-      properties:
-        enable:
-          type: boolean
-          default: true
-          description: If true, returns data.subjects.
-        count:
+        num_search_queries:
           type: integer
-          default: 2
-          minimum: 1
-          maximum: 5
-          description: Maximum number of subjects to return.
-        max_sub_news:
+          description: Number of text search queries executed.
+        num_subject_search_queries:
           type: integer
-          default: 5
-          minimum: 1
-          maximum: 20
-          description: Maximum number of sub-events to return per subject.
-    NewsSubjectTopNews:
-      type: object
-      description: The representative article for the subject.
-      properties:
-        title:
-          type: string
-          description: The title of the article.
-        url:
-          type: string
-          description: The URL of the article.
-        summary:
-          type: string
-          description: A summary of the article, in the language of the original.
-        highlight:
-          type: string
-          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
-        full_content:
-          type: string
-          description: Full raw page content. Returned only if full_content.enable is true.
-        authors:
-          type: string
-          description: Website name or author.
-        time_published:
-          type: string
-          format: date-time
-          description: Publish time in ISO 8601.
-        time_last_crawled:
-          type: string
-          format: date-time
-          description: Last crawl time in ISO 8601.
-        favicon:
-          type: string
-          description: The favicon URL of the source site.
-        cover_image:
-          $ref: '#/components/schemas/NewsImage'
-        images:
-          type: array
-          description: In-body images of the article, in order of appearance.
-          items:
-            $ref: '#/components/schemas/NewsImage'
+          description: Number of subject search queries executed. 0 when subjects.enable is false.
+        full_content_extra_count:
+          type: integer
+          description: Billable full_content results beyond the free allowance.
     FullContentOptions:
       type: object
       description: Controls whether to return the full raw content of each result page.
@@ -266,33 +175,6 @@ components:
           minimum: 100
           maximum: 100000
           description: Maximum tokens of full content included per result.
-    HighlightOptions:
-      type: object
-      description: Controls highlight extraction from result pages.
-      properties:
-        enable:
-          type: boolean
-          default: true
-          description: If true, returns query-relevant highlight in each result.
-        max_tokens:
-          type: integer
-          default: 512
-          minimum: 100
-          maximum: 20000
-          description: Max tokens returned per highlight.
-    NewsSearchUsage:
-      type: object
-      description: Usage information for the search request.
-      properties:
-        num_search_queries:
-          type: integer
-          description: Number of text search queries executed.
-        num_subject_search_queries:
-          type: integer
-          description: Number of subject search queries executed. 0 when subjects.enable is false.
-        full_content_extra_count:
-          type: integer
-          description: Billable full_content results beyond the free allowance.
     NewsSubjectSubNews:
       type: object
       description: The article representing one sub-event.
@@ -330,59 +212,19 @@ components:
           description: In-body images of the article, in order of appearance.
           items:
             $ref: '#/components/schemas/NewsImage'
-    NewsSearchResult:
+    NewsSearchMeta:
       type: object
-      description: A single news result.
+      description: Additional metadata for the search request.
       properties:
-        title:
+        usage:
+          $ref: '#/components/schemas/NewsSearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
           type: string
-          description: The title of the article.
-        url:
-          type: string
-          description: The URL of the article.
-        highlight:
-          type: string
-          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
-        full_content:
-          type: string
-          description: Full raw page content. Returned only if full_content.enable is true.
-        authors:
-          type: string
-          description: Website name or author.
-        time_published:
-          type: string
-          format: date-time
-          description: Publish time in ISO 8601.
-        time_last_crawled:
-          type: string
-          format: date-time
-          description: Last crawl time in ISO 8601.
-        favicon:
-          type: string
-          description: The favicon URL of the source site.
-        cover_image:
-          $ref: '#/components/schemas/NewsImage'
-        images:
-          type: array
-          description: In-body images of the article, in order of appearance.
-          items:
-            $ref: '#/components/schemas/NewsImage'
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: Business status code. Non-zero values indicate an error.
-        msg:
-          type: string
-          description: A message describing the error.
-        request_id:
-          type: string
-          description: Unique identifier for the request.
-      required:
-      - code
-      - msg
-      - request_id
+          nullable: true
+          description: Warning message, if any.
     NewsSearchRequest:
       type: object
       required:
@@ -490,19 +332,106 @@ components:
           $ref: '#/components/schemas/FullContentOptions'
         subjects:
           $ref: '#/components/schemas/NewsSubjectOptions'
-    NewsSearchMeta:
+    NewsSubjectOptions:
       type: object
-      description: Additional metadata for the search request.
+      description: Controls subject grouping, which clusters related articles into events.
       properties:
-        usage:
-          $ref: '#/components/schemas/NewsSearchUsage'
-        latency:
-          type: number
-          description: Response time in milliseconds.
-        warning:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns data.subjects.
+        count:
+          type: integer
+          default: 2
+          minimum: 1
+          maximum: 5
+          description: Maximum number of subjects to return.
+        max_sub_news:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 20
+          description: Maximum number of sub-events to return per subject.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
           type: string
-          nullable: true
-          description: Warning message, if any.
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    HighlightOptions:
+      type: object
+      description: Controls highlight extraction from result pages.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns query-relevant highlight in each result.
+        max_tokens:
+          type: integer
+          default: 512
+          minimum: 100
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    NewsSubjectTopNews:
+      type: object
+      description: The representative article for the subject.
+      properties:
+        title:
+          type: string
+          description: The title of the article.
+        url:
+          type: string
+          description: The URL of the article.
+        summary:
+          type: string
+          description: A summary of the article, in the language of the original.
+        highlight:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the source site.
+        cover_image:
+          $ref: '#/components/schemas/NewsImage'
+        images:
+          type: array
+          description: In-body images of the article, in order of appearance.
+          items:
+            $ref: '#/components/schemas/NewsImage'
+    NewsImage:
+      type: object
+      description: An image attached to an article.
+      properties:
+        url:
+          type: string
+          description: The image URL.
+        description:
+          type: string
+          description: Text description of the image.
     NewsSearchResponse:
       type: object
       properties:
@@ -519,37 +448,86 @@ components:
           $ref: '#/components/schemas/NewsSearchData'
         meta:
           $ref: '#/components/schemas/NewsSearchMeta'
-    NewsImage:
+    NewsSearchResult:
       type: object
-      description: An image attached to an article.
+      description: A single news result.
       properties:
+        title:
+          type: string
+          description: The title of the article.
         url:
           type: string
-          description: The image URL.
-        description:
+          description: The URL of the article.
+        highlight:
           type: string
-          description: Text description of the image.
+          description: Query-relevant highlight snippets. Returned only if highlight.enable is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if full_content.enable is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+        favicon:
+          type: string
+          description: The favicon URL of the source site.
+        cover_image:
+          $ref: '#/components/schemas/NewsImage'
+        images:
+          type: array
+          description: In-body images of the article, in order of appearance.
+          items:
+            $ref: '#/components/schemas/NewsImage'
+    NewsSubject:
+      type: object
+      description: A group of related articles covering one event.
+      properties:
+        name:
+          type: string
+          description: The event name.
+        summary:
+          type: string
+          description: A summary of the event.
+        time_start:
+          type: string
+          format: date-time
+          description: When the event started, in ISO 8601.
+        time_latest:
+          type: string
+          format: date-time
+          description: Publish time of the most recent article in the event, in ISO 8601.
+        top_news:
+          $ref: '#/components/schemas/NewsSubjectTopNews'
+        sub_news:
+          type: array
+          description: Sub-events within the subject, sorted by event time in descending order.
+          items:
+            $ref: '#/components/schemas/NewsSubjectSubNews'
+    NewsSearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        query:
+          type: string
+          description: The original query.
+        results:
+          type: array
+          description: A list of news results.
+          items:
+            $ref: '#/components/schemas/NewsSearchResult'
+        subjects:
+          type: array
+          description: A list of subjects, each grouping related articles into one event. Returned only when subjects.enable is true and the query produces at least one subject.
+          items:
+            $ref: '#/components/schemas/NewsSubject'
   responses:
-    RateLimited:
-      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 429
-            msg: Exceeding the rate limit
-            request_id: req_abc123def456
-    InternalError:
-      description: Internal error — Returned when an unexpected server-side error occurs.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 500
-            msg: Internal error
-            request_id: req_abc123def456
     Unauthorized:
       description: Invalid API Key — Returned when the API key is missing or invalid.
       content:
@@ -570,6 +548,26 @@ components:
             code: 403
             msg: Insufficient balance in account
             request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
   securitySchemes:
     bearerAuth:
       type: http
@@ -589,6 +587,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

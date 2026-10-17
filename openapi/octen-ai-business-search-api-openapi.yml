@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Business Search API
+  title: Octen Business Search API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Business Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -205,26 +205,39 @@ paths:
           $ref: '#/components/responses/InternalError'
       tags:
       - Business Search
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
-    BusinessEntityIdentifiers:
+    FullContentOptions:
       type: object
-      description: Identifiers for the company.
+      description: Controls whether to return the full raw content of each result page.
       properties:
-        website:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
+    BusinessSearchData:
+      type: object
+      description: The main response payload. Fields without data are omitted, at every level.
+      properties:
+        query:
           type: string
-          description: The official website.
-        linkedin_url:
-          type: string
-          description: LinkedIn company page URL.
-        stock_ticker:
-          type: string
-          description: Stock ticker, prefixed with the exchange.
-        sec_cik:
-          type: string
-          description: SEC Central Index Key.
+          description: The original query.
+        results:
+          type: array
+          description: A list of business results.
+          items:
+            $ref: '#/components/schemas/BusinessSearchResult'
+        entities:
+          type: array
+          description: A list of entity cards for the companies and people in the query. Returned only when entities.enable is true and the query matches at least one entity.
+          items:
+            $ref: '#/components/schemas/BusinessEntity'
     BusinessStock:
       type: object
       description: Live stock data from Octen. Returned for listed companies.
@@ -247,174 +260,32 @@ components:
         currency:
           type: string
           description: The currency the figures are reported in.
-    BusinessKeyPerson:
+    BusinessSearchMeta:
       type: object
-      description: A key person at the company.
+      description: Additional metadata for the search request.
       properties:
-        name:
+        usage:
+          $ref: '#/components/schemas/BusinessSearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
           type: string
-          description: The person's name.
-        title:
-          type: string
-          description: The person's title.
-    BusinessImage:
+          description: Warning message, if any.
+    HighlightOptions:
       type: object
-      description: An image attached to a page.
-      properties:
-        url:
-          type: string
-          description: The image URL.
-        description:
-          type: string
-          description: Text description of the image.
-    BusinessEntityAttributes:
-      type: object
-      description: Basic attributes of the company.
-      properties:
-        industry:
-          type: string
-          description: The industry the company operates in.
-        hq_location:
-          type: string
-          description: Headquarters location.
-        founded_year:
-          type: integer
-          description: The year the company was founded.
-        employee_range:
-          type: string
-          description: Employee count, as a range.
-    FullContentOptions:
-      type: object
-      description: Controls whether to return the full raw content of each result page.
+      description: Controls highlight extraction from result pages.
       properties:
         enable:
           type: boolean
-          default: false
-          description: If true, returns full_content for each result.
+          default: true
+          description: If true, returns query-relevant highlight in each result.
         max_tokens:
           type: integer
-          default: 2048
+          default: 512
           minimum: 100
-          maximum: 100000
-          description: Maximum tokens of full content included per result.
-    BusinessSearchUsage:
-      type: object
-      description: Usage information for the search request.
-      properties:
-        num_search_queries:
-          type: integer
-          description: Number of text search queries executed.
-        full_content_extra_count:
-          type: integer
-          description: Billable full_content results beyond the free allowance.
-    BusinessSearchData:
-      type: object
-      description: The main response payload. Fields without data are omitted, at every level.
-      properties:
-        query:
-          type: string
-          description: The original query.
-        results:
-          type: array
-          description: A list of business results.
-          items:
-            $ref: '#/components/schemas/BusinessSearchResult'
-        entities:
-          type: array
-          description: A list of entity cards for the companies and people in the query. Returned only when entities.enable is true and the query matches at least one entity.
-          items:
-            $ref: '#/components/schemas/BusinessEntity'
-    BusinessSearchResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: Business status code. 0 indicates success.
-        msg:
-          type: string
-          description: A message describing the result.
-        request_id:
-          type: string
-          description: The unique identifier for this request.
-        data:
-          $ref: '#/components/schemas/BusinessSearchData'
-        meta:
-          $ref: '#/components/schemas/BusinessSearchMeta'
-    BusinessCompanyEntity:
-      type: object
-      title: Company
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          enum:
-          - company
-          description: The kind of entity this card describes. Always `company`.
-        name:
-          type: string
-          description: The company name.
-        summary:
-          type: string
-          description: A profile of the company.
-        aliases:
-          type: array
-          items:
-            type: string
-          description: Other names and spellings for the company.
-        identifiers:
-          $ref: '#/components/schemas/BusinessEntityIdentifiers'
-        attributes:
-          $ref: '#/components/schemas/BusinessEntityAttributes'
-        metrics:
-          $ref: '#/components/schemas/BusinessEntityMetrics'
-        key_people:
-          type: array
-          description: Key people at the company.
-          items:
-            $ref: '#/components/schemas/BusinessKeyPerson'
-        logo:
-          type: object
-          description: The company logo.
-          properties:
-            url:
-              type: string
-              description: The logo image URL.
-        activities:
-          type: array
-          description: Recent activity from the company's own channels.
-          items:
-            $ref: '#/components/schemas/BusinessSearchResult'
-    BusinessCareerEntry:
-      type: object
-      description: One role in a person's career history.
-      properties:
-        organization:
-          type: string
-          description: The organization.
-        title:
-          type: string
-          description: The role held.
-        start:
-          type: string
-          description: When the role started, as a year or a year and month.
-        end:
-          type: string
-          description: When the role ended, as a year or a year and month. Omitted while the role is current.
-    BusinessWebTraffic:
-      type: object
-      description: Web traffic for the company's website.
-      properties:
-        visits_monthly:
-          type: integer
-          description: Monthly visits.
-        rank:
-          type: integer
-          description: Global traffic rank.
-        period:
-          type: string
-          description: The month the figures belong to.
-          example: 2026-08
+          maximum: 20000
+          description: Max tokens returned per highlight.
     BusinessSearchRequest:
       type: object
       required:
@@ -522,6 +393,102 @@ components:
           $ref: '#/components/schemas/FullContentOptions'
         entities:
           $ref: '#/components/schemas/BusinessEntityOptions'
+    BusinessPersonEntity:
+      type: object
+      title: Person
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - person
+          description: The kind of entity this card describes. Always `person`.
+        name:
+          type: string
+          description: The person's name.
+        summary:
+          type: string
+          description: A profile of the person.
+        linkedin_url:
+          type: string
+          description: LinkedIn profile URL.
+        current_position:
+          type: string
+          description: Current role and organization.
+        career:
+          type: array
+          description: Career history.
+          items:
+            $ref: '#/components/schemas/BusinessCareerEntry'
+        photo:
+          type: object
+          description: A photo of the person.
+          properties:
+            url:
+              type: string
+              description: The photo URL.
+        activities:
+          type: array
+          description: Recent activity from the person's own channels.
+          items:
+            $ref: '#/components/schemas/BusinessSearchResult'
+    BusinessSearchResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/BusinessSearchData'
+        meta:
+          $ref: '#/components/schemas/BusinessSearchMeta'
+    BusinessKeyPerson:
+      type: object
+      description: A key person at the company.
+      properties:
+        name:
+          type: string
+          description: The person's name.
+        title:
+          type: string
+          description: The person's title.
+    BusinessEntityOptions:
+      type: object
+      description: Controls the entity cards returned for companies and people.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns data.entities.
+        count:
+          type: integer
+          default: 2
+          minimum: 1
+          maximum: 20
+          description: Maximum number of entity cards to return.
+        max_activities:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 20
+          description: Maximum number of recent activities to return per entity card.
+    BusinessImage:
+      type: object
+      description: An image attached to a page.
+      properties:
+        url:
+          type: string
+          description: The image URL.
+        description:
+          type: string
+          description: Text description of the image.
     BusinessSearchResult:
       type: object
       description: A single business result.
@@ -572,46 +539,6 @@ components:
           $ref: '#/components/schemas/BusinessStock'
         web_traffic:
           $ref: '#/components/schemas/BusinessWebTraffic'
-    BusinessPersonEntity:
-      type: object
-      title: Person
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          enum:
-          - person
-          description: The kind of entity this card describes. Always `person`.
-        name:
-          type: string
-          description: The person's name.
-        summary:
-          type: string
-          description: A profile of the person.
-        linkedin_url:
-          type: string
-          description: LinkedIn profile URL.
-        current_position:
-          type: string
-          description: Current role and organization.
-        career:
-          type: array
-          description: Career history.
-          items:
-            $ref: '#/components/schemas/BusinessCareerEntry'
-        photo:
-          type: object
-          description: A photo of the person.
-          properties:
-            url:
-              type: string
-              description: The photo URL.
-        activities:
-          type: array
-          description: Recent activity from the person's own channels.
-          items:
-            $ref: '#/components/schemas/BusinessSearchResult'
     BusinessFinancials:
       type: object
       description: Financial results for one reporting period.
@@ -632,52 +559,52 @@ components:
         currency:
           type: string
           description: The currency the figures are reported in.
-    HighlightOptions:
+    BusinessEntityIdentifiers:
       type: object
-      description: Controls highlight extraction from result pages.
+      description: Identifiers for the company.
       properties:
-        enable:
-          type: boolean
-          default: true
-          description: If true, returns query-relevant highlight in each result.
-        max_tokens:
-          type: integer
-          default: 512
-          minimum: 100
-          maximum: 20000
-          description: Max tokens returned per highlight.
-    BusinessSearchMeta:
-      type: object
-      description: Additional metadata for the search request.
-      properties:
-        usage:
-          $ref: '#/components/schemas/BusinessSearchUsage'
-        latency:
-          type: number
-          description: Response time in milliseconds.
-        warning:
+        website:
           type: string
-          description: Warning message, if any.
-    BusinessEntityOptions:
+          description: The official website.
+        linkedin_url:
+          type: string
+          description: LinkedIn company page URL.
+        stock_ticker:
+          type: string
+          description: Stock ticker, prefixed with the exchange.
+        sec_cik:
+          type: string
+          description: SEC Central Index Key.
+    BusinessWebTraffic:
       type: object
-      description: Controls the entity cards returned for companies and people.
+      description: Web traffic for the company's website.
       properties:
-        enable:
-          type: boolean
-          default: true
-          description: If true, returns data.entities.
-        count:
+        visits_monthly:
           type: integer
-          default: 2
-          minimum: 1
-          maximum: 20
-          description: Maximum number of entity cards to return.
-        max_activities:
+          description: Monthly visits.
+        rank:
           type: integer
-          default: 5
-          minimum: 1
-          maximum: 20
-          description: Maximum number of recent activities to return per entity card.
+          description: Global traffic rank.
+        period:
+          type: string
+          description: The month the figures belong to.
+          example: 2026-08
+    BusinessEntityAttributes:
+      type: object
+      description: Basic attributes of the company.
+      properties:
+        industry:
+          type: string
+          description: The industry the company operates in.
+        hq_location:
+          type: string
+          description: Headquarters location.
+        founded_year:
+          type: integer
+          description: The year the company was founded.
+        employee_range:
+          type: string
+          description: Employee count, as a range.
     BusinessEntity:
       oneOf:
       - $ref: '#/components/schemas/BusinessCompanyEntity'
@@ -687,6 +614,51 @@ components:
         mapping:
           company: '#/components/schemas/BusinessCompanyEntity'
           person: '#/components/schemas/BusinessPersonEntity'
+    BusinessCompanyEntity:
+      type: object
+      title: Company
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - company
+          description: The kind of entity this card describes. Always `company`.
+        name:
+          type: string
+          description: The company name.
+        summary:
+          type: string
+          description: A profile of the company.
+        aliases:
+          type: array
+          items:
+            type: string
+          description: Other names and spellings for the company.
+        identifiers:
+          $ref: '#/components/schemas/BusinessEntityIdentifiers'
+        attributes:
+          $ref: '#/components/schemas/BusinessEntityAttributes'
+        metrics:
+          $ref: '#/components/schemas/BusinessEntityMetrics'
+        key_people:
+          type: array
+          description: Key people at the company.
+          items:
+            $ref: '#/components/schemas/BusinessKeyPerson'
+        logo:
+          type: object
+          description: The company logo.
+          properties:
+            url:
+              type: string
+              description: The logo image URL.
+        activities:
+          type: array
+          description: Recent activity from the company's own channels.
+          items:
+            $ref: '#/components/schemas/BusinessSearchResult'
     ErrorResponse:
       type: object
       properties:
@@ -703,6 +675,32 @@ components:
       - code
       - msg
       - request_id
+    BusinessSearchUsage:
+      type: object
+      description: Usage information for the search request.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of text search queries executed.
+        full_content_extra_count:
+          type: integer
+          description: Billable full_content results beyond the free allowance.
+    BusinessCareerEntry:
+      type: object
+      description: One role in a person's career history.
+      properties:
+        organization:
+          type: string
+          description: The organization.
+        title:
+          type: string
+          description: The role held.
+        start:
+          type: string
+          description: When the role started, as a year or a year and month.
+        end:
+          type: string
+          description: When the role ended, as a year or a year and month. Omitted while the role is current.
   responses:
     RateLimited:
       description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
@@ -763,6 +761,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

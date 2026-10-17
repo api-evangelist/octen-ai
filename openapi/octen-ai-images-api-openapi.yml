@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Images API
+  title: Octen Images API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Images across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -251,93 +251,43 @@ paths:
                   code: null
       tags:
       - Images
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
-    OpenAIErrorResponse:
+    ImageUsage:
       type: object
-      description: Error body in the OpenAI protocol format.
       required:
-      - error
+      - input_tokens
+      - output_tokens
+      - total_tokens
+      description: Token usage information.
       properties:
-        error:
+        input_tokens:
+          type: integer
+          description: Input tokens (text prompt + input image tokens).
+        input_tokens_details:
           type: object
           properties:
-            message:
-              type: string
-              description: A human-readable description of the error.
-            type:
-              type: string
-              description: The error category, e.g. `invalid_request_error`.
-            param:
-              type: string
-              nullable: true
-              description: The parameter related to the error, if any.
-            code:
-              type: string
-              nullable: true
-              description: A machine-readable error code, if any.
-          required:
-          - message
-          - type
-    ImageGenerationStreamEvent:
-      type: object
-      required:
-      - id
-      - type
-      - b64_json
-      description: A streaming SSE event. Partial preview images arrive first (each with `partial_image_index`), then one `completed` event with `usage`. The event type prefix is `image_generation` for text-to-image and `image_edit` for editing.
-      properties:
-        id:
-          type: string
-          description: Request identifier. Identical across all events of one request.
-        type:
-          type: string
-          enum:
-          - image_generation.partial_image
-          - image_generation.completed
-          - image_edit.partial_image
-          - image_edit.completed
-          description: The event type.
-        b64_json:
-          type: string
-          description: 'Base64 image for this event: the current preview for `partial_image`, the final image for `completed`.'
-        created_at:
+            text_tokens:
+              type: integer
+              description: Text tokens of the prompt.
+            image_tokens:
+              type: integer
+              description: Tokens of the input images.
+        output_tokens:
           type: integer
-          description: Unix timestamp when the event was generated.
-        size:
-          type: string
-          description: (GPT only) The output size actually applied; useful when `size` was `auto`.
-        quality:
-          type: string
-          enum:
-          - low
-          - medium
-          - high
-          - xhigh
-          - max
-          description: (GPT only) The quality tier actually applied.
-        background:
-          type: string
-          enum:
-          - transparent
-          - opaque
-          description: (GPT only) The background setting actually applied.
-        output_format:
-          type: string
-          enum:
-          - png
-          - jpeg
-          - webp
-          description: The output format actually applied; for Gemini, derived from the mimeType.
-        partial_image_index:
+          description: Output tokens (generated image tokens + reasoning text tokens).
+        output_tokens_details:
+          type: object
+          properties:
+            text_tokens:
+              type: integer
+              description: Output tokens used by reasoning text.
+            image_tokens:
+              type: integer
+              description: Tokens of the generated images.
+        total_tokens:
           type: integer
-          description: Present only in `partial_image` events. Preview index, starting at 0.
-        usage:
-          allOf:
-          - $ref: '#/components/schemas/ImageUsage'
-          description: Present only in `completed` events. Same structure as the non-streaming `usage`.
+          description: Total tokens (input_tokens + output_tokens).
     ImageGenerationFormRequest:
       description: Multipart form for the Image Generation API. Same fields as the JSON body, except image inputs are uploaded as files.
       allOf:
@@ -358,38 +308,6 @@ components:
             type: string
             format: binary
             description: (GPT only) Mask image file (PNG matching the input size). Transparent areas are repainted. Effective only when an image is provided.
-    ImageGenerationRequest:
-      description: JSON request body for the Image Generation API.
-      allOf:
-      - $ref: '#/components/schemas/ImageGenerationBaseRequest'
-      - type: object
-        properties:
-          image:
-            description: Reference/source image(s) for editing, a data URL prefix or a raw base64 string. Providing an image enters edit mode. An array passes multiple reference images.
-            oneOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-          mask:
-            type: string
-            description: (GPT only) Mask image, base64-encoded PNG matching the input size. Transparent areas are repainted. Effective only when `image` is provided.
-    ImagePart:
-      type: object
-      description: An ordered content part preserving the original text/image interleaving.
-      properties:
-        type:
-          type: string
-          enum:
-          - text
-          - image
-          description: The part type.
-        text:
-          type: string
-          description: Text content. Present when `type` is `text`.
-        index:
-          type: integer
-          description: Index into the `data` array. Present when `type` is `image`; read the image bytes from `data[index].b64_json`.
     ImageGenerationBaseRequest:
       type: object
       required:
@@ -504,41 +422,121 @@ components:
         user:
           type: string
           description: A unique identifier for the end user. Use hashed or pseudonymous identifiers to avoid passing personally identifiable information.
-    ImageUsage:
+    OpenAIErrorResponse:
+      type: object
+      description: Error body in the OpenAI protocol format.
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: A human-readable description of the error.
+            type:
+              type: string
+              description: The error category, e.g. `invalid_request_error`.
+            param:
+              type: string
+              nullable: true
+              description: The parameter related to the error, if any.
+            code:
+              type: string
+              nullable: true
+              description: A machine-readable error code, if any.
+          required:
+          - message
+          - type
+    ImageGenerationRequest:
+      description: JSON request body for the Image Generation API.
+      allOf:
+      - $ref: '#/components/schemas/ImageGenerationBaseRequest'
+      - type: object
+        properties:
+          image:
+            description: Reference/source image(s) for editing, a data URL prefix or a raw base64 string. Providing an image enters edit mode. An array passes multiple reference images.
+            oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          mask:
+            type: string
+            description: (GPT only) Mask image, base64-encoded PNG matching the input size. Transparent areas are repainted. Effective only when `image` is provided.
+    ImagePart:
+      type: object
+      description: An ordered content part preserving the original text/image interleaving.
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          - image
+          description: The part type.
+        text:
+          type: string
+          description: Text content. Present when `type` is `text`.
+        index:
+          type: integer
+          description: Index into the `data` array. Present when `type` is `image`; read the image bytes from `data[index].b64_json`.
+    ImageGenerationStreamEvent:
       type: object
       required:
-      - input_tokens
-      - output_tokens
-      - total_tokens
-      description: Token usage information.
+      - id
+      - type
+      - b64_json
+      description: A streaming SSE event. Partial preview images arrive first (each with `partial_image_index`), then one `completed` event with `usage`. The event type prefix is `image_generation` for text-to-image and `image_edit` for editing.
       properties:
-        input_tokens:
+        id:
+          type: string
+          description: Request identifier. Identical across all events of one request.
+        type:
+          type: string
+          enum:
+          - image_generation.partial_image
+          - image_generation.completed
+          - image_edit.partial_image
+          - image_edit.completed
+          description: The event type.
+        b64_json:
+          type: string
+          description: 'Base64 image for this event: the current preview for `partial_image`, the final image for `completed`.'
+        created_at:
           type: integer
-          description: Input tokens (text prompt + input image tokens).
-        input_tokens_details:
-          type: object
-          properties:
-            text_tokens:
-              type: integer
-              description: Text tokens of the prompt.
-            image_tokens:
-              type: integer
-              description: Tokens of the input images.
-        output_tokens:
+          description: Unix timestamp when the event was generated.
+        size:
+          type: string
+          description: (GPT only) The output size actually applied; useful when `size` was `auto`.
+        quality:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          description: (GPT only) The quality tier actually applied.
+        background:
+          type: string
+          enum:
+          - transparent
+          - opaque
+          description: (GPT only) The background setting actually applied.
+        output_format:
+          type: string
+          enum:
+          - png
+          - jpeg
+          - webp
+          description: The output format actually applied; for Gemini, derived from the mimeType.
+        partial_image_index:
           type: integer
-          description: Output tokens (generated image tokens + reasoning text tokens).
-        output_tokens_details:
-          type: object
-          properties:
-            text_tokens:
-              type: integer
-              description: Output tokens used by reasoning text.
-            image_tokens:
-              type: integer
-              description: Tokens of the generated images.
-        total_tokens:
-          type: integer
-          description: Total tokens (input_tokens + output_tokens).
+          description: Present only in `partial_image` events. Preview index, starting at 0.
+        usage:
+          allOf:
+          - $ref: '#/components/schemas/ImageUsage'
+          description: Present only in `completed` events. Same structure as the non-streaming `usage`.
     ImageGenerationResponse:
       type: object
       required:
@@ -617,6 +615,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

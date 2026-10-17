@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Video Search API
+  title: Octen Video Search API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Video Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -85,46 +85,24 @@ paths:
           $ref: '#/components/responses/InternalError'
       tags:
       - Video Search
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
-    VideoSearchData:
+    VideoSearchResponse:
       type: object
-      description: The main response payload.
       properties:
-        results:
-          type: array
-          description: A list of video search results.
-          items:
-            $ref: '#/components/schemas/VideoSearchResult'
-    VideoSearchInput:
-      type: object
-      required:
-      - type
-      description: A single text input. At most one input per request.
-      properties:
-        type:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
           type: string
-          enum:
-          - text
-          description: The input type.
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
         data:
-          type: string
-          description: The query content, max 500 characters.
-    VideoSearchMeta:
-      type: object
-      description: Additional metadata for the Video Search request.
-      properties:
-        usage:
-          $ref: '#/components/schemas/VideoSearchUsage'
-        latency:
-          type: number
-          description: Response time in milliseconds.
-        warning:
-          type: string
-          nullable: true
-          description: Warning message, if any.
+          $ref: '#/components/schemas/VideoSearchData'
+        meta:
+          $ref: '#/components/schemas/VideoSearchMeta'
     VideoSearchUsage:
       type: object
       description: Usage information for the Video Search request.
@@ -132,53 +110,6 @@ components:
         num_search_queries:
           type: integer
           description: Number of search queries executed.
-    VideoSearchRequest:
-      type: object
-      required:
-      - inputs
-      description: Request body for the Video Search API.
-      properties:
-        inputs:
-          type: array
-          maxItems: 1
-          description: Input array carrying a text query (at most 1).
-          items:
-            $ref: '#/components/schemas/VideoSearchInput'
-        count:
-          type: integer
-          minimum: 1
-          maximum: 10
-          default: 5
-          description: Number of results to return.
-        time_range:
-          type: string
-          enum:
-          - day
-          - week
-          - month
-          - year
-          - d
-          - w
-          - m
-          - y
-          description: Relative time window counting back from the current time, filtered by publish time. Mutually exclusive with `start_time`/`end_time` — if both are provided, `start_time`/`end_time` take precedence.
-        start_time:
-          type: string
-          format: date-time
-          description: Start time for filtering results by publish time. ISO 8601 format.
-          example: '2025-01-01T00:00:00+08:00'
-        end_time:
-          type: string
-          format: date-time
-          description: End time for filtering results by publish time. ISO 8601 format.
-          example: '2025-01-01T00:00:00+08:00'
-        safesearch:
-          type: string
-          enum:
-          - 'off'
-          - strict
-          default: strict
-          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
     VideoSearchResult:
       type: object
       description: A single video search result.
@@ -228,43 +159,90 @@ components:
       - code
       - msg
       - request_id
-    VideoSearchResponse:
+    VideoSearchInput:
       type: object
+      required:
+      - type
+      description: A single text input. At most one input per request.
       properties:
-        code:
-          type: integer
-          description: Business status code. 0 indicates success.
-        msg:
+        type:
           type: string
-          description: A message describing the result.
-        request_id:
-          type: string
-          description: The unique identifier for this request.
+          enum:
+          - text
+          description: The input type.
         data:
-          $ref: '#/components/schemas/VideoSearchData'
-        meta:
-          $ref: '#/components/schemas/VideoSearchMeta'
+          type: string
+          description: The query content, max 500 characters.
+    VideoSearchMeta:
+      type: object
+      description: Additional metadata for the Video Search request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/VideoSearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
+          type: string
+          nullable: true
+          description: Warning message, if any.
+    VideoSearchRequest:
+      type: object
+      required:
+      - inputs
+      description: Request body for the Video Search API.
+      properties:
+        inputs:
+          type: array
+          maxItems: 1
+          description: Input array carrying a text query (at most 1).
+          items:
+            $ref: '#/components/schemas/VideoSearchInput'
+        count:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
+          description: Number of results to return.
+        time_range:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          - year
+          - d
+          - w
+          - m
+          - y
+          description: Relative time window counting back from the current time, filtered by publish time. Mutually exclusive with `start_time`/`end_time` — if both are provided, `start_time`/`end_time` take precedence.
+        start_time:
+          type: string
+          format: date-time
+          description: Start time for filtering results by publish time. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        end_time:
+          type: string
+          format: date-time
+          description: End time for filtering results by publish time. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        safesearch:
+          type: string
+          enum:
+          - 'off'
+          - strict
+          default: strict
+          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
+    VideoSearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        results:
+          type: array
+          description: A list of video search results.
+          items:
+            $ref: '#/components/schemas/VideoSearchResult'
   responses:
-    RateLimited:
-      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 429
-            msg: Exceeding the rate limit
-            request_id: req_abc123def456
-    InternalError:
-      description: Internal error — Returned when an unexpected server-side error occurs.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 500
-            msg: Internal error
-            request_id: req_abc123def456
     Unauthorized:
       description: Invalid API Key — Returned when the API key is missing or invalid.
       content:
@@ -285,6 +263,26 @@ components:
             code: 403
             msg: Insufficient balance in account
             request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
   securitySchemes:
     bearerAuth:
       type: http
@@ -304,6 +302,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

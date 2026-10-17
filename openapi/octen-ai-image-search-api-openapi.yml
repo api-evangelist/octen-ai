@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Image Search API
+  title: Octen Image Search API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Image Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -157,10 +157,125 @@ paths:
           $ref: '#/components/responses/InternalError'
       tags:
       - Image Search
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
+    ImageSearchMeta:
+      type: object
+      description: Additional metadata for the Image Search request.
+      properties:
+        usage:
+          $ref: '#/components/schemas/ImageSearchUsage'
+        latency:
+          type: number
+          description: Response time in milliseconds.
+        warning:
+          type: string
+          nullable: true
+          description: Warning message, if any.
+    ImageSearchInput:
+      type: object
+      required:
+      - type
+      description: 'A single multimodal input. Currently each request accepts exactly one input: either one text input or one image input.'
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          - image
+          description: 'The input type. A single image must be at most 5MB and one of: JPEG, PNG, WEBP, BMP, TIFF, ICO, DIB, ICNS, SGI.'
+        url:
+          type: string
+          description: Image input as a public URL. For an image input, provide either `url` or `data`, not both.
+        data:
+          type: string
+          description: 'When `type` is `text`: the query content, max 500 characters. When `type` is `image`: base64-encoded image data, at most 5MB after encoding.'
+    ImageSearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        results:
+          type: array
+          description: A list of image search results.
+          items:
+            $ref: '#/components/schemas/ImageSearchResult'
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    HtmlSnippetOptions:
+      type: object
+      description: Only effective when `topic=design`; controls whether an `html_snippet` is returned for each result.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If `true`, returns an `html_snippet` for each image result.
+        max_tokens:
+          type: integer
+          default: 5000
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of `html_snippet` returned per image result.
+    ImageSearchResult:
+      type: object
+      description: A single image search result.
+      properties:
+        title:
+          type: string
+          description: The title of the image.
+        url:
+          type: string
+          description: The image URL.
+        source_page:
+          type: string
+          description: URL of the original page hosting the image.
+        description:
+          type: string
+          description: Server-generated text description of the image content.
+        width:
+          type: integer
+          description: Image width in pixels.
+        height:
+          type: integer
+          description: Image height in pixels.
+        thumbnail:
+          type: string
+          description: Thumbnail URL.
+        summary:
+          type: string
+          description: Structured description of the design asset, covering category, layout, style, tags, and more. Returned only when `topic=design`.
+        html_snippet:
+          type: string
+          description: HTML/CSS snippet that an LLM can reuse directly. Returned only when `topic=design` and `html_snippet.enable` is `true`.
+    ImageSearchResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. 0 indicates success.
+        msg:
+          type: string
+          description: A message describing the result.
+        request_id:
+          type: string
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/ImageSearchData'
+        meta:
+          $ref: '#/components/schemas/ImageSearchMeta'
     ImageSearchRequest:
       type: object
       required:
@@ -208,35 +323,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/HtmlSnippetOptions'
           description: Only effective when `topic=design`; controls whether an `html_snippet` is returned for each result.
-    ImageSearchMeta:
-      type: object
-      description: Additional metadata for the Image Search request.
-      properties:
-        usage:
-          $ref: '#/components/schemas/ImageSearchUsage'
-        latency:
-          type: number
-          description: Response time in milliseconds.
-        warning:
-          type: string
-          nullable: true
-          description: Warning message, if any.
-    ImageSearchResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: Business status code. 0 indicates success.
-        msg:
-          type: string
-          description: A message describing the result.
-        request_id:
-          type: string
-          description: The unique identifier for this request.
-        data:
-          $ref: '#/components/schemas/ImageSearchData'
-        meta:
-          $ref: '#/components/schemas/ImageSearchMeta'
     ImageSearchUsage:
       type: object
       description: Usage information for the Image Search request.
@@ -244,105 +330,7 @@ components:
         num_search_queries:
           type: integer
           description: Number of search queries executed.
-    HtmlSnippetOptions:
-      type: object
-      description: Only effective when `topic=design`; controls whether an `html_snippet` is returned for each result.
-      properties:
-        enable:
-          type: boolean
-          default: false
-          description: If `true`, returns an `html_snippet` for each image result.
-        max_tokens:
-          type: integer
-          default: 5000
-          minimum: 100
-          maximum: 100000
-          description: Maximum tokens of `html_snippet` returned per image result.
-    ImageSearchResult:
-      type: object
-      description: A single image search result.
-      properties:
-        title:
-          type: string
-          description: The title of the image.
-        url:
-          type: string
-          description: The image URL.
-        source_page:
-          type: string
-          description: URL of the original page hosting the image.
-        description:
-          type: string
-          description: Server-generated text description of the image content.
-        width:
-          type: integer
-          description: Image width in pixels.
-        height:
-          type: integer
-          description: Image height in pixels.
-        thumbnail:
-          type: string
-          description: Thumbnail URL.
-        summary:
-          type: string
-          description: Structured description of the design asset, covering category, layout, style, tags, and more. Returned only when `topic=design`.
-        html_snippet:
-          type: string
-          description: HTML/CSS snippet that an LLM can reuse directly. Returned only when `topic=design` and `html_snippet.enable` is `true`.
-    ImageSearchInput:
-      type: object
-      required:
-      - type
-      description: 'A single multimodal input. Currently each request accepts exactly one input: either one text input or one image input.'
-      properties:
-        type:
-          type: string
-          enum:
-          - text
-          - image
-          description: 'The input type. A single image must be at most 5MB and one of: JPEG, PNG, WEBP, BMP, TIFF, ICO, DIB, ICNS, SGI.'
-        url:
-          type: string
-          description: Image input as a public URL. For an image input, provide either `url` or `data`, not both.
-        data:
-          type: string
-          description: 'When `type` is `text`: the query content, max 500 characters. When `type` is `image`: base64-encoded image data, at most 5MB after encoding.'
-    ImageSearchData:
-      type: object
-      description: The main response payload.
-      properties:
-        results:
-          type: array
-          description: A list of image search results.
-          items:
-            $ref: '#/components/schemas/ImageSearchResult'
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: Business status code. Non-zero values indicate an error.
-        msg:
-          type: string
-          description: A message describing the error.
-        request_id:
-          type: string
-          description: Unique identifier for the request.
-      required:
-      - code
-      - msg
-      - request_id
   responses:
-    RateLimited:
-      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 429
-            msg: Exceeding the rate limit
-            request_id: req_abc123def456
     UnsupportedMediaType:
       description: Unsupported media type — Returned when the input media format is not supported.
       content:
@@ -352,6 +340,16 @@ components:
           example:
             code: 415
             msg: Unsupported media type
+            request_id: req_abc123def456
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
             request_id: req_abc123def456
     PayloadTooLarge:
       description: Payload too large — Returned when the request payload exceeds the size limit.
@@ -373,16 +371,6 @@ components:
             code: 401
             msg: Invalid API Key
             request_id: req_abc123def456
-    InternalError:
-      description: Internal error — Returned when an unexpected server-side error occurs.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 500
-            msg: Internal error
-            request_id: req_abc123def456
     InsufficientBalance:
       description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
       content:
@@ -392,6 +380,16 @@ components:
           example:
             code: 403
             msg: Insufficient balance in account
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
             request_id: req_abc123def456
   securitySchemes:
     bearerAuth:
@@ -412,6 +410,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

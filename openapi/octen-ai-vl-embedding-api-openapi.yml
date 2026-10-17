@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Vl Embedding API
+  title: Octen Vl Embedding API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Vl Embedding across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -149,10 +149,110 @@ paths:
           $ref: '#/components/responses/InternalError'
       tags:
       - Vl Embedding
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
+    VLEmbeddingData:
+      type: object
+      description: The main VL embedding response payload.
+      properties:
+        results:
+          type: array
+          description: A list of embedding results.
+          items:
+            $ref: '#/components/schemas/VLEmbeddingResult'
+        model:
+          type: string
+          description: The embedding model used for this request.
+    VLEmbeddingInput:
+      type: object
+      required:
+      - contents
+      description: 'The multimodal content to be vectorized. Supports text, images, videos, and combinations. Maximum total elements per request: 20. Maximum images per request: 5. Maximum videos per request: 1.'
+      properties:
+        contents:
+          type: array
+          maxItems: 20
+          description: The list of content elements to process.
+          items:
+            $ref: '#/components/schemas/VLEmbeddingContent'
+    VLEmbeddingContent:
+      type: object
+      description: A single content element. Each object should provide exactly one of `text`, `image`, or `video`. For multiple images, include multiple content objects (one image per object).
+      properties:
+        text:
+          type: string
+          description: Text input. Maximum 10,000 characters per entry.
+        image:
+          type: string
+          description: 'Image input. Supports a URL or a Base64 string. Maximum 5MB per image. Supported formats: JPEG, PNG, WEBP, BMP, TIFF, ICO, DIB, ICNS, SGI.'
+        video:
+          type: string
+          description: 'Video input. URL only. Maximum 50MB per file. Supported formats: MP4, AVI, MOV.'
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    VLEmbeddingRequest:
+      type: object
+      required:
+      - model
+      - input
+      properties:
+        model:
+          type: string
+          enum:
+          - octen-vl-embedding
+          - octen-vl-embedding-large
+          description: The multimodal embedding model used for this request.
+        input:
+          $ref: '#/components/schemas/VLEmbeddingInput'
+        enable_fusion:
+          type: boolean
+          default: false
+          description: Whether to generate a fused embedding. When `true`, all elements in `contents` are fused into a single vector; when `false`, each element produces an independent vector.
+        dimension:
+          type: integer
+          description: 'The dimensionality of the output embedding vectors. Defaults to the model''s max dimension (octen-vl-embedding: 2048, octen-vl-embedding-large: 4096). Any positive integer ≤ the model''s max dimension is allowed.'
+        fps:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 1.0
+          description: Frames sampled per second of video. For example, `0.5` samples one frame every two seconds. Lower values sample fewer frames and reduce video token consumption. Each video is sampled to at most 64 frames.
+        instruct:
+          type: string
+          default: Represent the user's input.
+          description: Custom task description used to guide the model in understanding the query intent. Its length counts toward `input_tokens` and shares the 10,000-character total limit with `contents`.
+    VLEmbeddingResult:
+      type: object
+      description: A single VL embedding result.
+      properties:
+        index:
+          type: integer
+          description: The position of the embedding in the input array.
+        embedding:
+          type: array
+          items:
+            type: number
+          description: The generated embedding vector. Type and encoding may vary based on the input parameters.
+        type:
+          type: string
+          enum:
+          - vl
+          - fusion
+          description: The result type.
     VLEmbeddingUsage:
       type: object
       description: Usage information for the VL embedding request.
@@ -188,79 +288,6 @@ components:
           $ref: '#/components/schemas/VLEmbeddingData'
         meta:
           $ref: '#/components/schemas/VLEmbeddingMeta'
-    VLEmbeddingResult:
-      type: object
-      description: A single VL embedding result.
-      properties:
-        index:
-          type: integer
-          description: The position of the embedding in the input array.
-        embedding:
-          type: array
-          items:
-            type: number
-          description: The generated embedding vector. Type and encoding may vary based on the input parameters.
-        type:
-          type: string
-          enum:
-          - vl
-          - fusion
-          description: The result type.
-    VLEmbeddingRequest:
-      type: object
-      required:
-      - model
-      - input
-      properties:
-        model:
-          type: string
-          enum:
-          - octen-vl-embedding
-          - octen-vl-embedding-large
-          description: The multimodal embedding model used for this request.
-        input:
-          $ref: '#/components/schemas/VLEmbeddingInput'
-        enable_fusion:
-          type: boolean
-          default: false
-          description: Whether to generate a fused embedding. When `true`, all elements in `contents` are fused into a single vector; when `false`, each element produces an independent vector.
-        dimension:
-          type: integer
-          description: 'The dimensionality of the output embedding vectors. Defaults to the model''s max dimension (octen-vl-embedding: 2048, octen-vl-embedding-large: 4096). Any positive integer ≤ the model''s max dimension is allowed.'
-        fps:
-          type: number
-          minimum: 0
-          maximum: 1
-          default: 1.0
-          description: Frames sampled per second of video. For example, `0.5` samples one frame every two seconds. Lower values sample fewer frames and reduce video token consumption. Each video is sampled to at most 64 frames.
-        instruct:
-          type: string
-          default: Represent the user's input.
-          description: Custom task description used to guide the model in understanding the query intent. Its length counts toward `input_tokens` and shares the 10,000-character total limit with `contents`.
-    VLEmbeddingInput:
-      type: object
-      required:
-      - contents
-      description: 'The multimodal content to be vectorized. Supports text, images, videos, and combinations. Maximum total elements per request: 20. Maximum images per request: 5. Maximum videos per request: 1.'
-      properties:
-        contents:
-          type: array
-          maxItems: 20
-          description: The list of content elements to process.
-          items:
-            $ref: '#/components/schemas/VLEmbeddingContent'
-    VLEmbeddingData:
-      type: object
-      description: The main VL embedding response payload.
-      properties:
-        results:
-          type: array
-          description: A list of embedding results.
-          items:
-            $ref: '#/components/schemas/VLEmbeddingResult'
-        model:
-          type: string
-          description: The embedding model used for this request.
     VLEmbeddingMeta:
       type: object
       description: Additional metadata for the VL embedding request.
@@ -271,46 +298,7 @@ components:
           type: string
           nullable: true
           description: Optional warning message, if any.
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: Business status code. Non-zero values indicate an error.
-        msg:
-          type: string
-          description: A message describing the error.
-        request_id:
-          type: string
-          description: Unique identifier for the request.
-      required:
-      - code
-      - msg
-      - request_id
-    VLEmbeddingContent:
-      type: object
-      description: A single content element. Each object should provide exactly one of `text`, `image`, or `video`. For multiple images, include multiple content objects (one image per object).
-      properties:
-        text:
-          type: string
-          description: Text input. Maximum 10,000 characters per entry.
-        image:
-          type: string
-          description: 'Image input. Supports a URL or a Base64 string. Maximum 5MB per image. Supported formats: JPEG, PNG, WEBP, BMP, TIFF, ICO, DIB, ICNS, SGI.'
-        video:
-          type: string
-          description: 'Video input. URL only. Maximum 50MB per file. Supported formats: MP4, AVI, MOV.'
   responses:
-    RateLimited:
-      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 429
-            msg: Exceeding the rate limit
-            request_id: req_abc123def456
     UnsupportedMediaType:
       description: Unsupported media type — Returned when the input media format is not supported.
       content:
@@ -331,6 +319,16 @@ components:
             code: 413
             msg: Payload too large
             request_id: req_abc123def456
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
     Unauthorized:
       description: Invalid API Key — Returned when the API key is missing or invalid.
       content:
@@ -341,16 +339,6 @@ components:
             code: 401
             msg: Invalid API Key
             request_id: req_abc123def456
-    InternalError:
-      description: Internal error — Returned when an unexpected server-side error occurs.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 500
-            msg: Internal error
-            request_id: req_abc123def456
     InsufficientBalance:
       description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
       content:
@@ -360,6 +348,16 @@ components:
           example:
             code: 403
             msg: Insufficient balance in account
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
             request_id: req_abc123def456
   securitySchemes:
     bearerAuth:
@@ -380,6 +378,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

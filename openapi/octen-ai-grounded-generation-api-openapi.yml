@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Grounded Generation API
+  title: Octen Grounded Generation API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Grounded Generation across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -75,8 +75,6 @@ paths:
           $ref: '#/components/responses/InternalError'
       tags:
       - Grounded Generation
-    servers:
-    - url: https://api.octen.ai
   /v1/grounded-generation/{generation_id}:
     get:
       summary: Get a generation result
@@ -144,76 +142,49 @@ paths:
           $ref: '#/components/responses/InternalError'
       tags:
       - Grounded Generation
-    servers:
-    - url: https://api.octen.ai
 components:
+  responses:
+    Unauthorized:
+      description: Invalid API Key — Returned when the API key is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            msg: Invalid API Key
+            request_id: req_abc123def456
+    InsufficientBalance:
+      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            msg: Insufficient balance in account
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
+            request_id: req_abc123def456
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
   schemas:
-    GroundedGenerationUsage:
-      type: object
-      description: Metering for the task. Present only when `status` is `succeeded`.
-      properties:
-        image_count:
-          type: integer
-          description: Number of images generated. Returned when `modality` is `image`.
-        video_count:
-          type: integer
-          description: Number of videos generated. Returned when `modality` is `video`.
-        video_seconds:
-          type: integer
-          description: Length of the generated video in seconds. Returned when `modality` is `video`.
-    GroundedGenerationSearchGroup:
-      type: object
-      description: The results for one search query.
-      properties:
-        query:
-          type: string
-          description: The query the task searched for.
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/GroundedGenerationSearchResult'
-          description: Results for this query.
-    GroundedGenerationSearchResult:
-      type: object
-      description: A single search result.
-      properties:
-        type:
-          type: string
-          enum:
-          - image
-          - video
-          description: Media type of the result.
-        title:
-          type: string
-          description: The title of the result.
-        url:
-          type: string
-          description: The media URL.
-        source_page:
-          type: string
-          description: URL of the original page hosting the media.
-        description:
-          type: string
-          description: Description of the result.
-        cover_url:
-          type: string
-          description: Thumbnail URL.
-    GroundedGenerationReference:
-      type: object
-      description: A single piece of reference material.
-      properties:
-        source_id:
-          type: string
-          description: Identifier of the reference, such as `source1`.
-        url:
-          type: string
-          description: The media URL.
-        title:
-          type: string
-          description: The title of the reference.
-        cover_url:
-          type: string
-          description: Thumbnail URL.
     GroundedGenerationTask:
       type: object
       required:
@@ -266,50 +237,22 @@ components:
           description: Unix timestamp in seconds when the task was last updated.
         usage:
           $ref: '#/components/schemas/GroundedGenerationUsage'
-    GroundedGenerationResponse:
+    GroundedGenerationReference:
       type: object
-      required:
-      - generation_id
-      - modality
-      - status
-      - created_at
+      description: A single piece of reference material.
       properties:
-        request_id:
+        source_id:
           type: string
-          description: Unique identifier for the request.
-        generation_id:
+          description: Identifier of the reference, such as `source1`.
+        url:
           type: string
-          description: Unique task id, used to retrieve the result.
-        modality:
+          description: The media URL.
+        title:
           type: string
-          enum:
-          - image
-          - video
-          description: The type of output this task generates.
-        status:
+          description: The title of the reference.
+        cover_url:
           type: string
-          enum:
-          - queued
-          description: Task state.
-        created_at:
-          type: integer
-          description: Unix timestamp in seconds when the task was created.
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: Business status code. Non-zero values indicate an error.
-        msg:
-          type: string
-          description: A message describing the error.
-        request_id:
-          type: string
-          description: Unique identifier for the request.
-      required:
-      - code
-      - msg
-      - request_id
+          description: Thumbnail URL.
     GroundedGenerationRequest:
       type: object
       required:
@@ -349,6 +292,60 @@ components:
           minimum: 5
           maximum: 10
           description: Video length in seconds. Applies when `modality` is `video`. Values outside the allowed range are adjusted to the nearest bound.
+    GroundedGenerationSearchResult:
+      type: object
+      description: A single search result.
+      properties:
+        type:
+          type: string
+          enum:
+          - image
+          - video
+          description: Media type of the result.
+        title:
+          type: string
+          description: The title of the result.
+        url:
+          type: string
+          description: The media URL.
+        source_page:
+          type: string
+          description: URL of the original page hosting the media.
+        description:
+          type: string
+          description: Description of the result.
+        cover_url:
+          type: string
+          description: Thumbnail URL.
+    GroundedGenerationUsage:
+      type: object
+      description: Metering for the task. Present only when `status` is `succeeded`.
+      properties:
+        image_count:
+          type: integer
+          description: Number of images generated. Returned when `modality` is `image`.
+        video_count:
+          type: integer
+          description: Number of videos generated. Returned when `modality` is `video`.
+        video_seconds:
+          type: integer
+          description: Length of the generated video in seconds. Returned when `modality` is `video`.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
     GroundedGenerationError:
       type: object
       description: Failure reason, present when `status` is `failed`. Failed tasks are not billed.
@@ -367,47 +364,46 @@ components:
         message:
           type: string
           description: A message describing the failure.
-  responses:
-    RateLimited:
-      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 429
-            msg: Exceeding the rate limit
-            request_id: req_abc123def456
-    InternalError:
-      description: Internal error — Returned when an unexpected server-side error occurs.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 500
-            msg: Internal error
-            request_id: req_abc123def456
-    Unauthorized:
-      description: Invalid API Key — Returned when the API key is missing or invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 401
-            msg: Invalid API Key
-            request_id: req_abc123def456
-    InsufficientBalance:
-      description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 403
-            msg: Insufficient balance in account
-            request_id: req_abc123def456
+    GroundedGenerationResponse:
+      type: object
+      required:
+      - generation_id
+      - modality
+      - status
+      - created_at
+      properties:
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+        generation_id:
+          type: string
+          description: Unique task id, used to retrieve the result.
+        modality:
+          type: string
+          enum:
+          - image
+          - video
+          description: The type of output this task generates.
+        status:
+          type: string
+          enum:
+          - queued
+          description: Task state.
+        created_at:
+          type: integer
+          description: Unix timestamp in seconds when the task was created.
+    GroundedGenerationSearchGroup:
+      type: object
+      description: The results for one search query.
+      properties:
+        query:
+          type: string
+          description: The query the task searched for.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroundedGenerationSearchResult'
+          description: Results for this query.
   securitySchemes:
     bearerAuth:
       type: http
@@ -427,6 +423,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

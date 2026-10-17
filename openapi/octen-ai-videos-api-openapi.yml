@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Videos API
+  title: Octen Videos API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Videos across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -72,8 +72,6 @@ paths:
                 $ref: '#/components/schemas/OpenAIErrorResponse'
       tags:
       - Videos
-    servers:
-    - url: https://api.octen.ai
   /v1/videos/{id}:
     get:
       summary: Download a video
@@ -125,10 +123,53 @@ paths:
                 $ref: '#/components/schemas/OpenAIErrorResponse'
       tags:
       - Videos
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
+    VideoTask:
+      type: object
+      required:
+      - id
+      - model
+      - status
+      - created
+      properties:
+        id:
+          type: string
+          description: Unique task id, used to download the video.
+        model:
+          type: string
+          description: The model used for this task.
+        status:
+          type: string
+          enum:
+          - queued
+          - in_progress
+          - completed
+          - failed
+          description: Task state.
+        created:
+          type: integer
+          description: Unix timestamp in seconds when the task was created.
+        video_url:
+          type: string
+          description: Signed download URL for the video file, present when `status` is `completed`. Valid for 7 days after generation.
+        expires_at:
+          type: integer
+          description: Unix timestamp in seconds when `video_url` expires. Present when `status` is `completed`.
+        duration:
+          type: integer
+          description: Length of the generated video in seconds. Present when `status` is `completed`.
+        resolution:
+          type: string
+          description: Resolution of the generated video. Present when `status` is `completed`.
+        usage:
+          $ref: '#/components/schemas/VideoUsage'
+        error:
+          type: string
+          description: Failure reason, present when `status` is `failed`.
+        code:
+          type: string
+          description: Machine-readable failure code, present when `status` is `failed`.
     VideoGenerationRequest:
       type: object
       required:
@@ -192,105 +233,14 @@ components:
           type: object
           additionalProperties: true
           description: Vendor-specific parameters, passed through to the upstream model without validation. Keys that duplicate a unified parameter, or that control upstream storage, notification, sample count, or platform behavior, are rejected.
-    OpenAIErrorResponse:
-      type: object
-      description: Error body in the OpenAI protocol format.
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          properties:
-            message:
-              type: string
-              description: A human-readable description of the error.
-            type:
-              type: string
-              description: The error category, e.g. `invalid_request_error`.
-            param:
-              type: string
-              nullable: true
-              description: The parameter related to the error, if any.
-            code:
-              type: string
-              nullable: true
-              description: A machine-readable error code, if any.
-          required:
-          - message
-          - type
-    VideoTask:
-      type: object
-      required:
-      - id
-      - model
-      - status
-      - created
-      properties:
-        id:
-          type: string
-          description: Unique task id, used to download the video.
-        model:
-          type: string
-          description: The model used for this task.
-        status:
-          type: string
-          enum:
-          - queued
-          - in_progress
-          - completed
-          - failed
-          description: Task state.
-        created:
-          type: integer
-          description: Unix timestamp in seconds when the task was created.
-        video_url:
-          type: string
-          description: Signed download URL for the video file, present when `status` is `completed`. Valid for 7 days after generation.
-        expires_at:
-          type: integer
-          description: Unix timestamp in seconds when `video_url` expires. Present when `status` is `completed`.
-        duration:
-          type: integer
-          description: Length of the generated video in seconds. Present when `status` is `completed`.
-        resolution:
-          type: string
-          description: Resolution of the generated video. Present when `status` is `completed`.
-        usage:
-          $ref: '#/components/schemas/VideoUsage'
-        error:
-          type: string
-          description: Failure reason, present when `status` is `failed`.
-        code:
-          type: string
-          description: Machine-readable failure code, present when `status` is `failed`.
-    VideoFrameImage:
+    VideoInputReference:
       type: object
       required:
       - image
-      - frame_type
       properties:
         image:
           type: string
           description: Image URL or base64 data.
-        frame_type:
-          type: string
-          enum:
-          - first_frame
-          - last_frame
-          description: Whether the image is the first or the last frame.
-    VideoUsage:
-      type: object
-      description: Metering for the task. Present only when `status` is `completed`.
-      properties:
-        video_seconds:
-          type: integer
-          description: Video length in seconds.
-        video_tokens:
-          type: integer
-          description: Billed token count.
-        input_image_count:
-          type: integer
-          description: Number of input images, returned when images were supplied.
     VideoGenerationResponse:
       type: object
       required:
@@ -329,14 +279,60 @@ components:
       - code
       - msg
       - request_id
-    VideoInputReference:
+    VideoFrameImage:
       type: object
       required:
       - image
+      - frame_type
       properties:
         image:
           type: string
           description: Image URL or base64 data.
+        frame_type:
+          type: string
+          enum:
+          - first_frame
+          - last_frame
+          description: Whether the image is the first or the last frame.
+    OpenAIErrorResponse:
+      type: object
+      description: Error body in the OpenAI protocol format.
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: A human-readable description of the error.
+            type:
+              type: string
+              description: The error category, e.g. `invalid_request_error`.
+            param:
+              type: string
+              nullable: true
+              description: The parameter related to the error, if any.
+            code:
+              type: string
+              nullable: true
+              description: A machine-readable error code, if any.
+          required:
+          - message
+          - type
+    VideoUsage:
+      type: object
+      description: Metering for the task. Present only when `status` is `completed`.
+      properties:
+        video_seconds:
+          type: integer
+          description: Video length in seconds.
+        video_tokens:
+          type: integer
+          description: Billed token count.
+        input_image_count:
+          type: integer
+          description: Number of input images, returned when images were supplied.
   securitySchemes:
     bearerAuth:
       type: http
@@ -356,6 +352,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

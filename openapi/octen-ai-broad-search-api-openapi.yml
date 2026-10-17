@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Broad Search API
+  title: Octen Broad Search API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Broad Search across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -171,82 +171,8 @@ paths:
           $ref: '#/components/responses/InternalError'
       tags:
       - Broad Search
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
-    BroadSearchRequest:
-      type: object
-      required:
-      - query
-      properties:
-        query:
-          type: string
-          maxLength: 500
-          description: The original search query.
-        max_queries:
-          type: integer
-          minimum: 1
-          maximum: 30
-          default: 5
-          description: Upper bound on the number of sub-queries generated.
-        search_options:
-          allOf:
-          - $ref: '#/components/schemas/WebSearchOptions'
-          description: Search options applied to each sub-query. Shares the same parameters and defaults as the Web Search API.
-    SearchUsage:
-      type: object
-      description: Usage information for the search request.
-      properties:
-        num_search_queries:
-          type: integer
-          description: Number of search queries executed.
-        full_content_extra_count:
-          type: integer
-          description: Billable full_content results beyond the free allowance.
-    SearchResultGroup:
-      type: object
-      description: A group of search results for a single sub-query.
-      properties:
-        query:
-          type: string
-          description: The sub-query that produced these results.
-        results:
-          type: array
-          description: The search results for this sub-query.
-          items:
-            $ref: '#/components/schemas/SearchResult'
-        latency:
-          type: integer
-          description: Search latency for this query in milliseconds.
-    FullContentOptions:
-      type: object
-      description: Controls whether to return the full raw content of each result page.
-      properties:
-        enable:
-          type: boolean
-          default: false
-          description: If true, returns full_content for each result.
-        max_tokens:
-          type: integer
-          default: 2048
-          minimum: 100
-          maximum: 100000
-          description: Maximum tokens of full content included per result.
-    HighlightOptions:
-      type: object
-      description: Controls highlight extraction from result pages.
-      properties:
-        enable:
-          type: boolean
-          default: true
-          description: If true, returns query-relevant highlight in each result.
-        max_tokens:
-          type: integer
-          default: 512
-          minimum: 100
-          maximum: 20000
-          description: Max tokens returned per highlight.
     SearchResult:
       type: object
       description: A single search result.
@@ -299,6 +225,96 @@ components:
               description:
                 type: string
                 description: Text description of the image.
+    SearchUsage:
+      type: object
+      description: Usage information for the search request.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of search queries executed.
+        full_content_extra_count:
+          type: integer
+          description: Billable full_content results beyond the free allowance.
+    FullContentOptions:
+      type: object
+      description: Controls whether to return the full raw content of each result page.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
+    BroadSearchData:
+      type: object
+      description: The main response payload.
+      properties:
+        query:
+          type: string
+          description: The original query.
+        queries:
+          type: array
+          items:
+            type: string
+          description: Sub-queries generated from the query.
+        search_results:
+          type: array
+          description: Results are grouped by sub-query and are not de-duplicated across groups.
+          items:
+            $ref: '#/components/schemas/SearchResultGroup'
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Business status code. Non-zero values indicate an error.
+        msg:
+          type: string
+          description: A message describing the error.
+        request_id:
+          type: string
+          description: Unique identifier for the request.
+      required:
+      - code
+      - msg
+      - request_id
+    HighlightOptions:
+      type: object
+      description: Controls highlight extraction from result pages.
+      properties:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns query-relevant highlight in each result.
+        max_tokens:
+          type: integer
+          default: 512
+          minimum: 100
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    BroadSearchRequest:
+      type: object
+      required:
+      - query
+      properties:
+        query:
+          type: string
+          maxLength: 500
+          description: The original search query.
+        max_queries:
+          type: integer
+          minimum: 1
+          maximum: 30
+          default: 5
+          description: Upper bound on the number of sub-queries generated.
+        search_options:
+          allOf:
+          - $ref: '#/components/schemas/WebSearchOptions'
+          description: Search options applied to each sub-query. Shares the same parameters and defaults as the Web Search API.
     WebSearchOptions:
       type: object
       properties:
@@ -422,19 +438,6 @@ components:
           type: boolean
           default: false
           description: Whether to include images in each result.
-    BroadSearchResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: Business status code. 0 indicates success.
-        request_id:
-          type: string
-          description: The unique identifier for this request.
-        data:
-          $ref: '#/components/schemas/BroadSearchData'
-        meta:
-          $ref: '#/components/schemas/SearchMeta'
     SearchMeta:
       type: object
       description: Additional metadata for the search request.
@@ -448,60 +451,35 @@ components:
           type: string
           nullable: true
           description: Warning message, if any.
-    BroadSearchData:
-      type: object
-      description: The main response payload.
-      properties:
-        query:
-          type: string
-          description: The original query.
-        queries:
-          type: array
-          items:
-            type: string
-          description: Sub-queries generated from the query.
-        search_results:
-          type: array
-          description: Results are grouped by sub-query and are not de-duplicated across groups.
-          items:
-            $ref: '#/components/schemas/SearchResultGroup'
-    ErrorResponse:
+    BroadSearchResponse:
       type: object
       properties:
         code:
           type: integer
-          description: Business status code. Non-zero values indicate an error.
-        msg:
-          type: string
-          description: A message describing the error.
+          description: Business status code. 0 indicates success.
         request_id:
           type: string
-          description: Unique identifier for the request.
-      required:
-      - code
-      - msg
-      - request_id
+          description: The unique identifier for this request.
+        data:
+          $ref: '#/components/schemas/BroadSearchData'
+        meta:
+          $ref: '#/components/schemas/SearchMeta'
+    SearchResultGroup:
+      type: object
+      description: A group of search results for a single sub-query.
+      properties:
+        query:
+          type: string
+          description: The sub-query that produced these results.
+        results:
+          type: array
+          description: The search results for this sub-query.
+          items:
+            $ref: '#/components/schemas/SearchResult'
+        latency:
+          type: integer
+          description: Search latency for this query in milliseconds.
   responses:
-    RateLimited:
-      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 429
-            msg: Exceeding the rate limit
-            request_id: req_abc123def456
-    InternalError:
-      description: Internal error — Returned when an unexpected server-side error occurs.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            code: 500
-            msg: Internal error
-            request_id: req_abc123def456
     Unauthorized:
       description: Invalid API Key — Returned when the API key is missing or invalid.
       content:
@@ -512,6 +490,16 @@ components:
             code: 401
             msg: Invalid API Key
             request_id: req_abc123def456
+    RateLimited:
+      description: Exceeding the rate limit — Returned when the request exceeds the configured rate limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            msg: Exceeding the rate limit
+            request_id: req_abc123def456
     InsufficientBalance:
       description: Insufficient balance in account — Returned when the account balance is insufficient to complete the request.
       content:
@@ -521,6 +509,16 @@ components:
           example:
             code: 403
             msg: Insufficient balance in account
+            request_id: req_abc123def456
+    InternalError:
+      description: Internal error — Returned when an unexpected server-side error occurs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            msg: Internal error
             request_id: req_abc123def456
   securitySchemes:
     bearerAuth:
@@ -541,6 +539,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Chat API
+  title: Octen Chat API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Chat across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -383,69 +383,39 @@ paths:
                   code: null
       tags:
       - Chat Completions
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
-    SystemMessage:
+    ChatCompletionDelta:
       type: object
-      required:
-      - role
-      - content
+      description: Incremental content in a streaming chunk. Contains only the new fields for this chunk.
       properties:
         role:
           type: string
           enum:
-          - system
-          description: The role of the message author. Always `system`.
+          - assistant
+          description: The role. Typically included in the first chunk.
         content:
-          description: The system prompt content. A plain string or an array of content blocks.
-          oneOf:
-          - type: string
-          - type: array
-            items:
-              $ref: '#/components/schemas/ChatContentBlock'
-    ChatResponseFormat:
-      type: object
-      description: Controls the output format. Some models may not support structured output and will automatically fall back to `text`.
-      properties:
-        type:
           type: string
-          enum:
-          - text
-          - json_object
-          - json_schema
-          default: text
-          description: The output format type.
-        json_schema:
-          $ref: '#/components/schemas/ChatJsonSchemaSpec'
-    ChatToolDefinition:
-      oneOf:
-      - $ref: '#/components/schemas/ChatFunctionTool'
-      - $ref: '#/components/schemas/ChatOctenBroadSearchTool'
-      - $ref: '#/components/schemas/ChatOctenSearchTool'
-      discriminator:
-        propertyName: type
-        mapping:
-          function: '#/components/schemas/ChatFunctionTool'
-          octen_broad_search: '#/components/schemas/ChatOctenBroadSearchTool'
-          octen_search: '#/components/schemas/ChatOctenSearchTool'
-      description: A tool definition. One of a custom `function` tool, the built-in `octen_broad_search` tool, or the `octen_search` tool.
-    ChatMessage:
-      oneOf:
-      - $ref: '#/components/schemas/SystemMessage'
-      - $ref: '#/components/schemas/DeveloperMessage'
-      - $ref: '#/components/schemas/UserMessage'
-      - $ref: '#/components/schemas/AssistantMessage'
-      - $ref: '#/components/schemas/ToolMessage'
-      discriminator:
-        propertyName: role
-        mapping:
-          system: '#/components/schemas/SystemMessage'
-          developer: '#/components/schemas/DeveloperMessage'
-          user: '#/components/schemas/UserMessage'
-          assistant: '#/components/schemas/AssistantMessage'
-          tool: '#/components/schemas/ToolMessage'
+          description: Incremental text content.
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatToolCallDelta'
+          description: Incremental tool call data.
+    FullContentOptions:
+      type: object
+      description: Controls whether to return the full raw content of each result page.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
     ChatCompletionChoice:
       type: object
       description: A single completion choice in a non-streaming response.
@@ -466,122 +436,83 @@ components:
           $ref: '#/components/schemas/ChatCompletionMessage'
         logprobs:
           $ref: '#/components/schemas/ChatLogprobs'
-    ChatSearchResultItem:
+    ChatLogprobs:
       type: object
-      description: A single search result.
+      nullable: true
+      description: Log probability information for the output tokens. Present only when `logprobs` is `true`, otherwise `null`.
       properties:
-        title:
-          type: string
-          description: The title of the result page.
-        url:
-          type: string
-          description: The URL of the result page.
-        highlights:
-          type: string
-          description: Query-relevant highlight snippets. Returned only if `highlight.enable` is true.
-        full_content:
-          type: string
-          description: Full raw page content. Returned only if `full_content.enable` is true.
-        authors:
-          type: string
-          description: Website name or author.
-        time_published:
-          type: string
-          format: date-time
-          description: Publish time in ISO 8601.
-        time_last_crawled:
-          type: string
-          format: date-time
-          description: Last crawl time in ISO 8601.
-    ChatFunctionDefinition:
+        content:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              token:
+                type: string
+                description: The token text.
+              logprob:
+                type: number
+                description: The log probability of this token.
+              bytes:
+                type: array
+                nullable: true
+                items:
+                  type: integer
+                description: UTF-8 byte representation.
+              top_logprobs:
+                type: array
+                description: The top candidate tokens at this position, same structure.
+                items:
+                  type: object
+    ChatFunctionTool:
       type: object
       required:
-      - name
-      description: A custom function definition.
+      - type
+      - function
+      description: A custom function tool, executed by the caller.
       properties:
-        name:
-          type: string
-          description: The name of the function.
-        description:
-          type: string
-          description: A description of what the function does.
-        parameters:
-          type: object
-          description: The function's parameter definition in JSON Schema format.
-        strict:
-          type: boolean
-          default: false
-          description: Whether to enable strict mode. When enabled, generated arguments strictly conform to `parameters`.
-    ChatReasoningOptions:
-      type: object
-      description: Options for reasoning models. Turns thinking on or off and sets the effort and budget.
-      properties:
-        enabled:
-          type: boolean
-          description: Set to `false` to turn off thinking. Overrides `effort` and `max_tokens`.
-        effort:
+        type:
           type: string
           enum:
-          - max
-          - xhigh
-          - high
-          - medium
-          - low
-          - minimal
-          - none
-          description: The reasoning effort level.
-        max_tokens:
-          type: integer
-          minimum: 1024
-          description: Thinking token budget.
-    OctenBroadSearchToolParameters:
-      description: Behavior configuration for the built-in `octen_broad_search` tool. Identical to `octen_search` except it accepts `max_queries` instead of `max_searches`. All parameters are optional and share the same semantics and defaults as the Web Search API.
-      allOf:
-      - type: object
-        properties:
-          max_queries:
-            type: integer
-            minimum: 1
-            maximum: 30
-            default: 5
-            description: Upper bound on the number of sub-queries generated.
-      - $ref: '#/components/schemas/WebSearchOptions'
-    FullContentOptions:
+          - function
+          description: The type of tool. Always `function` for a custom tool.
+        function:
+          allOf:
+          - $ref: '#/components/schemas/ChatFunctionDefinition'
+          description: The function definition.
+    HighlightOptions:
       type: object
-      description: Controls whether to return the full raw content of each result page.
+      description: Controls highlight extraction from result pages.
       properties:
         enable:
           type: boolean
-          default: false
-          description: If true, returns full_content for each result.
+          default: true
+          description: If true, returns query-relevant highlight in each result.
         max_tokens:
           type: integer
-          default: 2048
+          default: 512
           minimum: 100
-          maximum: 100000
-          description: Maximum tokens of full content included per result.
-    ChatCompletionChunkChoice:
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    AssistantMessage:
       type: object
-      description: A single choice in a streaming chunk.
+      required:
+      - role
       properties:
-        index:
-          type: integer
-          description: The index of this choice. Usually 0.
-        delta:
-          $ref: '#/components/schemas/ChatCompletionDelta'
-        finish_reason:
+        role:
+          type: string
+          enum:
+          - assistant
+          description: The role of the message author. Always `assistant`.
+        content:
           type: string
           nullable: true
-          enum:
-          - stop
-          - length
-          - tool_calls
-          - content_filter
-          - error
-          - null
-          description: The reason generation stopped. `null` for intermediate chunks; set in the `finish` chunk.
-        logprobs:
-          $ref: '#/components/schemas/ChatLogprobs'
+          description: The assistant's text content. May be `null` or omitted when the assistant only produces tool calls.
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatToolCall'
+          description: Tool calls generated by the model in a previous turn, replayed verbatim. Only valid when `role` is `assistant`.
     UserMessage:
       type: object
       required:
@@ -600,6 +531,51 @@ components:
           - type: array
             items:
               $ref: '#/components/schemas/ChatContentBlock'
+    ChatMessage:
+      oneOf:
+      - $ref: '#/components/schemas/SystemMessage'
+      - $ref: '#/components/schemas/DeveloperMessage'
+      - $ref: '#/components/schemas/UserMessage'
+      - $ref: '#/components/schemas/AssistantMessage'
+      - $ref: '#/components/schemas/ToolMessage'
+      discriminator:
+        propertyName: role
+        mapping:
+          system: '#/components/schemas/SystemMessage'
+          developer: '#/components/schemas/DeveloperMessage'
+          user: '#/components/schemas/UserMessage'
+          assistant: '#/components/schemas/AssistantMessage'
+          tool: '#/components/schemas/ToolMessage'
+    ChatContentBlock:
+      type: object
+      description: A content block within a message.
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          - image
+          - image_url
+          description: The type of content block.
+        text:
+          type: string
+          description: The text content. Required when `type` is `text`.
+        image:
+          type: string
+          description: Base64-encoded image. Required when `type` is `image`.
+        image_url:
+          type: object
+          description: Image URL object. Required when `type` is `image_url`.
+          required:
+          - url
+          properties:
+            url:
+              type: string
+              description: The URL of the image.
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
     ChatToolCall:
       type: object
       required:
@@ -621,6 +597,21 @@ components:
           description: The type of tool call. Always `function`.
         function:
           $ref: '#/components/schemas/ChatToolCallFunction'
+    ChatOctenSearchTool:
+      type: object
+      required:
+      - type
+      description: The built-in `octen_search` server tool, executed by Octen.
+      properties:
+        type:
+          type: string
+          enum:
+          - octen_search
+          description: The type of tool. Always `octen_search`.
+        parameters:
+          allOf:
+          - $ref: '#/components/schemas/OctenSearchToolParameters'
+          description: Search behavior configuration. Optional.
     ChatCompletionResponse:
       type: object
       required:
@@ -660,28 +651,260 @@ components:
         warning:
           type: string
           description: Warning message, if any.
-    ChatToolChoiceObject:
+    OctenSearchToolParameters:
+      description: Behavior configuration for the built-in `octen_search` tool. All parameters are optional and share the same semantics and defaults as the Web Search API. The query is generated automatically by the model; a single request may trigger multiple searches.
+      allOf:
+      - type: object
+        properties:
+          max_searches:
+            type: integer
+            default: 5
+            description: Maximum number of searches allowed in a single request.
+      - $ref: '#/components/schemas/WebSearchOptions'
+    ChatCompletionChunkChoice:
+      type: object
+      description: A single choice in a streaming chunk.
+      properties:
+        index:
+          type: integer
+          description: The index of this choice. Usually 0.
+        delta:
+          $ref: '#/components/schemas/ChatCompletionDelta'
+        finish_reason:
+          type: string
+          nullable: true
+          enum:
+          - stop
+          - length
+          - tool_calls
+          - content_filter
+          - error
+          - null
+          description: The reason generation stopped. `null` for intermediate chunks; set in the `finish` chunk.
+        logprobs:
+          $ref: '#/components/schemas/ChatLogprobs'
+    ChatSearchResultItem:
+      type: object
+      description: A single search result.
+      properties:
+        title:
+          type: string
+          description: The title of the result page.
+        url:
+          type: string
+          description: The URL of the result page.
+        highlights:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if `highlight.enable` is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if `full_content.enable` is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
+    ChatCompletionChunk:
       type: object
       required:
-      - type
-      description: Forces a specific tool. The named tool must be declared in `tools`.
+      - object
+      - created
+      - model
+      description: 'A streaming chunk. Returned when `stream=true`. The `type` field indicates the chunk kind: `search_done`, `content`, `finish`, `usage`. After the last chunk, `data: [DONE]` is sent.'
       properties:
         type:
           type: string
           enum:
-          - function
-          - octen_broad_search
-          - octen_search
-          description: The type of tool to force.
-        function:
+          - search_done
+          - content
+          - finish
+          - usage
+          description: The type of this streaming chunk.
+        id:
+          type: string
+          description: The unique identifier for this request.
+        object:
+          type: string
+          enum:
+          - chat.completion.chunk
+          description: The object type, always `chat.completion.chunk` for streaming responses.
+        created:
+          type: integer
+          description: Unix timestamp (in seconds) of when the chunk was created.
+        model:
+          type: string
+          description: The model used for this completion.
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatCompletionChunkChoice'
+          description: Incremental choices. Present in `content` and `finish` chunks.
+        search_results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatSearchResultGroup'
+          description: Search results. Present in `search_done` chunks.
+        usage:
+          $ref: '#/components/schemas/ChatCompletionUsage'
+    ChatCompletionMessage:
+      type: object
+      description: The assistant's response message.
+      properties:
+        role:
+          type: string
+          enum:
+          - assistant
+          description: The role of the message author. Always `assistant`.
+        content:
+          type: string
+          nullable: true
+          description: The assistant's text content. May be `null` when the model only produces tool calls or refuses.
+        tool_calls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatToolCall'
+          description: Custom function calls generated by the model. Present only when `finish_reason` is `tool_calls`.
+        annotations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatAnnotation'
+          description: Citation annotations. Present only when `octen_broad_search` or `octen_search` was used.
+        refusal:
+          type: string
+          nullable: true
+          description: A model-generated refusal message, or `null`.
+        reasoning:
+          type: string
+          nullable: true
+          description: Reasoning text. Present only for reasoning models, otherwise `null`.
+        reasoning_details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatReasoningDetail'
+          description: Detailed reasoning information. Present only for reasoning models.
+    ChatCompletionUsage:
+      type: object
+      required:
+      - prompt_tokens
+      - completion_tokens
+      - total_tokens
+      description: Token usage information. When `stream=true`, returned only in the final `usage` chunk.
+      properties:
+        num_search_queries:
+          type: integer
+          description: Number of searches executed. Returned only when search was used.
+        full_content_extra_count:
+          type: integer
+          description: Billable full_content results beyond the free allowance. Returned only when `full_content` is enabled.
+        prompt_tokens:
+          type: integer
+          description: Number of input tokens. Cache read and write tokens are included here, not listed separately.
+        completion_tokens:
+          type: integer
+          description: Number of output tokens (reasoning tokens are included).
+        total_tokens:
+          type: integer
+          description: Total tokens (prompt_tokens + completion_tokens).
+        prompt_tokens_details:
           type: object
-          description: The function to call. Required when `type` is `function`.
-          required:
-          - name
+          description: Breakdown of input tokens. Returned only when the prompt cache is hit or written to.
           properties:
-            name:
+            cached_tokens:
+              type: integer
+              description: Portion of `prompt_tokens` served from cache (a subset of `prompt_tokens`).
+            cache_write_tokens:
+              type: integer
+              description: Tokens written to cache (a subset of `prompt_tokens`). Returned only when `cache_control` was used and the model supports cache writes.
+            cache_write_5m_tokens:
+              type: integer
+              description: Tokens written to the 5-minute cache (a subset of `cache_write_tokens`). Only the field matching the TTL used is returned.
+            cache_write_1h_tokens:
+              type: integer
+              description: Tokens written to the 1-hour cache (a subset of `cache_write_tokens`). Only the field matching the TTL used is returned.
+        completion_tokens_details:
+          type: object
+          description: Breakdown of output tokens. Returned only for reasoning models.
+          properties:
+            reasoning_tokens:
+              type: integer
+              description: Number of reasoning tokens (already included in `completion_tokens`).
+    SystemMessage:
+      type: object
+      required:
+      - role
+      - content
+      properties:
+        role:
+          type: string
+          enum:
+          - system
+          description: The role of the message author. Always `system`.
+        content:
+          description: The system prompt content. A plain string or an array of content blocks.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              $ref: '#/components/schemas/ChatContentBlock'
+    ChatToolDefinition:
+      oneOf:
+      - $ref: '#/components/schemas/ChatFunctionTool'
+      - $ref: '#/components/schemas/ChatOctenBroadSearchTool'
+      - $ref: '#/components/schemas/ChatOctenSearchTool'
+      discriminator:
+        propertyName: type
+        mapping:
+          function: '#/components/schemas/ChatFunctionTool'
+          octen_broad_search: '#/components/schemas/ChatOctenBroadSearchTool'
+          octen_search: '#/components/schemas/ChatOctenSearchTool'
+      description: A tool definition. One of a custom `function` tool, the built-in `octen_broad_search` tool, or the `octen_search` tool.
+    ChatOctenBroadSearchTool:
+      type: object
+      required:
+      - type
+      description: The built-in `octen_broad_search` server tool, executed by Octen.
+      properties:
+        type:
+          type: string
+          enum:
+          - octen_broad_search
+          description: The type of tool. Always `octen_broad_search`.
+        parameters:
+          allOf:
+          - $ref: '#/components/schemas/OctenBroadSearchToolParameters'
+          description: Broad search behavior configuration. Optional.
+    OpenAIErrorResponse:
+      type: object
+      description: Error body in the OpenAI protocol format.
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          properties:
+            message:
               type: string
-              description: The name of the function to call.
+              description: A human-readable description of the error.
+            type:
+              type: string
+              description: The error category, e.g. `invalid_request_error`.
+            param:
+              type: string
+              nullable: true
+              description: The parameter related to the error, if any.
+            code:
+              type: string
+              nullable: true
+              description: A machine-readable error code, if any.
+          required:
+          - message
+          - type
     ChatReasoningDetail:
       type: object
       description: Detailed reasoning information. Returned only for reasoning models.
@@ -715,19 +938,129 @@ components:
         data:
           type: string
           description: Encrypted reasoning. Present only when `type` is `reasoning.encrypted`.
-    ChatToolCallFunction:
+    WebSearchOptions:
       type: object
-      required:
-      - name
-      - arguments
-      description: The function invocation details within a tool call.
       properties:
-        name:
+        count:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 100
+          description: Number of results to return.
+        include_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically include in the search results. The `site:` query operator adds to this list.
+          example:
+          - octen.ai
+          - wikipedia.org
+        exclude_domains:
+          type: array
+          items:
+            type: string
+            maxLength: 60
+          maxItems: 1200
+          description: A list of domains to specifically exclude from the search results. The `-site:` query operator adds to this list. If a domain appears in both `include_domains` and `exclude_domains`, `exclude_domains` takes precedence.
+          example:
+          - spam.com
+          - ads.example.net
+        include_text:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+          maxItems: 5
+          description: Strings that must appear in the result page text.
+        exclude_text:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+          maxItems: 5
+          description: Strings that must not appear in the result page text.
+        time_basis:
           type: string
-          description: The name of the function to call.
-        arguments:
+          enum:
+          - auto
+          - published
+          - crawled
+          default: auto
+          description: Determines which time field is used for time filtering. `published` uses time_published; `crawled` uses time_last_crawled. Results missing this field are excluded when filtering by time.
+        time_range:
           type: string
-          description: The arguments to the function, as a JSON string generated by the model.
+          enum:
+          - day
+          - week
+          - month
+          - year
+          - d
+          - w
+          - m
+          - y
+          description: Relative time window counting back from the current time based on `time_basis`. Mutually exclusive with `start_time`/`end_time` — if both are provided, `start_time`/`end_time` take precedence.
+        start_time:
+          type: string
+          format: date-time
+          description: Start time for filtering results. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        end_time:
+          type: string
+          format: date-time
+          description: End time for filtering results. ISO 8601 format.
+          example: '2025-01-01T00:00:00+08:00'
+        language:
+          type: array
+          items:
+            type: string
+            enum:
+            - ar
+            - de
+            - en
+            - es
+            - fr
+            - hi
+            - id
+            - it
+            - ja
+            - ko
+            - nl
+            - pl
+            - pt
+            - ru
+            - th
+            - tr
+            - vi
+            - zh
+          default: []
+          description: A list of languages to restrict results to, as ISO 639-1 codes. By default, no language filter is applied.
+          example:
+          - en
+          - zh
+        highlight:
+          $ref: '#/components/schemas/HighlightOptions'
+        full_content:
+          $ref: '#/components/schemas/FullContentOptions'
+        format:
+          type: string
+          enum:
+          - markdown
+          - text
+          default: text
+          description: Controls the formatting of highlight outputs.
+        safesearch:
+          type: string
+          enum:
+          - 'off'
+          - strict
+          default: strict
+          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
+        include_images:
+          type: boolean
+          default: false
+          description: Whether to include images in each result.
     ChatCompletionRequest:
       type: object
       required:
@@ -932,107 +1265,84 @@ components:
         previous_response_id:
           type: string
           description: The `id` of a previous response, used to chain state across turns.
-    OpenAIErrorResponse:
+    OctenBroadSearchToolParameters:
+      description: Behavior configuration for the built-in `octen_broad_search` tool. Identical to `octen_search` except it accepts `max_queries` instead of `max_searches`. All parameters are optional and share the same semantics and defaults as the Web Search API.
+      allOf:
+      - type: object
+        properties:
+          max_queries:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 5
+            description: Upper bound on the number of sub-queries generated.
+      - $ref: '#/components/schemas/WebSearchOptions'
+    ChatSearchResultGroup:
       type: object
-      description: Error body in the OpenAI protocol format.
-      required:
-      - error
+      description: Search results for a single auto-generated query. One element per search.
       properties:
-        error:
-          type: object
-          properties:
-            message:
-              type: string
-              description: A human-readable description of the error.
-            type:
-              type: string
-              description: The error category, e.g. `invalid_request_error`.
-            param:
-              type: string
-              nullable: true
-              description: The parameter related to the error, if any.
-            code:
-              type: string
-              nullable: true
-              description: A machine-readable error code, if any.
-          required:
-          - message
-          - type
-    ChatOctenBroadSearchTool:
+        query:
+          type: string
+          description: The query the model actually searched for. One message may produce multiple queries.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatSearchResultItem'
+          description: The search results for this query.
+    ChatToolCallFunction:
       type: object
       required:
-      - type
-      description: The built-in `octen_broad_search` server tool, executed by Octen.
+      - name
+      - arguments
+      description: The function invocation details within a tool call.
       properties:
-        type:
+        name:
           type: string
-          enum:
-          - octen_broad_search
-          description: The type of tool. Always `octen_broad_search`.
-        parameters:
-          allOf:
-          - $ref: '#/components/schemas/OctenBroadSearchToolParameters'
-          description: Broad search behavior configuration. Optional.
-    ChatCompletionChunk:
+          description: The name of the function to call.
+        arguments:
+          type: string
+          description: The arguments to the function, as a JSON string generated by the model.
+    ChatReasoningOptions:
       type: object
-      required:
-      - object
-      - created
-      - model
-      description: 'A streaming chunk. Returned when `stream=true`. The `type` field indicates the chunk kind: `search_done`, `content`, `finish`, `usage`. After the last chunk, `data: [DONE]` is sent.'
+      description: Options for reasoning models. Turns thinking on or off and sets the effort and budget.
       properties:
-        type:
+        enabled:
+          type: boolean
+          description: Set to `false` to turn off thinking. Overrides `effort` and `max_tokens`.
+        effort:
           type: string
           enum:
-          - search_done
-          - content
-          - finish
-          - usage
-          description: The type of this streaming chunk.
-        id:
-          type: string
-          description: The unique identifier for this request.
-        object:
-          type: string
-          enum:
-          - chat.completion.chunk
-          description: The object type, always `chat.completion.chunk` for streaming responses.
-        created:
+          - max
+          - xhigh
+          - high
+          - medium
+          - low
+          - minimal
+          - none
+          description: The reasoning effort level.
+        max_tokens:
           type: integer
-          description: Unix timestamp (in seconds) of when the chunk was created.
-        model:
-          type: string
-          description: The model used for this completion.
-        choices:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatCompletionChunkChoice'
-          description: Incremental choices. Present in `content` and `finish` chunks.
-        search_results:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatSearchResultGroup'
-          description: Search results. Present in `search_done` chunks.
-        usage:
-          $ref: '#/components/schemas/ChatCompletionUsage'
-    ToolMessage:
+          minimum: 1024
+          description: Thinking token budget.
+    DeveloperMessage:
       type: object
       required:
       - role
-      - tool_call_id
       - content
+      description: A developer message. The OpenAI-protocol equivalent of `system` (sent by newer OpenAI SDKs); handled as `system`.
       properties:
         role:
           type: string
           enum:
-          - tool
-          description: The role of the message author. Always `tool`.
-        tool_call_id:
-          type: string
-          description: The ID of the tool call this message responds to.
+          - developer
+          description: The role of the message author. Always `developer`.
         content:
-          type: string
-          description: The tool output, typically a JSON string with the function result.
+          description: The content. A plain string or an array of content blocks.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              $ref: '#/components/schemas/ChatContentBlock'
     ChatToolCallDelta:
       type: object
       description: Incremental tool call data in a streaming chunk. The first chunk for a tool call includes `id`, `type`, and `function.name`. Subsequent chunks append to `function.arguments`.
@@ -1058,397 +1368,6 @@ components:
             arguments:
               type: string
               description: Incremental JSON string of the function arguments. Concatenate across chunks to build the complete arguments.
-    DeveloperMessage:
-      type: object
-      required:
-      - role
-      - content
-      description: A developer message. The OpenAI-protocol equivalent of `system` (sent by newer OpenAI SDKs); handled as `system`.
-      properties:
-        role:
-          type: string
-          enum:
-          - developer
-          description: The role of the message author. Always `developer`.
-        content:
-          description: The content. A plain string or an array of content blocks.
-          oneOf:
-          - type: string
-          - type: array
-            items:
-              $ref: '#/components/schemas/ChatContentBlock'
-    ChatOctenSearchTool:
-      type: object
-      required:
-      - type
-      description: The built-in `octen_search` server tool, executed by Octen.
-      properties:
-        type:
-          type: string
-          enum:
-          - octen_search
-          description: The type of tool. Always `octen_search`.
-        parameters:
-          allOf:
-          - $ref: '#/components/schemas/OctenSearchToolParameters'
-          description: Search behavior configuration. Optional.
-    ChatJsonSchemaSpec:
-      type: object
-      required:
-      - name
-      description: JSON Schema specification for structured output. Required when `response_format.type` is `json_schema`.
-      properties:
-        name:
-          type: string
-          description: A user-defined name for the schema.
-        strict:
-          type: boolean
-          default: true
-          description: Whether the model output must strictly conform to the schema.
-        description:
-          type: string
-          description: A description of the schema.
-        schema:
-          type: object
-          description: The JSON Schema definition object. May contain `type`, `properties`, `required`, `additionalProperties`, etc.
-    ChatCompletionUsage:
-      type: object
-      required:
-      - prompt_tokens
-      - completion_tokens
-      - total_tokens
-      description: Token usage information. When `stream=true`, returned only in the final `usage` chunk.
-      properties:
-        num_search_queries:
-          type: integer
-          description: Number of searches executed. Returned only when search was used.
-        full_content_extra_count:
-          type: integer
-          description: Billable full_content results beyond the free allowance. Returned only when `full_content` is enabled.
-        prompt_tokens:
-          type: integer
-          description: Number of input tokens. Cache read and write tokens are included here, not listed separately.
-        completion_tokens:
-          type: integer
-          description: Number of output tokens (reasoning tokens are included).
-        total_tokens:
-          type: integer
-          description: Total tokens (prompt_tokens + completion_tokens).
-        prompt_tokens_details:
-          type: object
-          description: Breakdown of input tokens. Returned only when the prompt cache is hit or written to.
-          properties:
-            cached_tokens:
-              type: integer
-              description: Portion of `prompt_tokens` served from cache (a subset of `prompt_tokens`).
-            cache_write_tokens:
-              type: integer
-              description: Tokens written to cache (a subset of `prompt_tokens`). Returned only when `cache_control` was used and the model supports cache writes.
-            cache_write_5m_tokens:
-              type: integer
-              description: Tokens written to the 5-minute cache (a subset of `cache_write_tokens`). Only the field matching the TTL used is returned.
-            cache_write_1h_tokens:
-              type: integer
-              description: Tokens written to the 1-hour cache (a subset of `cache_write_tokens`). Only the field matching the TTL used is returned.
-        completion_tokens_details:
-          type: object
-          description: Breakdown of output tokens. Returned only for reasoning models.
-          properties:
-            reasoning_tokens:
-              type: integer
-              description: Number of reasoning tokens (already included in `completion_tokens`).
-    ChatContentBlock:
-      type: object
-      description: A content block within a message.
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          enum:
-          - text
-          - image
-          - image_url
-          description: The type of content block.
-        text:
-          type: string
-          description: The text content. Required when `type` is `text`.
-        image:
-          type: string
-          description: Base64-encoded image. Required when `type` is `image`.
-        image_url:
-          type: object
-          description: Image URL object. Required when `type` is `image_url`.
-          required:
-          - url
-          properties:
-            url:
-              type: string
-              description: The URL of the image.
-        cache_control:
-          $ref: '#/components/schemas/CacheControl'
-    ChatCompletionMessage:
-      type: object
-      description: The assistant's response message.
-      properties:
-        role:
-          type: string
-          enum:
-          - assistant
-          description: The role of the message author. Always `assistant`.
-        content:
-          type: string
-          nullable: true
-          description: The assistant's text content. May be `null` when the model only produces tool calls or refuses.
-        tool_calls:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatToolCall'
-          description: Custom function calls generated by the model. Present only when `finish_reason` is `tool_calls`.
-        annotations:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatAnnotation'
-          description: Citation annotations. Present only when `octen_broad_search` or `octen_search` was used.
-        refusal:
-          type: string
-          nullable: true
-          description: A model-generated refusal message, or `null`.
-        reasoning:
-          type: string
-          nullable: true
-          description: Reasoning text. Present only for reasoning models, otherwise `null`.
-        reasoning_details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatReasoningDetail'
-          description: Detailed reasoning information. Present only for reasoning models.
-    CacheControl:
-      type: object
-      description: Prompt caching marker. Sets a cache breakpoint so the stable prefix up to this block can be reused.
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          enum:
-          - ephemeral
-          description: The cache control type. Always `ephemeral`.
-        ttl:
-          type: string
-          enum:
-          - 5m
-          - 1h
-          default: 5m
-          description: Cache lifetime.
-    HighlightOptions:
-      type: object
-      description: Controls highlight extraction from result pages.
-      properties:
-        enable:
-          type: boolean
-          default: true
-          description: If true, returns query-relevant highlight in each result.
-        max_tokens:
-          type: integer
-          default: 512
-          minimum: 100
-          maximum: 20000
-          description: Max tokens returned per highlight.
-    ChatFunctionTool:
-      type: object
-      required:
-      - type
-      - function
-      description: A custom function tool, executed by the caller.
-      properties:
-        type:
-          type: string
-          enum:
-          - function
-          description: The type of tool. Always `function` for a custom tool.
-        function:
-          allOf:
-          - $ref: '#/components/schemas/ChatFunctionDefinition'
-          description: The function definition.
-    OctenSearchToolParameters:
-      description: Behavior configuration for the built-in `octen_search` tool. All parameters are optional and share the same semantics and defaults as the Web Search API. The query is generated automatically by the model; a single request may trigger multiple searches.
-      allOf:
-      - type: object
-        properties:
-          max_searches:
-            type: integer
-            default: 5
-            description: Maximum number of searches allowed in a single request.
-      - $ref: '#/components/schemas/WebSearchOptions'
-    ChatCompletionDelta:
-      type: object
-      description: Incremental content in a streaming chunk. Contains only the new fields for this chunk.
-      properties:
-        role:
-          type: string
-          enum:
-          - assistant
-          description: The role. Typically included in the first chunk.
-        content:
-          type: string
-          description: Incremental text content.
-        tool_calls:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatToolCallDelta'
-          description: Incremental tool call data.
-    ChatLogprobs:
-      type: object
-      nullable: true
-      description: Log probability information for the output tokens. Present only when `logprobs` is `true`, otherwise `null`.
-      properties:
-        content:
-          type: array
-          nullable: true
-          items:
-            type: object
-            properties:
-              token:
-                type: string
-                description: The token text.
-              logprob:
-                type: number
-                description: The log probability of this token.
-              bytes:
-                type: array
-                nullable: true
-                items:
-                  type: integer
-                description: UTF-8 byte representation.
-              top_logprobs:
-                type: array
-                description: The top candidate tokens at this position, same structure.
-                items:
-                  type: object
-    WebSearchOptions:
-      type: object
-      properties:
-        count:
-          type: integer
-          default: 5
-          minimum: 1
-          maximum: 100
-          description: Number of results to return.
-        include_domains:
-          type: array
-          items:
-            type: string
-            maxLength: 60
-          maxItems: 1200
-          description: A list of domains to specifically include in the search results. The `site:` query operator adds to this list.
-          example:
-          - octen.ai
-          - wikipedia.org
-        exclude_domains:
-          type: array
-          items:
-            type: string
-            maxLength: 60
-          maxItems: 1200
-          description: A list of domains to specifically exclude from the search results. The `-site:` query operator adds to this list. If a domain appears in both `include_domains` and `exclude_domains`, `exclude_domains` takes precedence.
-          example:
-          - spam.com
-          - ads.example.net
-        include_text:
-          type: array
-          items:
-            type: string
-            maxLength: 30
-          maxItems: 5
-          description: Strings that must appear in the result page text.
-        exclude_text:
-          type: array
-          items:
-            type: string
-            maxLength: 30
-          maxItems: 5
-          description: Strings that must not appear in the result page text.
-        time_basis:
-          type: string
-          enum:
-          - auto
-          - published
-          - crawled
-          default: auto
-          description: Determines which time field is used for time filtering. `published` uses time_published; `crawled` uses time_last_crawled. Results missing this field are excluded when filtering by time.
-        time_range:
-          type: string
-          enum:
-          - day
-          - week
-          - month
-          - year
-          - d
-          - w
-          - m
-          - y
-          description: Relative time window counting back from the current time based on `time_basis`. Mutually exclusive with `start_time`/`end_time` — if both are provided, `start_time`/`end_time` take precedence.
-        start_time:
-          type: string
-          format: date-time
-          description: Start time for filtering results. ISO 8601 format.
-          example: '2025-01-01T00:00:00+08:00'
-        end_time:
-          type: string
-          format: date-time
-          description: End time for filtering results. ISO 8601 format.
-          example: '2025-01-01T00:00:00+08:00'
-        language:
-          type: array
-          items:
-            type: string
-            enum:
-            - ar
-            - de
-            - en
-            - es
-            - fr
-            - hi
-            - id
-            - it
-            - ja
-            - ko
-            - nl
-            - pl
-            - pt
-            - ru
-            - th
-            - tr
-            - vi
-            - zh
-          default: []
-          description: A list of languages to restrict results to, as ISO 639-1 codes. By default, no language filter is applied.
-          example:
-          - en
-          - zh
-        highlight:
-          $ref: '#/components/schemas/HighlightOptions'
-        full_content:
-          $ref: '#/components/schemas/FullContentOptions'
-        format:
-          type: string
-          enum:
-          - markdown
-          - text
-          default: text
-          description: Controls the formatting of highlight outputs.
-        safesearch:
-          type: string
-          enum:
-          - 'off'
-          - strict
-          default: strict
-          description: Controls filtering of explicit/adult content. `off` disables filtering; `strict` drops all adult content.
-        include_images:
-          type: boolean
-          default: false
-          description: Whether to include images in each result.
     ChatAnnotation:
       type: object
       description: A citation annotation. Returned only when `octen_search` was used, currently only for `anthropic/` models. For other models, results are still available in `search_results`.
@@ -1473,37 +1392,116 @@ components:
             end_index:
               type: integer
               description: End position of the cited span in `content`.
-    ChatSearchResultGroup:
-      type: object
-      description: Search results for a single auto-generated query. One element per search.
-      properties:
-        query:
-          type: string
-          description: The query the model actually searched for. One message may produce multiple queries.
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatSearchResultItem'
-          description: The search results for this query.
-    AssistantMessage:
+    ToolMessage:
       type: object
       required:
       - role
+      - tool_call_id
+      - content
       properties:
         role:
           type: string
           enum:
-          - assistant
-          description: The role of the message author. Always `assistant`.
+          - tool
+          description: The role of the message author. Always `tool`.
+        tool_call_id:
+          type: string
+          description: The ID of the tool call this message responds to.
         content:
           type: string
-          nullable: true
-          description: The assistant's text content. May be `null` or omitted when the assistant only produces tool calls.
-        tool_calls:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatToolCall'
-          description: Tool calls generated by the model in a previous turn, replayed verbatim. Only valid when `role` is `assistant`.
+          description: The tool output, typically a JSON string with the function result.
+    ChatFunctionDefinition:
+      type: object
+      required:
+      - name
+      description: A custom function definition.
+      properties:
+        name:
+          type: string
+          description: The name of the function.
+        description:
+          type: string
+          description: A description of what the function does.
+        parameters:
+          type: object
+          description: The function's parameter definition in JSON Schema format.
+        strict:
+          type: boolean
+          default: false
+          description: Whether to enable strict mode. When enabled, generated arguments strictly conform to `parameters`.
+    ChatJsonSchemaSpec:
+      type: object
+      required:
+      - name
+      description: JSON Schema specification for structured output. Required when `response_format.type` is `json_schema`.
+      properties:
+        name:
+          type: string
+          description: A user-defined name for the schema.
+        strict:
+          type: boolean
+          default: true
+          description: Whether the model output must strictly conform to the schema.
+        description:
+          type: string
+          description: A description of the schema.
+        schema:
+          type: object
+          description: The JSON Schema definition object. May contain `type`, `properties`, `required`, `additionalProperties`, etc.
+    CacheControl:
+      type: object
+      description: Prompt caching marker. Sets a cache breakpoint so the stable prefix up to this block can be reused.
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - ephemeral
+          description: The cache control type. Always `ephemeral`.
+        ttl:
+          type: string
+          enum:
+          - 5m
+          - 1h
+          default: 5m
+          description: Cache lifetime.
+    ChatResponseFormat:
+      type: object
+      description: Controls the output format. Some models may not support structured output and will automatically fall back to `text`.
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          - json_object
+          - json_schema
+          default: text
+          description: The output format type.
+        json_schema:
+          $ref: '#/components/schemas/ChatJsonSchemaSpec'
+    ChatToolChoiceObject:
+      type: object
+      required:
+      - type
+      description: Forces a specific tool. The named tool must be declared in `tools`.
+      properties:
+        type:
+          type: string
+          enum:
+          - function
+          - octen_broad_search
+          - octen_search
+          description: The type of tool to force.
+        function:
+          type: object
+          description: The function to call. Required when `type` is `function`.
+          required:
+          - name
+          properties:
+            name:
+              type: string
+              description: The name of the function to call.
   securitySchemes:
     bearerAuth:
       type: http
@@ -1523,6 +1521,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml

@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Octen Ai Messages API
+  title: Octen Messages API
+  description: Octen API provides Broad Search, Web Search, Image Search, Video Search, Extract, Embeddings, VL Embeddings, Answer, and Deep Research services.
   version: 1.0.0
-  description: 'Operations tagged Messages across 2 of this provider''s published API definitions: octen-ai-openapi.json, octen-ai-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://api.octen.ai
 security:
@@ -346,184 +346,98 @@ paths:
                   message: Service is temporarily overloaded, retry later
       tags:
       - Messages
-    servers:
-    - url: https://api.octen.ai
 components:
   schemas:
+    FullContentOptions:
+      type: object
+      description: Controls whether to return the full raw content of each result page.
+      properties:
+        enable:
+          type: boolean
+          default: false
+          description: If true, returns full_content for each result.
+        max_tokens:
+          type: integer
+          default: 2048
+          minimum: 100
+          maximum: 100000
+          description: Maximum tokens of full content included per result.
     MessagesToolDefinition:
       oneOf:
       - $ref: '#/components/schemas/MessagesCustomTool'
       - $ref: '#/components/schemas/MessagesOctenBroadSearchTool'
       - $ref: '#/components/schemas/MessagesOctenSearchTool'
       description: A tool definition. One of a custom tool, the built-in `octen_broad_search` tool, or the `octen_search` tool.
-    MessagesResponseContentBlock:
+    HighlightOptions:
       type: object
-      description: A content block in the response. The fields present depend on `type`.
+      description: Controls highlight extraction from result pages.
       properties:
-        type:
-          type: string
-          enum:
-          - text
-          - thinking
-          - redacted_thinking
-          - tool_use
-          - server_tool_use
-          - web_search_tool_result
-          description: The type of content block.
-        text:
-          type: string
-          description: The assistant's text content. Present when `type` is `text`.
-        citations:
-          type: array
-          items:
-            $ref: '#/components/schemas/MessagesCitation'
-          description: Citation annotations for this text block. Present only when `octen_broad_search` or `octen_search` was used.
-        thinking:
-          type: string
-          description: Reasoning content. Present when `type` is `thinking`.
-        signature:
-          type: string
-          description: Signature of the thinking block. Replay verbatim in multi-turn conversations.
-        data:
-          type: string
-          description: Encrypted thinking content. Present when `type` is `redacted_thinking`.
-        id:
-          type: string
-          description: Block id. Present for `tool_use` and `server_tool_use` blocks.
-        name:
-          type: string
-          description: Tool name. Present for `tool_use` and `server_tool_use` blocks.
-        input:
-          type: object
-          description: Tool call arguments. For `server_tool_use`, contains the auto-generated `query`.
-        tool_use_id:
-          type: string
-          description: The id of the matching `server_tool_use` block. Present for `web_search_tool_result` blocks.
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/MessagesWebSearchResult'
-          description: Search results. Present for `web_search_tool_result` blocks.
-    MessagesThinking:
-      type: object
-      description: Thinking options for reasoning models.
-      properties:
-        type:
-          type: string
-          enum:
-          - enabled
-          - disabled
-          - adaptive
-          description: '`adaptive` lets the model decide the thinking depth.'
-        budget_tokens:
+        enable:
+          type: boolean
+          default: true
+          description: If true, returns query-relevant highlight in each result.
+        max_tokens:
           type: integer
-          minimum: 1024
-          description: Thinking token budget. Required when `type` is `enabled`; must be less than `max_tokens`. Not allowed when `type` is `adaptive` or `disabled`.
-        display:
-          type: string
-          enum:
-          - summarized
-          - omitted
-          default: summarized
-          description: Controls how thinking is shown. `summarized` returns thinking blocks; `omitted` returns only the signature so blocks can be replayed. Valid only when `type` is `enabled` or `adaptive`.
-    MessagesStreamEvent:
+          default: 512
+          minimum: 100
+          maximum: 20000
+          description: Max tokens returned per highlight.
+    AnthropicErrorResponse:
       type: object
+      description: Error body in the Anthropic protocol format.
       required:
       - type
-      description: 'A streaming SSE event. Returned when `stream=true`. Events arrive in order: `message_start` → `content_block_start`/`content_block_delta`/`content_block_stop` → `message_delta` → `message_stop`. `ping` may appear anywhere and can be ignored. On error, an `error` event is sent.'
+      - error
       properties:
         type:
           type: string
           enum:
-          - message_start
-          - content_block_start
-          - content_block_delta
-          - content_block_stop
-          - message_delta
-          - message_stop
-          - ping
           - error
-          description: The event type.
-        message:
-          type: object
-          description: Present in `message_start`. The initial message (id, model, role, initial usage).
-        index:
-          type: integer
-          description: Present in `content_block_*`. The content block index; concatenate deltas by index.
-        content_block:
-          type: object
-          description: Present in `content_block_start`. The block that is starting. For built-in search, the `web_search_tool_result` block carries the full results here.
-        delta:
-          type: object
-          description: Present in `content_block_delta` (`text_delta` / `thinking_delta` / `signature_delta` / `input_json_delta`) and `message_delta` (`stop_reason`, `stop_details`, `stop_sequence`).
-        usage:
-          type: object
-          description: Present in `message_delta`. Cumulative token counts (not incremental).
+          description: Always `error`.
         error:
           type: object
-          description: Present in `error` events.
-    MessagesResponse:
-      type: object
-      required:
-      - id
-      - type
-      - role
-      - model
-      - content
-      - stop_reason
-      - usage
-      description: A non-streaming response. Returned when `stream=false`.
-      properties:
-        id:
-          type: string
-          description: The unique identifier for this request.
-        type:
-          type: string
-          enum:
-          - message
-          - error
-          description: The response type. `message` on success.
-        role:
-          type: string
-          enum:
-          - assistant
-          description: Always `assistant`.
-        model:
-          type: string
-          description: The model used for this response.
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/MessagesResponseContentBlock'
-          description: The response content, as a list of content blocks.
-        stop_reason:
-          type: string
-          enum:
-          - end_turn
-          - max_tokens
-          - stop_sequence
-          - tool_use
-          - pause_turn
-          - refusal
-          description: Why the model stopped.
-        stop_details:
-          type: object
-          description: Additional detail about why the model stopped. Returned only when `stop_reason` is `refusal`.
           properties:
             type:
               type: string
-              enum:
-              - refusal
-              description: The stop detail type. Always `refusal`.
-            explanation:
+              description: The error category, e.g. `invalid_request_error`.
+            message:
               type: string
-              description: An explanation of why the request was refused.
-        stop_sequence:
+              description: A human-readable description of the error.
+          required:
+          - type
+          - message
+    MessagesWebSearchResult:
+      type: object
+      description: A single search result block.
+      properties:
+        type:
           type: string
-          nullable: true
-          description: The stop sequence that was hit, or `null`.
-        usage:
-          $ref: '#/components/schemas/MessagesUsage'
+          enum:
+          - web_search_result
+          description: The block type.
+        title:
+          type: string
+          description: The title of the result page.
+        url:
+          type: string
+          description: The URL of the result page.
+        highlights:
+          type: string
+          description: Query-relevant highlight snippets. Returned only if `highlight.enable` is true.
+        full_content:
+          type: string
+          description: Full raw page content. Returned only if `full_content.enable` is true.
+        authors:
+          type: string
+          description: Website name or author.
+        time_published:
+          type: string
+          format: date-time
+          description: Publish time in ISO 8601.
+        time_last_crawled:
+          type: string
+          format: date-time
+          description: Last crawl time in ISO 8601.
     MessagesRequest:
       type: object
       required:
@@ -665,184 +579,87 @@ components:
               - 1h
               default: 5m
               description: Cache lifetime.
-    MessagesMessage:
-      type: object
-      required:
-      - role
-      - content
-      description: A message in the conversation. Tool results are returned via a `tool_result` content block in a `user` message.
-      properties:
-        role:
-          type: string
-          enum:
-          - user
-          - assistant
-          description: The role of the message author.
-        content:
-          description: The content. A plain string or an array of content blocks.
-          oneOf:
-          - type: string
-          - type: array
-            items:
-              $ref: '#/components/schemas/MessagesContentBlock'
-    OctenBroadSearchToolParameters:
-      description: Behavior configuration for the built-in `octen_broad_search` tool. Identical to `octen_search` except it accepts `max_queries` instead of `max_searches`. All parameters are optional and share the same semantics and defaults as the Web Search API.
-      allOf:
-      - type: object
-        properties:
-          max_queries:
-            type: integer
-            minimum: 1
-            maximum: 30
-            default: 5
-            description: Upper bound on the number of sub-queries generated.
-      - $ref: '#/components/schemas/WebSearchOptions'
-    FullContentOptions:
-      type: object
-      description: Controls whether to return the full raw content of each result page.
-      properties:
-        enable:
-          type: boolean
-          default: false
-          description: If true, returns full_content for each result.
-        max_tokens:
-          type: integer
-          default: 2048
-          minimum: 100
-          maximum: 100000
-          description: Maximum tokens of full content included per result.
-    MessagesContentBlock:
+    MessagesOctenSearchTool:
       type: object
       required:
       - type
-      description: A content block within a message. The fields used depend on `type`. For replaying a multi-turn conversation, blocks such as `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `server_tool_use`, and `web_search_tool_result` are returned verbatim.
+      - name
+      description: The built-in `octen_search` server tool, executed by Octen.
+      properties:
+        type:
+          type: string
+          enum:
+          - octen_search
+          description: The type of tool. Always `octen_search`.
+        name:
+          type: string
+          enum:
+          - octen_search
+          description: The tool name. Always `octen_search`.
+        parameters:
+          allOf:
+          - $ref: '#/components/schemas/OctenSearchToolParameters'
+          description: Search behavior configuration. Optional.
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+    OctenSearchToolParameters:
+      description: Behavior configuration for the built-in `octen_search` tool. All parameters are optional and share the same semantics and defaults as the Web Search API. The query is generated automatically by the model; a single request may trigger multiple searches.
+      allOf:
+      - type: object
+        properties:
+          max_searches:
+            type: integer
+            default: 5
+            description: Maximum number of searches allowed in a single request.
+      - $ref: '#/components/schemas/WebSearchOptions'
+    MessagesResponseContentBlock:
+      type: object
+      description: A content block in the response. The fields present depend on `type`.
       properties:
         type:
           type: string
           enum:
           - text
-          - image
-          - tool_use
-          - tool_result
           - thinking
           - redacted_thinking
+          - tool_use
           - server_tool_use
           - web_search_tool_result
           description: The type of content block.
         text:
           type: string
-          description: Text content. Required when `type` is `text`.
-        source:
-          type: object
-          description: Image source. Required when `type` is `image`.
-          properties:
-            type:
-              type: string
-              enum:
-              - url
-              - base64
-              description: How the image is provided.
-            url:
-              type: string
-              description: Image URL. Required when `source.type` is `url`.
-            media_type:
-              type: string
-              enum:
-              - image/jpeg
-              - image/png
-              - image/gif
-              - image/webp
-              description: Image MIME type. Required when `source.type` is `base64`.
-            data:
-              type: string
-              description: Base64-encoded image. Required when `source.type` is `base64`.
-        id:
-          type: string
-          description: Block id, replayed verbatim. Used by `tool_use` and `server_tool_use` blocks.
-        name:
-          type: string
-          description: Tool name, replayed verbatim. For `server_tool_use` it is `octen_search`. Used by `tool_use` and `server_tool_use` blocks.
-        input:
-          type: object
-          description: Tool call arguments, replayed verbatim. Used by `tool_use` and `server_tool_use` blocks.
-        tool_use_id:
-          type: string
-          description: The id of the corresponding `tool_use` or `server_tool_use` block. Used by `tool_result` and `web_search_tool_result` blocks.
-        content:
-          description: Result content. A string or content blocks for `tool_result`; the array of `web_search_result` blocks for `web_search_tool_result`.
-          oneOf:
-          - type: string
-          - type: array
-            items:
-              type: object
-        is_error:
-          type: boolean
-          default: false
-          description: Whether the tool execution failed. Used by `tool_result` blocks.
+          description: The assistant's text content. Present when `type` is `text`.
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessagesCitation'
+          description: Citation annotations for this text block. Present only when `octen_broad_search` or `octen_search` was used.
         thinking:
           type: string
-          description: Thinking content, replayed verbatim. Required when `type` is `thinking`.
+          description: Reasoning content. Present when `type` is `thinking`.
         signature:
           type: string
-          description: Thinking signature, replayed verbatim. Required when `type` is `thinking`.
+          description: Signature of the thinking block. Replay verbatim in multi-turn conversations.
         data:
           type: string
-          description: Encrypted thinking content, replayed verbatim. Required when `type` is `redacted_thinking`.
-        cache_control:
-          $ref: '#/components/schemas/CacheControl'
-    MessagesCitation:
-      type: object
-      description: A citation into a search result. Returned only when `octen_search` was used and the text cites a result.
-      properties:
-        type:
+          description: Encrypted thinking content. Present when `type` is `redacted_thinking`.
+        id:
           type: string
-          enum:
-          - web_search_result_location
-          description: The citation type.
-        url:
+          description: Block id. Present for `tool_use` and `server_tool_use` blocks.
+        name:
           type: string
-          description: The URL of the cited source.
-        title:
+          description: Tool name. Present for `tool_use` and `server_tool_use` blocks.
+        input:
+          type: object
+          description: Tool call arguments. For `server_tool_use`, contains the auto-generated `query`.
+        tool_use_id:
           type: string
-          description: The title of the cited source.
-        cited_text:
-          type: string
-          description: The cited source snippet.
-        encrypted_index:
-          type: string
-          description: Encrypted index of the citation location. Replay verbatim when returning text blocks with citations.
-    MessagesWebSearchResult:
-      type: object
-      description: A single search result block.
-      properties:
-        type:
-          type: string
-          enum:
-          - web_search_result
-          description: The block type.
-        title:
-          type: string
-          description: The title of the result page.
-        url:
-          type: string
-          description: The URL of the result page.
-        highlights:
-          type: string
-          description: Query-relevant highlight snippets. Returned only if `highlight.enable` is true.
-        full_content:
-          type: string
-          description: Full raw page content. Returned only if `full_content.enable` is true.
-        authors:
-          type: string
-          description: Website name or author.
-        time_published:
-          type: string
-          format: date-time
-          description: Publish time in ISO 8601.
-        time_last_crawled:
-          type: string
-          format: date-time
-          description: Last crawl time in ISO 8601.
+          description: The id of the matching `server_tool_use` block. Present for `web_search_tool_result` blocks.
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessagesWebSearchResult'
+          description: Search results. Present for `web_search_tool_result` blocks.
     MessagesUsage:
       type: object
       required:
@@ -889,74 +706,6 @@ components:
         full_content_extra_count:
           type: integer
           description: Billable full_content results beyond the free allowance. Returned only when `full_content` is enabled.
-    MessagesOctenSearchTool:
-      type: object
-      required:
-      - type
-      - name
-      description: The built-in `octen_search` server tool, executed by Octen.
-      properties:
-        type:
-          type: string
-          enum:
-          - octen_search
-          description: The type of tool. Always `octen_search`.
-        name:
-          type: string
-          enum:
-          - octen_search
-          description: The tool name. Always `octen_search`.
-        parameters:
-          allOf:
-          - $ref: '#/components/schemas/OctenSearchToolParameters'
-          description: Search behavior configuration. Optional.
-        cache_control:
-          $ref: '#/components/schemas/CacheControl'
-    AnthropicErrorResponse:
-      type: object
-      description: Error body in the Anthropic protocol format.
-      required:
-      - type
-      - error
-      properties:
-        type:
-          type: string
-          enum:
-          - error
-          description: Always `error`.
-        error:
-          type: object
-          properties:
-            type:
-              type: string
-              description: The error category, e.g. `invalid_request_error`.
-            message:
-              type: string
-              description: A human-readable description of the error.
-          required:
-          - type
-          - message
-    MessagesCustomTool:
-      type: object
-      required:
-      - name
-      description: A custom tool, executed by the caller and returned via a `tool_result` block.
-      properties:
-        name:
-          type: string
-          description: The tool name.
-        description:
-          type: string
-          description: A description of what the custom tool does.
-        input_schema:
-          type: object
-          description: The custom tool's parameter definition in JSON Schema format.
-        strict:
-          type: boolean
-          default: false
-          description: Whether to enable strict mode for a custom tool.
-        cache_control:
-          $ref: '#/components/schemas/CacheControl'
     MessagesSystemBlock:
       type: object
       required:
@@ -997,68 +746,47 @@ components:
           description: Broad search behavior configuration. Optional.
         cache_control:
           $ref: '#/components/schemas/CacheControl'
-    CacheControl:
+    MessagesMessage:
       type: object
-      description: Prompt caching marker. Sets a cache breakpoint so the stable prefix up to this block can be reused.
       required:
-      - type
+      - role
+      - content
+      description: A message in the conversation. Tool results are returned via a `tool_result` content block in a `user` message.
+      properties:
+        role:
+          type: string
+          enum:
+          - user
+          - assistant
+          description: The role of the message author.
+        content:
+          description: The content. A plain string or an array of content blocks.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              $ref: '#/components/schemas/MessagesContentBlock'
+    MessagesCitation:
+      type: object
+      description: A citation into a search result. Returned only when `octen_search` was used and the text cites a result.
       properties:
         type:
           type: string
           enum:
-          - ephemeral
-          description: The cache control type. Always `ephemeral`.
-        ttl:
+          - web_search_result_location
+          description: The citation type.
+        url:
           type: string
-          enum:
-          - 5m
-          - 1h
-          default: 5m
-          description: Cache lifetime.
-    HighlightOptions:
-      type: object
-      description: Controls highlight extraction from result pages.
-      properties:
-        enable:
-          type: boolean
-          default: true
-          description: If true, returns query-relevant highlight in each result.
-        max_tokens:
-          type: integer
-          default: 512
-          minimum: 100
-          maximum: 20000
-          description: Max tokens returned per highlight.
-    OctenSearchToolParameters:
-      description: Behavior configuration for the built-in `octen_search` tool. All parameters are optional and share the same semantics and defaults as the Web Search API. The query is generated automatically by the model; a single request may trigger multiple searches.
-      allOf:
-      - type: object
-        properties:
-          max_searches:
-            type: integer
-            default: 5
-            description: Maximum number of searches allowed in a single request.
-      - $ref: '#/components/schemas/WebSearchOptions'
-    MessagesToolChoice:
-      type: object
-      description: Controls whether and how the model calls tools.
-      properties:
-        type:
+          description: The URL of the cited source.
+        title:
           type: string
-          enum:
-          - auto
-          - any
-          - tool
-          - none
-          default: auto
-          description: '`auto`: model decides; `any`: must call a tool; `tool`: call a specific tool; `none`: no tools.'
-        name:
+          description: The title of the cited source.
+        cited_text:
           type: string
-          description: The tool name to force. Required when `type` is `tool` (e.g. `octen_broad_search` or `octen_search`).
-        disable_parallel_tool_use:
-          type: boolean
-          default: false
-          description: When `true`, the model issues at most one tool call per turn.
+          description: The cited source snippet.
+        encrypted_index:
+          type: string
+          description: Encrypted index of the citation location. Replay verbatim when returning text blocks with citations.
     WebSearchOptions:
       type: object
       properties:
@@ -1182,6 +910,276 @@ components:
           type: boolean
           default: false
           description: Whether to include images in each result.
+    MessagesCustomTool:
+      type: object
+      required:
+      - name
+      description: A custom tool, executed by the caller and returned via a `tool_result` block.
+      properties:
+        name:
+          type: string
+          description: The tool name.
+        description:
+          type: string
+          description: A description of what the custom tool does.
+        input_schema:
+          type: object
+          description: The custom tool's parameter definition in JSON Schema format.
+        strict:
+          type: boolean
+          default: false
+          description: Whether to enable strict mode for a custom tool.
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+    OctenBroadSearchToolParameters:
+      description: Behavior configuration for the built-in `octen_broad_search` tool. Identical to `octen_search` except it accepts `max_queries` instead of `max_searches`. All parameters are optional and share the same semantics and defaults as the Web Search API.
+      allOf:
+      - type: object
+        properties:
+          max_queries:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 5
+            description: Upper bound on the number of sub-queries generated.
+      - $ref: '#/components/schemas/WebSearchOptions'
+    MessagesToolChoice:
+      type: object
+      description: Controls whether and how the model calls tools.
+      properties:
+        type:
+          type: string
+          enum:
+          - auto
+          - any
+          - tool
+          - none
+          default: auto
+          description: '`auto`: model decides; `any`: must call a tool; `tool`: call a specific tool; `none`: no tools.'
+        name:
+          type: string
+          description: The tool name to force. Required when `type` is `tool` (e.g. `octen_broad_search` or `octen_search`).
+        disable_parallel_tool_use:
+          type: boolean
+          default: false
+          description: When `true`, the model issues at most one tool call per turn.
+    MessagesThinking:
+      type: object
+      description: Thinking options for reasoning models.
+      properties:
+        type:
+          type: string
+          enum:
+          - enabled
+          - disabled
+          - adaptive
+          description: '`adaptive` lets the model decide the thinking depth.'
+        budget_tokens:
+          type: integer
+          minimum: 1024
+          description: Thinking token budget. Required when `type` is `enabled`; must be less than `max_tokens`. Not allowed when `type` is `adaptive` or `disabled`.
+        display:
+          type: string
+          enum:
+          - summarized
+          - omitted
+          default: summarized
+          description: Controls how thinking is shown. `summarized` returns thinking blocks; `omitted` returns only the signature so blocks can be replayed. Valid only when `type` is `enabled` or `adaptive`.
+    MessagesContentBlock:
+      type: object
+      required:
+      - type
+      description: A content block within a message. The fields used depend on `type`. For replaying a multi-turn conversation, blocks such as `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `server_tool_use`, and `web_search_tool_result` are returned verbatim.
+      properties:
+        type:
+          type: string
+          enum:
+          - text
+          - image
+          - tool_use
+          - tool_result
+          - thinking
+          - redacted_thinking
+          - server_tool_use
+          - web_search_tool_result
+          description: The type of content block.
+        text:
+          type: string
+          description: Text content. Required when `type` is `text`.
+        source:
+          type: object
+          description: Image source. Required when `type` is `image`.
+          properties:
+            type:
+              type: string
+              enum:
+              - url
+              - base64
+              description: How the image is provided.
+            url:
+              type: string
+              description: Image URL. Required when `source.type` is `url`.
+            media_type:
+              type: string
+              enum:
+              - image/jpeg
+              - image/png
+              - image/gif
+              - image/webp
+              description: Image MIME type. Required when `source.type` is `base64`.
+            data:
+              type: string
+              description: Base64-encoded image. Required when `source.type` is `base64`.
+        id:
+          type: string
+          description: Block id, replayed verbatim. Used by `tool_use` and `server_tool_use` blocks.
+        name:
+          type: string
+          description: Tool name, replayed verbatim. For `server_tool_use` it is `octen_search`. Used by `tool_use` and `server_tool_use` blocks.
+        input:
+          type: object
+          description: Tool call arguments, replayed verbatim. Used by `tool_use` and `server_tool_use` blocks.
+        tool_use_id:
+          type: string
+          description: The id of the corresponding `tool_use` or `server_tool_use` block. Used by `tool_result` and `web_search_tool_result` blocks.
+        content:
+          description: Result content. A string or content blocks for `tool_result`; the array of `web_search_result` blocks for `web_search_tool_result`.
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: object
+        is_error:
+          type: boolean
+          default: false
+          description: Whether the tool execution failed. Used by `tool_result` blocks.
+        thinking:
+          type: string
+          description: Thinking content, replayed verbatim. Required when `type` is `thinking`.
+        signature:
+          type: string
+          description: Thinking signature, replayed verbatim. Required when `type` is `thinking`.
+        data:
+          type: string
+          description: Encrypted thinking content, replayed verbatim. Required when `type` is `redacted_thinking`.
+        cache_control:
+          $ref: '#/components/schemas/CacheControl'
+    MessagesResponse:
+      type: object
+      required:
+      - id
+      - type
+      - role
+      - model
+      - content
+      - stop_reason
+      - usage
+      description: A non-streaming response. Returned when `stream=false`.
+      properties:
+        id:
+          type: string
+          description: The unique identifier for this request.
+        type:
+          type: string
+          enum:
+          - message
+          - error
+          description: The response type. `message` on success.
+        role:
+          type: string
+          enum:
+          - assistant
+          description: Always `assistant`.
+        model:
+          type: string
+          description: The model used for this response.
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessagesResponseContentBlock'
+          description: The response content, as a list of content blocks.
+        stop_reason:
+          type: string
+          enum:
+          - end_turn
+          - max_tokens
+          - stop_sequence
+          - tool_use
+          - pause_turn
+          - refusal
+          description: Why the model stopped.
+        stop_details:
+          type: object
+          description: Additional detail about why the model stopped. Returned only when `stop_reason` is `refusal`.
+          properties:
+            type:
+              type: string
+              enum:
+              - refusal
+              description: The stop detail type. Always `refusal`.
+            explanation:
+              type: string
+              description: An explanation of why the request was refused.
+        stop_sequence:
+          type: string
+          nullable: true
+          description: The stop sequence that was hit, or `null`.
+        usage:
+          $ref: '#/components/schemas/MessagesUsage'
+    CacheControl:
+      type: object
+      description: Prompt caching marker. Sets a cache breakpoint so the stable prefix up to this block can be reused.
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - ephemeral
+          description: The cache control type. Always `ephemeral`.
+        ttl:
+          type: string
+          enum:
+          - 5m
+          - 1h
+          default: 5m
+          description: Cache lifetime.
+    MessagesStreamEvent:
+      type: object
+      required:
+      - type
+      description: 'A streaming SSE event. Returned when `stream=true`. Events arrive in order: `message_start` → `content_block_start`/`content_block_delta`/`content_block_stop` → `message_delta` → `message_stop`. `ping` may appear anywhere and can be ignored. On error, an `error` event is sent.'
+      properties:
+        type:
+          type: string
+          enum:
+          - message_start
+          - content_block_start
+          - content_block_delta
+          - content_block_stop
+          - message_delta
+          - message_stop
+          - ping
+          - error
+          description: The event type.
+        message:
+          type: object
+          description: Present in `message_start`. The initial message (id, model, role, initial usage).
+        index:
+          type: integer
+          description: Present in `content_block_*`. The content block index; concatenate deltas by index.
+        content_block:
+          type: object
+          description: Present in `content_block_start`. The block that is starting. For built-in search, the `web_search_tool_result` block carries the full results here.
+        delta:
+          type: object
+          description: Present in `content_block_delta` (`text_delta` / `thinking_delta` / `signature_delta` / `input_json_delta`) and `message_delta` (`stop_reason`, `stop_details`, `stop_sequence`).
+        usage:
+          type: object
+          description: Present in `message_delta`. Cumulative token counts (not incremental).
+        error:
+          type: object
+          description: Present in `error` events.
   securitySchemes:
     bearerAuth:
       type: http
@@ -1201,6 +1199,3 @@ components:
       in: header
       name: x-api-key
       description: API key used for request authentication. Alternatively, you can send the key as a Bearer token in the `Authorization` header.
-x-refined-from:
-- octen-ai-openapi.json
-- octen-ai-openapi.yml
