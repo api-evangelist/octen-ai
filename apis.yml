@@ -12,6 +12,18 @@ modified: '2026-10-07'
 tags:
 - Search
 - Web Search
+- Artificial Intelligence
+- LLM
+- Embeddings
+- Content Extraction
+- Model Gateway
+- MCP
+- Agents
+- Deep Research
+- Company
+tags_raw:
+- Search
+- Web Search
 - AI
 - LLM
 - Embeddings
@@ -139,6 +151,8 @@ apis:
   humanURL: https://docs.octen.ai/api-reference/broad-search
   baseURL: https://api.octen.ai
   tags:
+  - Answers
+  tags_raw:
   - Answer
   properties:
   - type: OpenAPI
@@ -241,6 +255,8 @@ apis:
   humanURL: https://docs.octen.ai/api-reference/broad-search
   baseURL: https://api.octen.ai
   tags:
+  - Embeddings
+  tags_raw:
   - Embedding
   properties:
   - type: OpenAPI
@@ -377,6 +393,8 @@ apis:
   humanURL: https://docs.octen.ai/api-reference/broad-search
   baseURL: https://api.octen.ai
   tags:
+  - Image
+  tags_raw:
   - Images
   properties:
   - type: OpenAPI
@@ -411,6 +429,8 @@ apis:
   humanURL: https://docs.octen.ai/api-reference/broad-search
   baseURL: https://api.octen.ai
   tags:
+  - Message
+  tags_raw:
   - Messages
   properties:
   - type: OpenAPI
@@ -581,6 +601,8 @@ apis:
   humanURL: https://docs.octen.ai/api-reference/broad-search
   baseURL: https://api.octen.ai
   tags:
+  - Video
+  tags_raw:
   - Videos
   properties:
   - type: OpenAPI
